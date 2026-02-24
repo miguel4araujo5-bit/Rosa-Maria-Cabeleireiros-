@@ -1,19 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
 import {
-  CalendarDays,
-  Clock,
-  Scissors,
-  Shield,
   Phone,
   Instagram,
-  ArrowLeft,
   CheckCircle2,
-  Trash2,
-  Pencil,
-  X,
   Loader2,
-  Lock,
 } from 'lucide-react'
 import { api } from './services/api'
 import type { Appointment } from './types'
@@ -26,14 +17,14 @@ type AvailabilitySlot = {
 }
 
 const SERVICES = [
-  { id: 'corte_mulher', label: 'Corte Mulher', icon: Scissors },
-  { id: 'corte_homem', label: 'Corte Homem', icon: Scissors },
-  { id: 'coloracao', label: 'Coloração', icon: Scissors },
-  { id: 'madeixas', label: 'Madeixas', icon: Scissors },
-  { id: 'brushing', label: 'Brushing', icon: Scissors },
-  { id: 'tratamento', label: 'Tratamento Capilar', icon: Scissors },
-  { id: 'alisamento', label: 'Alisamento / Queratina', icon: Scissors },
-  { id: 'outro', label: 'Outro', icon: Scissors },
+  { id: 'corte_mulher', label: 'Corte Mulher' },
+  { id: 'corte_homem', label: 'Corte Homem' },
+  { id: 'coloracao', label: 'Coloração' },
+  { id: 'madeixas', label: 'Madeixas' },
+  { id: 'brushing', label: 'Brushing' },
+  { id: 'tratamento', label: 'Tratamento Capilar' },
+  { id: 'alisamento', label: 'Alisamento / Queratina' },
+  { id: 'outro', label: 'Outro' },
 ] as const
 
 const TIMES = [
@@ -56,8 +47,7 @@ function isClosedDay(dateStr: string) {
 }
 
 function todayISO() {
-  const d = new Date()
-  return d.toISOString().split('T')[0]
+  return new Date().toISOString().split('T')[0]
 }
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -68,13 +58,9 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <header className="border-b border-stone-200 bg-white">
         <div className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
           <Logo />
-          <nav className="flex items-center gap-8 font-sans text-sm uppercase tracking-[0.25em]">
+          <nav className="font-sans text-sm uppercase tracking-[0.25em]">
             <Link to="/marcacao" className="hover:text-brand-gold transition">
               Marcação
-            </Link>
-            <Link to="/admin" className="hover:text-brand-gold inline-flex items-center gap-2 transition">
-              <Shield className="w-4 h-4" />
-              Admin
             </Link>
           </nav>
         </div>
@@ -109,16 +95,11 @@ const Home: React.FC = () => (
         <div className="section-subtitle">Marcação online</div>
         <h1 className="section-title">Agende a sua visita com simplicidade</h1>
         <p className="text-lg text-stone-600 leading-relaxed">
-          Escolha o serviço, o dia e a hora. Recebe confirmação e a agenda fica organizada.
+          Escolha os serviços, o dia e a hora. Recebe confirmação e a agenda fica organizada.
         </p>
-        <div className="flex gap-4">
-          <Link to="/marcacao" className="btn-primary">
-            Fazer marcação
-          </Link>
-          <Link to="/admin" className="btn-outline">
-            Área administrativa
-          </Link>
-        </div>
+        <Link to="/marcacao" className="btn-primary">
+          Fazer marcação
+        </Link>
         <div className="text-sm text-stone-500">
           Encerrado aos Domingos e Segundas-feiras.
         </div>
@@ -129,12 +110,11 @@ const Home: React.FC = () => (
 
 function Booking() {
   const navigate = useNavigate()
-  const [step, setStep] = useState(1)
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([])
   const [loading, setLoading] = useState(false)
 
   const [formData, setFormData] = useState({
-    service: '',
+    services: [] as string[],
     date: '',
     time: '',
     name: '',
@@ -151,102 +131,173 @@ function Booking() {
   const isSlotTaken = (time: string) =>
     availability.some((a) => a.date === formData.date && a.time === time)
 
+  const toggleService = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      services: prev.services.includes(id)
+        ? prev.services.filter((s) => s !== id)
+        : [...prev.services, id],
+    }))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!formData.services.length) {
+      alert('Selecione pelo menos um serviço.')
+      return
+    }
+
+    if (!formData.date || closed) {
+      alert('Escolha uma data válida.')
+      return
+    }
+
+    if (!formData.time || isSlotTaken(formData.time)) {
+      alert('Escolha um horário disponível.')
+      return
+    }
+
+    if (!formData.name || !formData.whatsapp) {
+      alert('Preencha nome e WhatsApp.')
+      return
+    }
+
     try {
       setLoading(true)
       await api.createAppointment({
-        ...formData,
+        name: formData.name,
+        whatsapp: formData.whatsapp,
+        services: JSON.stringify(formData.services),
+        date: formData.date,
+        time: formData.time,
+        observation: formData.observation,
         status: 'por_confirmar',
       })
-      setStep(3)
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Erro ao criar marcação')
+      navigate('/')
+    } catch {
+      alert('Erro ao criar marcação')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6">
-      {step === 3 ? (
-        <div className="text-center space-y-6">
-          <CheckCircle2 className="w-16 h-16 mx-auto text-brand-gold" />
-          <h2 className="section-title">Pedido enviado</h2>
-          <Link to="/" className="btn-outline">Voltar ao início</Link>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="elegant-card p-10 space-y-8">
-          <div className="section-subtitle">Escolha o serviço</div>
+    <div className="max-w-5xl mx-auto px-6">
+      <form onSubmit={handleSubmit} className="elegant-card p-12 space-y-12">
 
-          <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <div className="section-subtitle">Escolha os serviços</div>
+          <div className="grid md:grid-cols-2 gap-4">
             {SERVICES.map((s) => {
-              const Icon = s.icon
-              const active = formData.service === s.id
+              const active = formData.services.includes(s.id)
               return (
                 <button
                   key={s.id}
                   type="button"
-                  onClick={() => setFormData((p) => ({ ...p, service: s.id }))}
+                  onClick={() => toggleService(s.id)}
                   className={`border p-6 text-left transition ${
-                    active ? 'border-brand-gold bg-brand-pink-soft' : 'border-stone-200 hover:border-brand-gold'
+                    active
+                      ? 'border-brand-gold bg-brand-pink-soft'
+                      : 'border-stone-200 hover:border-brand-gold'
                   }`}
                 >
-                  <div className="flex items-center gap-3 font-serif text-lg">
-                    <Icon className="w-5 h-5" />
-                    {s.label}
-                  </div>
+                  <div className="font-serif text-lg">{s.label}</div>
                 </button>
               )
             })}
           </div>
+        </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <input
-              type="date"
-              min={todayISO()}
-              value={formData.date}
-              onChange={(e) => setFormData((p) => ({ ...p, date: e.target.value }))}
-              className="input-field"
-            />
-            <select
-              value={formData.time}
-              onChange={(e) => setFormData((p) => ({ ...p, time: e.target.value }))}
-              className="input-field"
-            >
-              <option value="">Escolha horário</option>
-              {TIMES.map((t) => (
-                <option key={t} value={t} disabled={isSlotTaken(t)}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
-
+        <div className="grid md:grid-cols-2 gap-6">
           <input
-            placeholder="Nome"
+            type="date"
+            min={todayISO()}
+            value={formData.date}
+            onChange={(e) =>
+              setFormData((p) => ({ ...p, date: e.target.value, time: '' }))
+            }
+            className="input-field"
+          />
+
+          <div>
+            <div className="grid grid-cols-3 gap-3">
+              {TIMES.map((t) => {
+                const taken = isSlotTaken(t)
+                const disabled = !formData.date || taken || closed
+                const active = formData.time === t
+
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() =>
+                      setFormData((p) => ({ ...p, time: t }))
+                    }
+                    className={`py-4 border text-sm font-semibold transition ${
+                      active
+                        ? 'bg-brand-ink text-white border-brand-ink'
+                        : 'border-stone-200 hover:border-brand-gold'
+                    } ${disabled && 'opacity-40 cursor-not-allowed'}`}
+                  >
+                    {t}
+                  </button>
+                )
+              })}
+            </div>
+
+            {closed && formData.date && (
+              <div className="mt-4 text-sm text-red-600 font-semibold">
+                Estamos encerrados aos Domingos e Segundas-feiras.
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <input
+            placeholder="Nome completo"
             className="input-field"
             value={formData.name}
-            onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+            onChange={(e) =>
+              setFormData((p) => ({ ...p, name: e.target.value }))
+            }
           />
           <input
-            placeholder="WhatsApp"
+            placeholder="Telemóvel / WhatsApp"
             className="input-field"
             value={formData.whatsapp}
-            onChange={(e) => setFormData((p) => ({ ...p, whatsapp: e.target.value }))}
+            onChange={(e) =>
+              setFormData((p) => ({ ...p, whatsapp: e.target.value }))
+            }
           />
+        </div>
 
-          <button type="submit" className="btn-primary w-full">
-            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Confirmar marcação'}
-          </button>
-        </form>
-      )}
+        <textarea
+          placeholder="Observações (opcional)"
+          className="input-field resize-none"
+          rows={4}
+          value={formData.observation}
+          onChange={(e) =>
+            setFormData((p) => ({ ...p, observation: e.target.value }))
+          }
+        />
+
+        <button type="submit" className="btn-primary w-full">
+          {loading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Agendar agora'}
+        </button>
+      </form>
     </div>
   )
 }
 
 function Admin() {
-  return <div className="max-w-4xl mx-auto px-6"><div className="section-title">Admin em construção</div></div>
+  return (
+    <div className="max-w-4xl mx-auto px-6">
+      <div className="section-title">Admin em construção</div>
+    </div>
+  )
 }
 
 const App: React.FC = () => (
