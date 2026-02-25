@@ -3,9 +3,12 @@
   "name": "rosa-maria-cabeleireiros",
   "main": "worker.ts",
   "compatibility_date": "2026-02-22",
+
   "assets": {
-    "directory": "./dist"
+    "directory": "./dist",
+    "binding": "ASSETS"
   },
+
   "d1_databases": [
     {
       "binding": "DB",
@@ -14,4 +17,3 @@
     }
   ]
 }
-
