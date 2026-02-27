@@ -28,6 +28,11 @@ function clearAdminToken() {
 =========================== */
 
 async function parseResponse<T>(res: Response): Promise<T> {
+  if (res.status === 401) {
+    clearAdminToken()
+    throw new Error('Sessão expirada. Faça login novamente.')
+  }
+
   if (!res.ok) {
     const data = await res.json().catch(() => null)
     const message =
@@ -38,6 +43,12 @@ async function parseResponse<T>(res: Response): Promise<T> {
   }
 
   return res.json()
+}
+
+function authHeaders(): HeadersInit {
+  const token = getAdminToken()
+  if (!token) return {}
+  return { Authorization: `Bearer ${token}` }
 }
 
 /* ===========================
@@ -56,7 +67,7 @@ export const api = {
 
   async createAppointment(
     payload: CreateAppointmentPayload
-  ): Promise<Appointment> {
+  ): Promise<void> {
     const res = await fetch('/api/appointments', {
       method: 'POST',
       headers: {
@@ -68,7 +79,7 @@ export const api = {
       }),
     })
 
-    return parseResponse<Appointment>(res)
+    await parseResponse<{ success: boolean }>(res)
   },
 
   /* ---------------------------
@@ -94,17 +105,14 @@ export const api = {
   async adminLogout(): Promise<void> {
     const token = getAdminToken()
 
-    if (!token) {
-      clearAdminToken()
-      return
+    if (token) {
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }).catch(() => null)
     }
-
-    await fetch('/api/admin/logout', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }).catch(() => null)
 
     clearAdminToken()
   },
@@ -114,61 +122,40 @@ export const api = {
   --------------------------- */
 
   async getAdminAppointments(): Promise<Appointment[]> {
-    const token = getAdminToken()
-
     const res = await fetch('/api/admin/appointments', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: authHeaders(),
     })
-
-    if (res.status === 401) {
-      clearAdminToken()
-      throw new Error('Sessão expirada. Faça login novamente.')
-    }
 
     return parseResponse<Appointment[]>(res)
   },
 
   async updateAppointment(
-    id: number | string,
+    id: string,
     data: Partial<Appointment>
-  ): Promise<Appointment> {
-    const token = getAdminToken()
-
+  ): Promise<void> {
     const res = await fetch(`/api/appointments/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+        ...authHeaders(),
       },
       body: JSON.stringify(data),
     })
 
-    if (res.status === 401) {
-      clearAdminToken()
-      throw new Error('Sessão expirada. Faça login novamente.')
-    }
-
-    return parseResponse<Appointment>(res)
+    await parseResponse<{ success: boolean }>(res)
   },
 
-  async deleteAppointment(id: number | string): Promise<void> {
-    const token = getAdminToken()
-
+  async deleteAppointment(id: string): Promise<void> {
     const res = await fetch(`/api/appointments/${id}`, {
       method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: authHeaders(),
     })
 
-    if (res.status === 401) {
-      clearAdminToken()
-      throw new Error('Sessão expirada. Faça login novamente.')
-    }
-
     if (!res.ok) {
+      if (res.status === 401) {
+        clearAdminToken()
+        throw new Error('Sessão expirada. Faça login novamente.')
+      }
       throw new Error(`Erro ${res.status}`)
     }
   },
