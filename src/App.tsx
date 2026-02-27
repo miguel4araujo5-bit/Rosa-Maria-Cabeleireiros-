@@ -1091,17 +1091,16 @@ function Admin() {
         )}
         target="_blank"
         rel="noreferrer"
-      >
+           >
         WhatsApp
       </a>
     </>
   )}
 </div>
- 
-                    )}
-                  </div>
-                )
-              })}
+                )}
+              </div>
+            )
+          )}
             </div>
 
             <div className="pt-10 flex items-center justify-center gap-3 text-xs uppercase tracking-[0.3em] text-stone-300 font-bold">
