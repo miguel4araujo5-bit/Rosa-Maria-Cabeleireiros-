@@ -27,8 +27,6 @@ const TIMES = [
   '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00',
 ] as const
 
-const ADMIN_TOKEN_KEY = 'rm_admin_token'
-
 function useScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => {
@@ -94,16 +92,6 @@ function safeParseServices(services: unknown) {
 function serviceLabels(ids: string[]) {
   const map = new Map(SERVICES.map((s) => [s.id, s.label] as const))
   return ids.map((id) => map.get(id) || id)
-}
-
-async function fetchJson<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
-  const res = await fetch(input, init)
-  const data = await res.json().catch(() => ({}))
-  if (!res.ok) {
-    const msg = (data && (data.error || data.message)) ? String(data.error || data.message) : `Erro (${res.status})`
-    throw new Error(msg)
-  }
-  return data as T
 }
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -231,8 +219,8 @@ function Booking() {
         status: 'por_confirmar',
       })
       navigate('/')
-    } catch {
-      alert('Erro ao criar marcação')
+    } catch (e: any) {
+      alert(e?.message ? String(e.message) : 'Erro ao criar marcação')
     } finally {
       setLoading(false)
     }
@@ -343,38 +331,23 @@ function Booking() {
 
 function Admin() {
   const navigate = useNavigate()
-  const [token, setToken] = useState<string>(() => localStorage.getItem(ADMIN_TOKEN_KEY) || '')
   const [password, setPassword] = useState('')
   const [authLoading, setAuthLoading] = useState(false)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [items, setItems] = useState<any[]>([])
+  const [items, setItems] = useState<Appointment[]>([])
   const [filter, setFilter] = useState<'todos' | 'por_confirmar' | 'confirmado' | 'bloqueado'>('por_confirmar')
 
-  const headers = useMemo(() => {
-    const h: Record<string, string> = { 'Content-Type': 'application/json' }
-    if (token) h.Authorization = `Bearer ${token}`
-    return h
-  }, [token])
-
   const load = async () => {
-    if (!token) return
     setLoading(true)
     setError('')
     try {
-      const data = await fetchJson<any[]>('/api/admin/appointments', { headers })
+      const data = await api.getAdminAppointments()
       setItems(Array.isArray(data) ? data : [])
     } catch (e: any) {
-      const msg = e?.message ? String(e.message) : 'Erro'
-      if (msg.toLowerCase().includes('unauthorized')) {
-        localStorage.removeItem(ADMIN_TOKEN_KEY)
-        setToken('')
-        setItems([])
-        setError('')
-        return
-      }
-      setError(msg)
+      setItems([])
+      setError(e?.message ? String(e.message) : 'Erro')
     } finally {
       setLoading(false)
     }
@@ -382,7 +355,7 @@ function Admin() {
 
   useEffect(() => {
     load()
-  }, [token])
+  }, [])
 
   const onLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -390,15 +363,9 @@ function Admin() {
     setAuthLoading(true)
     setError('')
     try {
-      const res = await fetchJson<{ success: boolean; token: string }>('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      })
-      const t = res.token || ''
-      localStorage.setItem(ADMIN_TOKEN_KEY, t)
-      setToken(t)
+      await api.adminLogin(password)
       setPassword('')
+      await load()
     } catch (e: any) {
       setError(e?.message ? String(e.message) : 'Erro')
     } finally {
@@ -407,29 +374,17 @@ function Admin() {
   }
 
   const onLogout = async () => {
-    const t = token
-    localStorage.removeItem(ADMIN_TOKEN_KEY)
-    setToken('')
+    await api.adminLogout()
     setItems([])
     setError('')
-    try {
-      if (t) {
-        await fetch('/api/admin/logout', { method: 'POST', headers: { Authorization: `Bearer ${t}` } })
-      }
-    } catch { }
     navigate('/')
   }
 
   const updateStatus = async (id: string, status: 'por_confirmar' | 'confirmado' | 'bloqueado') => {
-    if (!token) return
     setLoading(true)
     setError('')
     try {
-      await fetchJson<{ success: boolean }>(`/api/appointments/${encodeURIComponent(id)}`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify({ status }),
-      })
+      await api.updateAppointment(id, { status } as any)
       await load()
     } catch (e: any) {
       setError(e?.message ? String(e.message) : 'Erro')
@@ -439,16 +394,12 @@ function Admin() {
   }
 
   const remove = async (id: string) => {
-    if (!token) return
     const ok = confirm('Apagar esta marcação?')
     if (!ok) return
     setLoading(true)
     setError('')
     try {
-      await fetchJson<{ success: boolean }>(`/api/appointments/${encodeURIComponent(id)}`, {
-        method: 'DELETE',
-        headers,
-      })
+      await api.deleteAppointment(id)
       await load()
     } catch (e: any) {
       setError(e?.message ? String(e.message) : 'Erro')
@@ -457,13 +408,21 @@ function Admin() {
     }
   }
 
+  const hasSession = useMemo(() => {
+    try {
+      return !!localStorage.getItem('rm_admin_token')
+    } catch {
+      return false
+    }
+  }, [])
+
   const filtered = useMemo(() => {
     const list = Array.isArray(items) ? items : []
     if (filter === 'todos') return list
-    return list.filter((a) => String(a.status || '') === filter)
+    return list.filter((a: any) => String((a as any).status || '') === filter)
   }, [items, filter])
 
-  if (!token) {
+  if (!hasSession && items.length === 0) {
     return (
       <div className="max-w-md mx-auto px-6">
         <div className="elegant-card p-10 space-y-8">
@@ -552,7 +511,7 @@ function Admin() {
           </div>
         )}
 
-        {filtered.map((a) => {
+        {filtered.map((a: any) => {
           const id = String(a.id || '')
           const name = String(a.name || '')
           const whatsapp = String(a.whatsapp || '')
@@ -670,7 +629,7 @@ const App: React.FC = () => (
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/marcacao" element={<Booking />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/*" element={<Admin />} />
       </Routes>
     </Shell>
   </Router>
