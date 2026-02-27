@@ -619,6 +619,18 @@ function Admin() {
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [movingId, setMovingId] = useState<string | null>(null)
+
+  const [editForm, setEditForm] = useState({
+  name: '',
+  whatsapp: '',
+  services: [] as string[],
+  observation: '',
+  internalNote: '',
+  date: '',
+  time: ''
+})
 
   const fetchAppointments = async () => {
     setLoading(true)
@@ -935,34 +947,142 @@ function Admin() {
                           {actionLoading === key ? 'A processar...' : 'Desbloquear Horário'}
                         </button>
                       ) : (
-                        <div className="space-y-4">
-                          <div>
-                            <p className="text-xl font-serif font-bold">{name || 'Sem nome'}</p>
-                            <p className="text-xs font-black text-brand-gold uppercase tracking-widest">
-                              {services.length ? services.join(' · ') : '—'}
-                            </p>
-                            <p className="text-xs font-bold text-stone-400 mt-1">{whatsapp || '—'}</p>
-                            {obs && <p className="text-xs text-stone-500 mt-2">{obs}</p>}
-                          </div>
+                      <div className="space-y-4">
+  {editingId === String((app as any).id) ? (
+    <div className="space-y-4 border border-brand-gold p-4 rounded-xl bg-amber-50">
 
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              type="button"
-                              onClick={() => updateStatus(String((app as any).id), 'confirmado')}
-                              disabled={actionLoading === String((app as any).id)}
-                              className="bg-emerald-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 disabled:opacity-50"
-                            >
-                              Confirmar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => updateStatus(String((app as any).id), 'bloqueado')}
-                              disabled={actionLoading === String((app as any).id)}
-                              className="bg-red-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-700 disabled:opacity-50"
-                            >
-                              Rejeitar
-                            </button>
-                          </div>
+      <input
+        className="input-field"
+        value={editForm.name}
+        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+        placeholder="Nome"
+      />
+
+      <input
+        className="input-field"
+        value={editForm.whatsapp}
+        onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })}
+        placeholder="WhatsApp"
+      />
+
+      <textarea
+        className="input-field"
+        value={editForm.observation}
+        onChange={(e) => setEditForm({ ...editForm, observation: e.target.value })}
+        placeholder="Observação do cliente"
+      />
+
+      <div className="grid grid-cols-2 gap-2">
+        <input
+          type="date"
+          className="input-field"
+          value={editForm.date}
+          onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
+        />
+
+        <select
+          className="input-field"
+          value={editForm.time}
+          onChange={(e) => setEditForm({ ...editForm, time: e.target.value })}
+        >
+          {TIMES.map(t => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          className="bg-emerald-600 text-white py-2 rounded-xl"
+          onClick={async () => {
+            await api.updateAppointment(String((app as any).id), {
+              name: editForm.name,
+              whatsapp: editForm.whatsapp,
+              services: JSON.stringify(editForm.services),
+              observation: editForm.observation,
+              date: editForm.date,
+              time: editForm.time
+            } as any)
+
+            setEditingId(null)
+            await fetchAppointments()
+          }}
+        >
+          Guardar
+        </button>
+
+        <button
+          type="button"
+          className="border border-stone-300 py-2 rounded-xl"
+          onClick={() => setEditingId(null)}
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  ) : (
+    <>
+      <div>
+        <p className="text-xl font-serif font-bold">{name || 'Sem nome'}</p>
+        <p className="text-xs font-black text-brand-gold uppercase tracking-widest">
+          {services.length ? services.join(' · ') : '—'}
+        </p>
+        <p className="text-xs font-bold text-stone-400 mt-1">{whatsapp || '—'}</p>
+        {obs && <p className="text-xs text-stone-500 mt-2">{obs}</p>}
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => updateStatus(String((app as any).id), 'confirmado')}
+          disabled={actionLoading === String((app as any).id)}
+          className="bg-emerald-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 disabled:opacity-50"
+        >
+          Confirmar
+        </button>
+
+        <button
+          type="button"
+          onClick={() => updateStatus(String((app as any).id), 'bloqueado')}
+          disabled={actionLoading === String((app as any).id)}
+          className="bg-red-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-700 disabled:opacity-50"
+        >
+          Rejeitar
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setEditingId(String((app as any).id))
+            setEditForm({
+              name,
+              whatsapp,
+              services: safeParseServices((app as any).services),
+              observation: obs,
+              date: String((app as any).date),
+              time: String((app as any).time)
+            })
+          }}
+          className="border border-stone-300 py-3 rounded-xl text-[10px] uppercase font-black"
+        >
+          Editar / Mover
+        </button>
+
+        <button
+          type="button"
+          onClick={() => deleteAppointment(String((app as any).id))}
+          disabled={actionLoading === String((app as any).id)}
+          className="border border-stone-300 py-3 rounded-xl text-[10px] uppercase font-black"
+        >
+          Apagar
+        </button>
+      </div>
+    </>
+  )}
+</div>
 
                           <div className="grid grid-cols-2 gap-2">
                             <a
