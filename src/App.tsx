@@ -947,7 +947,7 @@ function Admin() {
                           {actionLoading === key ? 'A processar...' : 'Desbloquear Horário'}
                         </button>
                       ) : (
-                      <div className="space-y-4">
+                    <div className="space-y-4">
   {editingId === String((app as any).id) ? (
     <div className="space-y-4 border border-brand-gold p-4 rounded-xl bg-amber-50">
 
@@ -969,7 +969,7 @@ function Admin() {
         className="input-field"
         value={editForm.observation}
         onChange={(e) => setEditForm({ ...editForm, observation: e.target.value })}
-        placeholder="Observação do cliente"
+        placeholder="Observação"
       />
 
       <div className="grid grid-cols-2 gap-2">
@@ -999,7 +999,7 @@ function Admin() {
             await api.updateAppointment(String((app as any).id), {
               name: editForm.name,
               whatsapp: editForm.whatsapp,
-              services: JSON.stringify(editForm.services),
+              services: (app as any).services,
               observation: editForm.observation,
               date: editForm.date,
               time: editForm.time
@@ -1080,48 +1080,24 @@ function Admin() {
           Apagar
         </button>
       </div>
+
+      <a
+        className="block text-center py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-brand-gold"
+        href={waLink(
+          whatsapp,
+          confirmed ? msgConfirm :
+          status === 'bloqueado' ? msgReject :
+          msgPending
+        )}
+        target="_blank"
+        rel="noreferrer"
+      >
+        WhatsApp
+      </a>
     </>
   )}
 </div>
-
-                          <div className="grid grid-cols-2 gap-2">
-                            <a
-                              className="py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-brand-gold text-center"
-                              href={waLink(whatsapp, confirmed ? msgConfirm : status === 'bloqueado' ? msgReject : msgPending)}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              WhatsApp
-                            </a>
-                            <button
-                              type="button"
-                              onClick={() => deleteAppointment(String((app as any).id))}
-                              disabled={actionLoading === String((app as any).id)}
-                              className="py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-red-300 hover:text-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
-                            >
-                              <Trash2 size={16} /> Apagar
-                            </button>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => toggleBlock(time)}
-                            disabled={actionLoading === key}
-                            className="w-full py-3 text-[10px] font-black uppercase tracking-widest text-stone-300 border border-stone-100 rounded-xl hover:border-brand-gold hover:text-brand-gold disabled:opacity-50"
-                          >
-                            {actionLoading === key ? 'A processar...' : 'Bloquear este horário'}
-                          </button>
-                        </div>
-                      )
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => toggleBlock(time)}
-                        disabled={actionLoading === key}
-                        className="w-full py-3 text-[10px] font-black uppercase tracking-widest text-stone-300 border border-stone-100 rounded-xl hover:border-brand-gold hover:text-brand-gold disabled:opacity-50"
-                      >
-                        {actionLoading === key ? 'A processar...' : 'Bloquear Horário'}
-                      </button>
+ 
                     )}
                   </div>
                 )
