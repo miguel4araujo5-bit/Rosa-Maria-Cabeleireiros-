@@ -13,12 +13,18 @@ const CORS_HEADERS: Record<string, string> = {
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+    headers: {
+      'Content-Type': 'application/json',
+      ...CORS_HEADERS,
+    },
   })
 }
 
 function noContent(status = 204) {
-  return new Response(null, { status, headers: { ...CORS_HEADERS } })
+  return new Response(null, {
+    status,
+    headers: { ...CORS_HEADERS },
+  })
 }
 
 async function readJson(request: Request) {
@@ -34,9 +40,15 @@ export default {
     const url = new URL(request.url)
     const { pathname } = url
 
-    if (request.method === 'OPTIONS') return noContent()
+    // Handle CORS preflight
+    if (request.method === 'OPTIONS') {
+      return noContent()
+    }
 
+    // ---------------- API ROUTES ----------------
     if (pathname.startsWith('/api')) {
+
+      // INIT TABLE
       if (pathname === '/api/init' && request.method === 'GET') {
         await env.DB.exec(`
           CREATE TABLE IF NOT EXISTS appointments (
@@ -56,6 +68,7 @@ export default {
         return json({ success: true })
       }
 
+      // GET AVAILABILITY
       if (pathname === '/api/availability' && request.method === 'GET') {
         const { results } = await env.DB.prepare(
           `SELECT date, time, status FROM appointments`
@@ -63,6 +76,7 @@ export default {
         return json(results ?? [])
       }
 
+      // CREATE APPOINTMENT
       if (pathname === '/api/appointments' && request.method === 'POST') {
         const body = await readJson(request)
         if (!body) return json({ error: 'Invalid JSON' }, 400)
@@ -70,17 +84,19 @@ export default {
         const { name, whatsapp, services, date, time, observation } = body
 
         if (!name || !whatsapp || !services || !date || !time) {
-          return json({ error: 'Missing fields' }, 400)
+          return json({ error: 'Missing required fields' }, 400)
         }
 
         const existing = await env.DB.prepare(
           `SELECT id FROM appointments WHERE date = ? AND time = ?`
         ).bind(date, time).first()
 
-        if (existing) return json({ error: 'Horário já ocupado' }, 400)
+        if (existing) {
+          return json({ error: 'Horário já ocupado' }, 400)
+        }
 
         await env.DB.prepare(
-          `INSERT INTO appointments 
+          `INSERT INTO appointments
             (id, name, whatsapp, services, date, time, observation, status, created_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
         )
@@ -100,42 +116,60 @@ export default {
         return json({ success: true })
       }
 
+      // ADMIN LOGIN
       if (pathname === '/api/admin/login' && request.method === 'POST') {
         const body = await readJson(request)
-        if (!body?.password) return json({ error: 'Password required' }, 400)
-        if (body.password !== env.ADMIN_PASSWORD) return json({ error: 'Invalid password' }, 401)
+        if (!body?.password) {
+          return json({ error: 'Password required' }, 400)
+        }
+
+        if (body.password !== env.ADMIN_PASSWORD) {
+          return json({ error: 'Invalid password' }, 401)
+        }
+
         return json({ success: true })
       }
 
+      // GET ALL APPOINTMENTS
       if (pathname === '/api/admin/appointments' && request.method === 'GET') {
         const { results } = await env.DB.prepare(
           `SELECT * FROM appointments ORDER BY date ASC, time ASC`
         ).all()
+
         return json(results ?? [])
       }
 
+      // UPDATE STATUS
       if (pathname.startsWith('/api/appointments/') && request.method === 'PUT') {
         const id = pathname.split('/').pop()
         const body = await readJson(request)
-        if (!id || !body) return json({ error: 'Invalid request' }, 400)
 
-        const nextStatus = body.status ? String(body.status) : null
-        if (!nextStatus) return json({ error: 'Missing status' }, 400)
+        if (!id || !body?.status) {
+          return json({ error: 'Invalid request' }, 400)
+        }
 
         await env.DB.prepare(
           `UPDATE appointments SET status = ? WHERE id = ?`
-        ).bind(nextStatus, id).run()
+        )
+          .bind(String(body.status), id)
+          .run()
 
         return json({ success: true })
       }
 
+      // DELETE APPOINTMENT
       if (pathname.startsWith('/api/appointments/') && request.method === 'DELETE') {
         const id = pathname.split('/').pop()
-        if (!id) return json({ error: 'Invalid id' }, 400)
+
+        if (!id) {
+          return json({ error: 'Invalid id' }, 400)
+        }
 
         await env.DB.prepare(
           `DELETE FROM appointments WHERE id = ?`
-        ).bind(id).run()
+        )
+          .bind(id)
+          .run()
 
         return json({ success: true })
       }
@@ -143,6 +177,14 @@ export default {
       return json({ error: 'Not found' }, 404)
     }
 
-    return env.ASSETS.fetch(request)
+    // ---------------- STATIC FILES (SPA FALLBACK) ----------------
+
+    const asset = await env.ASSETS.fetch(request)
+
+    if (asset.status === 404) {
+      return env.ASSETS.fetch(new Request('/index.html', request))
+    }
+
+    return asset
   },
 }
