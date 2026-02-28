@@ -3,6 +3,8 @@
   "name": "rosa-maria-cabeleireiros",
   "main": "worker.ts",
   "compatibility_date": "2026-02-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "minify": true,
 
   "assets": {
     "directory": "./dist",
@@ -15,5 +17,9 @@
       "database_name": "rosa-maria-db",
       "database_id": "5af59c80-8496-476a-bced-a630423af767"
     }
-  ]
+  ],
+
+  "env": {
+    "production": {}
+  }
 }
