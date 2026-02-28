@@ -108,3 +108,6 @@ export function daysBetweenInclusive(start: Date, end: Date) {
   }
   return out
 }
+import type { Appointment } from './types'
+
+export function parseTimes(raw: unknown): string
