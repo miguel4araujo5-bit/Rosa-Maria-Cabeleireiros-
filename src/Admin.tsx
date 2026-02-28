@@ -3,12 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { Calendar, ChevronRight, Check, LogOut, MessageSquare, RefreshCw, Trash2, X } from 'lucide-react'
 import { api } from './services/api'
 import type { Appointment } from './types'
-
 const TIMES = [
   '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
   '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00',
 ] as const
-
 const SERVICES = [
   { id: 'corte_mulher', label: 'Corte Mulher', category: 'Cortes' },
   { id: 'corte_homem', label: 'Corte Homem', category: 'Cortes' },
@@ -19,61 +17,49 @@ const SERVICES = [
   { id: 'alisamento', label: 'Alisamento / Queratina', category: 'Tratamentos' },
   { id: 'outro', label: 'Outro', category: 'Outros' },
 ] as const
-
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ')
 }
-
 function todayISO() {
   return new Date().toISOString().split('T')[0]
 }
-
 function toPTDateLabel(dateISO: string) {
   if (!dateISO) return ''
   const d = new Date(`${dateISO}T00:00:00`)
   const fmt = new Intl.DateTimeFormat('pt-PT', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' })
   return fmt.format(d).replace('.', '')
 }
-
 function monthTitle(d: Date) {
   const fmt = new Intl.DateTimeFormat('pt-PT', { month: 'long', year: 'numeric' })
   const s = fmt.format(d)
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
-
 function pad2(n: number) {
   return String(n).padStart(2, '0')
 }
-
 function toISODate(d: Date) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
 }
-
 function addDays(d: Date, days: number) {
   const x = new Date(d)
   x.setDate(x.getDate() + days)
   return x
 }
-
 function startOfMonth(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), 1)
 }
-
 function endOfMonth(d: Date) {
   return new Date(d.getFullYear(), d.getMonth() + 1, 0)
 }
-
 function startOfWeekMonday(d: Date) {
   const x = new Date(d.getFullYear(), d.getMonth(), d.getDate())
   const day = x.getDay()
   const diff = (day === 0 ? -6 : 1 - day)
   return addDays(x, diff)
 }
-
 function endOfWeekMonday(d: Date) {
   return addDays(startOfWeekMonday(d), 6)
 }
-
 function daysBetweenInclusive(start: Date, end: Date) {
   const out: Date[] = []
   let cur = new Date(start.getFullYear(), start.getMonth(), start.getDate())
@@ -84,7 +70,6 @@ function daysBetweenInclusive(start: Date, end: Date) {
   }
   return out
 }
-
 function normalizePhone(raw: string) {
   const s = String(raw || '').trim()
   const digits = s.replace(/[^\d+]/g, '')
@@ -95,14 +80,12 @@ function normalizePhone(raw: string) {
   if (digits.length === 9) return `+351${digits}`
   return digits
 }
-
 function waLink(phoneRaw: string, message: string) {
   const phone = normalizePhone(phoneRaw).replace('+', '')
   const text = encodeURIComponent(message)
   if (!phone) return `https://wa.me/?text=${text}`
   return `https://wa.me/${phone}?text=${text}`
 }
-
 function safeParseServices(services: unknown) {
   try {
     if (Array.isArray(services)) return services.map(String)
@@ -118,23 +101,21 @@ function safeParseServices(services: unknown) {
     return typeof services === 'string' && services ? [services] : []
   }
 }
-
 function serviceLabels(ids: string[]) {
   const map = new Map(SERVICES.map((s) => [s.id, s.label] as const))
   return ids.map((id) => map.get(id) || id)
 }
-
-async function createBlockAndReturnId(date: string, time: string) {
+async function createBlockAndReturnId(date: string, time: string, extra: { name?: string; observation?: string } = {}) {
   const res = await fetch('/api/appointments', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      name: 'HORÁRIO BLOQUEADO',
+      name: extra.name || 'HORÁRIO BLOQUEADO',
       whatsapp: '-',
       services: JSON.stringify(['bloqueio_manual']),
       date,
       time,
-      observation: '',
+      observation: extra.observation || '',
       status: 'por_confirmar',
     }),
   })
@@ -147,7 +128,6 @@ async function createBlockAndReturnId(date: string, time: string) {
   if (!id) throw new Error('Falha ao criar bloqueio.')
   return id
 }
-
 export default function Admin() {
   const navigate = useNavigate()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -158,13 +138,10 @@ export default function Admin() {
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(false)
-
-  // New states for Reagendar
   const [showRescheduleModal, setShowRescheduleModal] = useState(false)
   const [rescheduleAppointment, setRescheduleAppointment] = useState<Appointment | null>(null)
   const [newRescheduleDate, setNewRescheduleDate] = useState(todayISO())
-  const [newRescheduleTime, setNewRescheduleTime] = useState('')
-
+  const [newRescheduleTimes, setNewRescheduleTimes] = useState<string[]>([])
   const fetchAppointments = async () => {
     setLoading(true)
     try {
@@ -177,11 +154,9 @@ export default function Admin() {
       setLoading(false)
     }
   }
-
   useEffect(() => {
     fetchAppointments()
   }, [])
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setAuthLoading(true)
@@ -196,14 +171,12 @@ export default function Admin() {
       setAuthLoading(false)
     }
   }
-
   const handleLogout = async () => {
     await api.adminLogout()
     setIsLoggedIn(false)
     setAppointments([])
     navigate('/')
   }
-
   const updateStatus = async (id: string, status: 'por_confirmar' | 'confirmado' | 'bloqueado') => {
     setActionLoading(id)
     try {
@@ -215,7 +188,6 @@ export default function Admin() {
       setActionLoading(null)
     }
   }
-
   const deleteAppointment = async (id: string) => {
     const ok = confirm('Tem a certeza que deseja apagar esta marcação?')
     if (!ok) return
@@ -229,7 +201,6 @@ export default function Admin() {
       setActionLoading(null)
     }
   }
-
   const toggleBlock = async (time: string) => {
     const existing = appointments.find(a => String(a.date) === selectedDate && String(a.time) === time)
     const key = `${selectedDate}-${time}`
@@ -257,19 +228,27 @@ export default function Admin() {
       setActionLoading(null)
     }
   }
-
-  // New: Open reschedule modal
   const openReschedule = (app: Appointment) => {
     setRescheduleAppointment(app)
     setNewRescheduleDate(String(app.date || todayISO()))
-    setNewRescheduleTime(String(app.time || ''))
+    setNewRescheduleTimes(app.time ? [String(app.time)] : [])
     setShowRescheduleModal(true)
   }
-
-  // New: Save reschedule
+  const isConsecutive = (times: string[]) => {
+    if (times.length <= 1) return true
+    const sorted = [...times].sort((a, b) => TIMES.indexOf(a as any) - TIMES.indexOf(b as any))
+    for (let i = 1; i < sorted.length; i++) {
+      if (TIMES.indexOf(sorted[i] as any) !== TIMES.indexOf(sorted[i - 1] as any) + 1) return false
+    }
+    return true
+  }
   const saveReschedule = async () => {
-    if (!rescheduleAppointment || !newRescheduleDate || !newRescheduleTime) {
-      alert('Escolha data e hora válidas.')
+    if (!rescheduleAppointment || !newRescheduleDate || newRescheduleTimes.length === 0) {
+      alert('Escolha data e horários válidos.')
+      return
+    }
+    if (!isConsecutive(newRescheduleTimes)) {
+      alert('Por favor, selecione horários consecutivos.')
       return
     }
     const id = String(rescheduleAppointment.id || '')
@@ -277,13 +256,23 @@ export default function Admin() {
       alert('Marcação inválida.')
       return
     }
+    const name = String(rescheduleAppointment.name || '')
     setActionLoading(id)
     try {
+      const sortedTimes = [...newRescheduleTimes].sort((a, b) => TIMES.indexOf(a as any) - TIMES.indexOf(b as any))
+      const firstTime = sortedTimes[0]
       await api.updateAppointment(id, {
         date: newRescheduleDate,
-        time: newRescheduleTime,
-        status: 'por_confirmar' // reset to pending for confirmation
+        time: firstTime,
+        status: 'por_confirmar'
       } as any)
+      for (const t of sortedTimes.slice(1)) {
+        const blockId = await createBlockAndReturnId(newRescheduleDate, t, {
+          name: `Continuação - ${name}`,
+          observation: `Parte da marcação de ${name} às ${firstTime}`
+        })
+        await api.updateAppointment(blockId, { status: 'bloqueado' } as any)
+      }
       setShowRescheduleModal(false)
       setRescheduleAppointment(null)
       await fetchAppointments()
@@ -294,13 +283,11 @@ export default function Admin() {
       setActionLoading(null)
     }
   }
-
   const monthStart = useMemo(() => startOfMonth(currentMonth), [currentMonth])
   const monthEnd = useMemo(() => endOfMonth(currentMonth), [currentMonth])
   const gridStart = useMemo(() => startOfWeekMonday(monthStart), [monthStart])
   const gridEnd = useMemo(() => endOfWeekMonday(monthEnd), [monthEnd])
   const calendarDays = useMemo(() => daysBetweenInclusive(gridStart, gridEnd), [gridStart, gridEnd])
-
   const hasBookingOnDay = (date: Date) => {
     const dateStr = toISODate(date)
     return appointments.some(a =>
@@ -308,7 +295,6 @@ export default function Admin() {
       (String(a.status) === 'por_confirmar' || String(a.status) === 'confirmado')
     )
   }
-
   const hasBlockOnDay = (date: Date) => {
     const dateStr = toISODate(date)
     return appointments.some(a =>
@@ -316,11 +302,9 @@ export default function Admin() {
       String(a.status) === 'bloqueado'
     )
   }
-
   const dayApps = useMemo(() => {
     return appointments.filter(a => String(a.date) === selectedDate)
   }, [appointments, selectedDate])
-
   if (!isLoggedIn) {
     return (
       <div className="pt-48 pb-32 px-6 flex items-center justify-center min-h-screen bg-stone-50">
@@ -347,7 +331,6 @@ export default function Admin() {
       </div>
     )
   }
-
   return (
     <div className="pt-48 pb-32 px-6 max-w-6xl mx-auto">
       <div className="flex flex-col items-center mb-16 text-center space-y-6">
@@ -361,7 +344,6 @@ export default function Admin() {
           <LogOut size={16} /> Sair
         </button>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-7 space-y-8">
           <div className="bg-white p-8 rounded-3xl shadow-2xl border-2 border-stone-100">
@@ -382,7 +364,6 @@ export default function Admin() {
                 <ChevronRight size={32} />
               </button>
             </div>
-
             <div className="grid grid-cols-7 gap-2 mb-4">
               {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map(day => (
                 <div key={day} className="text-center text-xs font-black text-stone-400 uppercase tracking-widest py-2">
@@ -390,7 +371,6 @@ export default function Admin() {
                 </div>
               ))}
             </div>
-
             <div className="grid grid-cols-7 gap-2">
               {calendarDays.map((day, idx) => {
                 const dateStr = toISODate(day)
@@ -421,14 +401,12 @@ export default function Admin() {
                 )
               })}
             </div>
-
             <div className="mt-10 flex flex-wrap gap-6 text-xs font-bold uppercase tracking-widest text-stone-400 justify-center">
               <div className="flex items-center gap-2"><div className="w-4 h-4 bg-red-100 border border-red-200 rounded"></div> Com pedido</div>
               <div className="flex items-center gap-2"><div className="w-4 h-4 bg-stone-100 border border-stone-200 rounded"></div> Bloqueado</div>
               <div className="flex items-center gap-2"><div className="w-4 h-4 bg-brand-ink rounded"></div> Selecionado</div>
               <div className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-brand-gold rounded"></div> Hoje</div>
             </div>
-
             <div className="mt-12 flex justify-center">
               <button
                 type="button"
@@ -441,14 +419,12 @@ export default function Admin() {
             </div>
           </div>
         </div>
-
         <div className="lg:col-span-5 space-y-8">
           <div className="bg-white p-8 rounded-3xl shadow-2xl border-4 border-brand-gold sticky top-32">
             <div className="text-center mb-10">
               <p className="text-xs uppercase tracking-[0.4em] font-black text-brand-gold mb-2">Horários para o dia</p>
               <h3 className="text-5xl font-serif italic">{toPTDateLabel(selectedDate)}</h3>
             </div>
-
             <div className="space-y-4 max-h-[640px] overflow-y-auto pr-2 custom-scrollbar">
               {TIMES.map(time => {
                 const app = dayApps.find(a => String(a.time) === time)
@@ -465,7 +441,6 @@ export default function Admin() {
                 const msgConfirm = `Olá ${name}! A sua marcação no Rosa Maria Cabeleireiros ficou confirmada para ${toPTDateLabel(selectedDate)} às ${time}. Até breve.`
                 const msgReject = `Olá ${name}! Obrigado pelo seu pedido. Infelizmente não conseguimos confirmar ${toPTDateLabel(selectedDate)} às ${time}. Pode responder com outro horário/dia para tentarmos ajustar.`
                 const msgPending = `Olá ${name}! Recebemos o seu pedido para ${toPTDateLabel(selectedDate)} às ${time}. Iremos confirmar o mais rápido possível.`
-
                 return (
                   <div
                     key={time}
@@ -495,7 +470,6 @@ export default function Admin() {
                         <span className="text-[10px] font-black uppercase tracking-widest text-stone-200">Livre</span>
                       )}
                     </div>
-
                     {busy ? (
                       blocked ? (
                         <button
@@ -516,7 +490,6 @@ export default function Admin() {
                             <p className="text-xs font-bold text-stone-400 mt-1">{whatsapp || '—'}</p>
                             {obs && <p className="text-xs text-stone-500 mt-2">{obs}</p>}
                           </div>
-
                           <div className="grid grid-cols-3 gap-2">
                             <button
                               type="button"
@@ -543,7 +516,6 @@ export default function Admin() {
                               Reagendar
                             </button>
                           </div>
-
                           <div className="grid grid-cols-2 gap-2">
                             <a
                               className="py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-brand-gold text-center"
@@ -562,7 +534,6 @@ export default function Admin() {
                               <Trash2 size={16} /> Apagar
                             </button>
                           </div>
-
                           <button
                             type="button"
                             onClick={() => toggleBlock(time)}
@@ -587,15 +558,12 @@ export default function Admin() {
                 )
               })}
             </div>
-
             <div className="pt-10 flex items-center justify-center gap-3 text-xs uppercase tracking-[0.3em] text-stone-300 font-bold">
               <Calendar size={16} /> {loading ? 'A carregar…' : 'Atualizado'}
             </div>
           </div>
         </div>
       </div>
-
-      {/* Reagendar Modal */}
       {showRescheduleModal && rescheduleAppointment && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative">
@@ -605,9 +573,7 @@ export default function Admin() {
             >
               <X size={24} />
             </button>
-
             <h3 className="text-2xl font-serif italic mb-6 text-center">Reagendar Marcação</h3>
-
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">
@@ -619,25 +585,30 @@ export default function Admin() {
                   value={newRescheduleDate}
                   onChange={e => {
                     setNewRescheduleDate(e.target.value)
-                    setNewRescheduleTime('')
+                    setNewRescheduleTimes([])
                   }}
                   className="w-full border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-brand-gold"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">
-                  Novo Horário
+                  Novos Horários
                 </label>
                 <div className="grid grid-cols-3 gap-3">
                   {TIMES.map(t => (
                     <button
                       key={t}
                       type="button"
-                      onClick={() => setNewRescheduleTime(t)}
+                      onClick={() => {
+                        setNewRescheduleTimes(prev => 
+                          prev.includes(t)
+                            ? prev.filter(x => x !== t)
+                            : [...prev, t]
+                        )
+                      }}
                       className={cn(
                         "py-3 px-2 text-sm font-medium rounded-lg border transition-all",
-                        newRescheduleTime === t
+                        newRescheduleTimes.includes(t)
                           ? "bg-brand-gold text-white border-brand-gold"
                           : "border-stone-300 hover:border-brand-gold"
                       )}
@@ -647,7 +618,6 @@ export default function Admin() {
                   ))}
                 </div>
               </div>
-
               <div className="flex gap-4 pt-4">
                 <button
                   onClick={() => setShowRescheduleModal(false)}
@@ -657,10 +627,10 @@ export default function Admin() {
                 </button>
                 <button
                   onClick={saveReschedule}
-                  disabled={!newRescheduleDate || !newRescheduleTime}
+                  disabled={!newRescheduleDate || newRescheduleTimes.length === 0}
                   className="flex-1 py-4 bg-brand-gold text-white rounded-xl font-bold uppercase tracking-widest hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Guardar Nova Data/Hora
+                  Guardar Nova Data/Horários
                 </button>
               </div>
             </div>
