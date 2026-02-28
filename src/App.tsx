@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
-import { Calendar, ChevronRight, Check, MessageSquare, Menu, X, RefreshCw, Trash2, Phone, Instagram, LogOut } from 'lucide-react'
+import { Calendar, ChevronRight, Check, MessageSquare, Menu, X, Phone, Instagram, LogOut } from 'lucide-react'
 import { api } from './services/api'
 import type { Appointment } from './types'
 import Logo from './Logo'
@@ -154,7 +154,6 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const location = useLocation()
   const isAdmin = location.pathname.startsWith('/admin')
-
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -162,7 +161,6 @@ function Navbar() {
           <Link to="/" className="flex flex-col items-center group" onClick={() => setIsOpen(false)}>
             <Logo />
           </Link>
-
           <div className="hidden md:flex items-center gap-16">
             <Link to="/" className="text-sm uppercase tracking-[0.25em] font-bold text-stone-600 hover:text-brand-ink transition-colors">Início</Link>
             <Link to="/marcacao" className="btn-primary py-4 px-10 text-xs">Agendar Agora</Link>
@@ -174,13 +172,11 @@ function Navbar() {
               <Link to={ADMIN_PATH} className="text-stone-300 hover:text-stone-500 text-[10px] uppercase tracking-[0.2em] font-bold">Admin</Link>
             )}
           </div>
-
           <button onClick={() => setIsOpen(!isOpen)} className="md:hidden text-brand-ink p-2 border-2 border-stone-100">
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
       </div>
-
       {isOpen && (
         <div className="md:hidden bg-white border-b border-stone-200 overflow-hidden">
           <div className="px-8 py-16 space-y-10 text-center">
@@ -207,7 +203,6 @@ function Home() {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-brand-paper/80 via-transparent to-brand-paper"></div>
         </div>
-
         <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
           <span className="section-subtitle">Marcação online</span>
           <div className="mb-10">
@@ -225,19 +220,16 @@ function Home() {
             </a>
           </div>
         </div>
-
         <div className="absolute bottom-12 left-1/2 -translate-x-1/2 hidden md:block">
           <div className="w-px h-24 bg-gradient-to-b from-brand-gold to-transparent"></div>
         </div>
       </section>
-
       <section id="servicos" className="py-36 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-24">
             <span className="section-subtitle">Serviços</span>
             <h2 className="section-title">Seleção</h2>
           </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
             {SERVICE_CATEGORIES.map((category, idx) => (
               <div key={category} className="space-y-10">
@@ -259,7 +251,6 @@ function Home() {
               </div>
             ))}
           </div>
-
           <div className="pt-20 flex justify-center">
             <Link to="/marcacao" className="btn-primary px-16 py-6 text-lg">
               Agendar
@@ -276,7 +267,6 @@ function Booking() {
   const [step, setStep] = useState(1)
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([])
   const [loading, setLoading] = useState(false)
-
   const [formData, setFormData] = useState({
     name: '',
     whatsapp: '',
@@ -285,9 +275,7 @@ function Booking() {
     time: '',
     observation: '',
   })
-
   const closed = useMemo(() => isClosedDayISO(formData.date), [formData.date])
-
   const fetchAvailability = async () => {
     try {
       const data = await api.getAvailability()
@@ -296,15 +284,12 @@ function Booking() {
       setAvailability([])
     }
   }
-
   useEffect(() => {
     fetchAvailability()
   }, [])
-
   useEffect(() => {
     if (step === 2) fetchAvailability()
   }, [step])
-
   const isSlotTaken = (time: string) => {
     return availability.some(a =>
       a.date === formData.date &&
@@ -312,7 +297,6 @@ function Booking() {
       (a.status === 'por_confirmar' || a.status === 'confirmado' || a.status === 'bloqueado')
     )
   }
-
   const toggleService = (id: string) => {
     setFormData(prev => ({
       ...prev,
@@ -321,7 +305,6 @@ function Booking() {
         : [...prev.selectedServices, id],
     }))
   }
-
   const sendWhatsAppToManager = () => {
     const labels = serviceLabels(formData.selectedServices)
     const message =
@@ -334,30 +317,24 @@ function Booking() {
       `Estado: por confirmar`
     window.open(`https://wa.me/${MANAGER_WHATSAPP}?text=${encodeURIComponent(message)}`, '_blank', 'noreferrer')
   }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     if (!formData.name.trim() || !formData.whatsapp.trim()) {
       alert('Preencha nome e WhatsApp.')
       return
     }
-
     if (formData.selectedServices.length === 0) {
       alert('Selecione pelo menos um serviço.')
       return
     }
-
     if (!formData.date || closed) {
       alert('Escolha uma data válida.')
       return
     }
-
     if (!formData.time || isSlotTaken(formData.time)) {
       alert('Escolha um horário disponível.')
       return
     }
-
     setLoading(true)
     try {
       await api.createAppointment({
@@ -369,7 +346,6 @@ function Booking() {
         observation: formData.observation || '',
         status: 'por_confirmar',
       } as any)
-
       setStep(3)
       try {
         sendWhatsAppToManager()
@@ -381,7 +357,6 @@ function Booking() {
       setLoading(false)
     }
   }
-
   return (
     <div className="pt-48 pb-32 px-6 bg-brand-paper min-h-screen">
       <div className="max-w-4xl mx-auto">
@@ -402,7 +377,6 @@ function Booking() {
             {step === 1 ? "Os seus dados" : step === 2 ? "Data e Hora" : "Concluído"}
           </p>
         </div>
-
         <div className="elegant-card p-10 md:p-20">
           {step === 1 && (
             <div className="space-y-16">
@@ -430,7 +404,6 @@ function Booking() {
                   />
                 </div>
               </div>
-
               <div className="space-y-6">
                 <label className="input-label">Escolha os Serviços</label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[420px] overflow-y-auto pr-4 custom-scrollbar">
@@ -465,7 +438,6 @@ function Booking() {
                   ))}
                 </div>
               </div>
-
               <div className="pt-10">
                 <button
                   type="button"
@@ -478,7 +450,6 @@ function Booking() {
               </div>
             </div>
           )}
-
           {step === 2 && (
             <form onSubmit={handleSubmit} className="space-y-16">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -495,7 +466,6 @@ function Booking() {
                     <p className="text-red-500 font-bold text-sm">Estamos encerrados aos Domingos e Segundas.</p>
                   )}
                 </div>
-
                 <div className="space-y-4">
                   <label className="input-label">Escolha a Hora</label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -503,7 +473,6 @@ function Booking() {
                       const taken = !closed && formData.date ? isSlotTaken(t) : false
                       const selected = formData.time === t
                       const disabled = closed || !formData.date || taken
-
                       return (
                         <button
                           key={t}
@@ -525,7 +494,6 @@ function Booking() {
                   </div>
                 </div>
               </div>
-
               <div className="space-y-4">
                 <label className="input-label">Alguma observação importante?</label>
                 <textarea
@@ -535,7 +503,6 @@ function Booking() {
                   onChange={e => setFormData({ ...formData, observation: e.target.value })}
                 />
               </div>
-
               <div className="flex flex-col md:flex-row gap-6 pt-10">
                 <button type="button" onClick={() => setStep(1)} className="btn-outline flex-1 py-6">Voltar</button>
                 <button type="submit" disabled={loading} className="btn-primary flex-1 py-6 text-lg flex items-center justify-center gap-3 disabled:opacity-50">
@@ -544,7 +511,6 @@ function Booking() {
               </div>
             </form>
           )}
-
           {step === 3 && (
             <div className="text-center py-16">
               <div className="w-32 h-32 border-4 border-brand-gold rounded-full flex items-center justify-center mx-auto mb-12">
@@ -575,443 +541,8 @@ function Booking() {
             </div>
           )}
         </div>
-
         <div className="mt-10 text-center text-xs uppercase tracking-[0.3em] text-stone-300 font-bold">
           Encerrado aos Domingos e Segundas
-        </div>
-      </div>
-    </div>
-  )
-}
-
-async function createBlockAndReturnId(date: string, time: string) {
-  const res = await fetch('/api/appointments', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name: 'HORÁRIO BLOQUEADO',
-      whatsapp: '-',
-      services: JSON.stringify(['bloqueio_manual']),
-      date,
-      time,
-      observation: '',
-      status: 'por_confirmar',
-    }),
-  })
-  const data = await res.json().catch(() => null)
-  if (!res.ok) {
-    const msg = data?.error || data?.message || `Erro ${res.status}`
-    throw new Error(String(msg))
-  }
-  const id = data?.id ? String(data.id) : ''
-  if (!id) throw new Error('Falha ao criar bloqueio.')
-  return id
-}
-
-function Admin() {
-  const navigate = useNavigate()
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [password, setPassword] = useState('')
-
-  const [appointments, setAppointments] = useState<Appointment[]>([])
-  const [currentMonth, setCurrentMonth] = useState(() => new Date())
-  const [selectedDate, setSelectedDate] = useState(() => todayISO())
-  const [loading, setLoading] = useState(true)
-  const [actionLoading, setActionLoading] = useState<string | null>(null)
-  const [authLoading, setAuthLoading] = useState(false)
-
-  const fetchAppointments = async () => {
-    setLoading(true)
-    try {
-      const data = await api.getAdminAppointments()
-      setAppointments(Array.isArray(data) ? data : [])
-      setIsLoggedIn(true)
-    } catch {
-      setAppointments([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchAppointments()
-  }, [])
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setAuthLoading(true)
-    try {
-      await api.adminLogin(password)
-      setPassword('')
-      setIsLoggedIn(true)
-      await fetchAppointments()
-    } catch (err: any) {
-      alert(err?.message ? String(err.message) : 'Password incorreta.')
-    } finally {
-      setAuthLoading(false)
-    }
-  }
-
-  const handleLogout = async () => {
-    await api.adminLogout()
-    setIsLoggedIn(false)
-    setAppointments([])
-    navigate('/')
-  }
-
-  const updateStatus = async (id: string, status: 'por_confirmar' | 'confirmado' | 'bloqueado') => {
-    setActionLoading(id)
-    try {
-      await api.updateAppointment(id, { status } as any)
-      await fetchAppointments()
-    } catch (err: any) {
-      alert(err?.message ? String(err.message) : 'Erro ao atualizar.')
-    } finally {
-      setActionLoading(null)
-    }
-  }
-
-  const deleteAppointment = async (id: string) => {
-    const ok = confirm('Tem a certeza que deseja apagar esta marcação?')
-    if (!ok) return
-    setActionLoading(id)
-    try {
-      await api.deleteAppointment(id)
-      await fetchAppointments()
-    } catch (err: any) {
-      alert(err?.message ? String(err.message) : 'Erro ao apagar.')
-    } finally {
-      setActionLoading(null)
-    }
-  }
-
-  const toggleBlock = async (time: string) => {
-    const existing = (appointments as any[]).find(a => String(a.date) === selectedDate && String(a.time) === time)
-
-    const key = `${selectedDate}-${time}`
-    setActionLoading(key)
-
-    try {
-      if (existing) {
-        const id = String(existing.id || '')
-        if (!id) throw new Error('Marcaçāo inválida.')
-
-        if (String(existing.status) === 'bloqueado') {
-          await api.deleteAppointment(id)
-          await fetchAppointments()
-          return
-        }
-
-        const ok = confirm('Este horário tem uma marcação. Deseja rejeitar (bloquear) este horário?')
-        if (!ok) return
-        await updateStatus(id, 'bloqueado')
-        return
-      }
-
-      const createdId = await createBlockAndReturnId(selectedDate, time)
-      await api.updateAppointment(createdId, { status: 'bloqueado' } as any)
-      await fetchAppointments()
-    } catch (err: any) {
-      alert(err?.message ? String(err.message) : 'Erro ao bloquear/desbloquear.')
-    } finally {
-      setActionLoading(null)
-    }
-  }
-
-  const monthStart = useMemo(() => startOfMonth(currentMonth), [currentMonth])
-  const monthEnd = useMemo(() => endOfMonth(currentMonth), [currentMonth])
-  const gridStart = useMemo(() => startOfWeekMonday(monthStart), [monthStart])
-  const gridEnd = useMemo(() => endOfWeekMonday(monthEnd), [monthEnd])
-  const calendarDays = useMemo(() => daysBetweenInclusive(gridStart, gridEnd), [gridStart, gridEnd])
-
-  const hasBookingOnDay = (date: Date) => {
-    const dateStr = toISODate(date)
-    return (appointments as any[]).some(a =>
-      String(a.date) === dateStr &&
-      (String(a.status) === 'por_confirmar' || String(a.status) === 'confirmado')
-    )
-  }
-
-  const hasBlockOnDay = (date: Date) => {
-    const dateStr = toISODate(date)
-    return (appointments as any[]).some(a =>
-      String(a.date) === dateStr &&
-      String(a.status) === 'bloqueado'
-    )
-  }
-
-  const dayApps = useMemo(() => {
-    return (appointments as any[]).filter(a => String(a.date) === selectedDate)
-  }, [appointments, selectedDate])
-
-  if (!isLoggedIn) {
-    return (
-      <div className="pt-48 pb-32 px-6 flex items-center justify-center min-h-screen bg-stone-50">
-        <div className="elegant-card p-16 max-w-md w-full text-center">
-          <span className="section-subtitle">Acesso da Gerente</span>
-          <h2 className="text-5xl font-serif italic mb-12">Entrar no Sistema</h2>
-          <form onSubmit={handleLogin} className="space-y-10">
-            <div className="space-y-6">
-              <label className="text-sm uppercase tracking-widest font-bold text-stone-400">Palavra-passe</label>
-              <input
-                type="password"
-                className="w-full border-b-4 border-brand-gold py-6 text-center text-5xl focus:outline-none bg-transparent"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••"
-                autoComplete="current-password"
-              />
-            </div>
-            <button type="submit" disabled={authLoading} className="btn-primary w-full py-10 text-2xl shadow-xl disabled:opacity-50">
-              {authLoading ? 'A entrar...' : 'ENTRAR AGORA'}
-            </button>
-          </form>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="pt-48 pb-32 px-6 max-w-6xl mx-auto">
-      <div className="flex flex-col items-center mb-16 text-center space-y-6">
-        <span className="section-subtitle">Gestão do Salão</span>
-        <h1 className="text-7xl font-serif italic">Agenda Mensal</h1>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-8 py-4 bg-red-50 hover:bg-red-100 text-red-700 rounded-full text-xs font-black uppercase tracking-widest transition-all"
-        >
-          <LogOut size={16} /> Sair
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <div className="lg:col-span-7 space-y-8">
-          <div className="bg-white p-8 rounded-3xl shadow-2xl border-2 border-stone-100">
-            <div className="flex justify-between items-center mb-10">
-              <button
-                type="button"
-                onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
-                className="p-4 hover:bg-stone-50 rounded-full transition-colors"
-              >
-                <ChevronRight className="rotate-180" size={32} />
-              </button>
-
-              <h2 className="text-4xl font-serif italic capitalize">{monthTitle(currentMonth)}</h2>
-
-              <button
-                type="button"
-                onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
-                className="p-4 hover:bg-stone-50 rounded-full transition-colors"
-              >
-                <ChevronRight size={32} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-7 gap-2 mb-4">
-              {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map(day => (
-                <div key={day} className="text-center text-xs font-black text-stone-400 uppercase tracking-widest py-2">
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-7 gap-2">
-              {calendarDays.map((day, idx) => {
-                const dateStr = toISODate(day)
-                const isSelected = selectedDate === dateStr
-                const isCurrent = day.getMonth() === monthStart.getMonth()
-                const booking = hasBookingOnDay(day)
-                const block = hasBlockOnDay(day)
-                const today = toISODate(new Date()) === dateStr
-
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setSelectedDate(dateStr)}
-                    className={cn(
-                      "aspect-square flex flex-col items-center justify-center rounded-2xl border-2 transition-all relative",
-                      !isCurrent && "opacity-20 border-transparent",
-                      isSelected && "bg-brand-ink text-white border-brand-ink scale-105 z-10 shadow-lg",
-                      !isSelected && booking && "bg-red-50 border-red-200 text-red-700",
-                      !isSelected && !booking && block && "bg-stone-100 border-stone-200 text-stone-400",
-                      !isSelected && !booking && !block && "bg-white border-stone-50 text-stone-600 hover:border-brand-gold",
-                      today && !isSelected && "ring-2 ring-brand-gold ring-offset-2"
-                    )}
-                  >
-                    <span className="text-2xl font-serif font-bold">{day.getDate()}</span>
-                    {booking && <div className="w-2 h-2 bg-red-500 rounded-full mt-1"></div>}
-                    {block && !booking && <div className="w-2 h-2 bg-stone-400 rounded-full mt-1"></div>}
-                  </button>
-                )
-              })}
-            </div>
-
-            <div className="mt-10 flex flex-wrap gap-6 text-xs font-bold uppercase tracking-widest text-stone-400 justify-center">
-              <div className="flex items-center gap-2"><div className="w-4 h-4 bg-red-100 border border-red-200 rounded"></div> Com pedido</div>
-              <div className="flex items-center gap-2"><div className="w-4 h-4 bg-stone-100 border border-stone-200 rounded"></div> Bloqueado</div>
-              <div className="flex items-center gap-2"><div className="w-4 h-4 bg-brand-ink rounded"></div> Selecionado</div>
-              <div className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-brand-gold rounded"></div> Hoje</div>
-            </div>
-
-            <div className="mt-12 flex justify-center">
-              <button
-                type="button"
-                onClick={fetchAppointments}
-                className="flex items-center gap-3 px-8 py-4 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-full text-xs font-black uppercase tracking-widest transition-all"
-              >
-                <RefreshCw size={16} className={cn(loading && "animate-spin")} />
-                Atualizar Agenda
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-5 space-y-8">
-          <div className="bg-white p-8 rounded-3xl shadow-2xl border-4 border-brand-gold sticky top-32">
-            <div className="text-center mb-10">
-              <p className="text-xs uppercase tracking-[0.4em] font-black text-brand-gold mb-2">Horários para o dia</p>
-              <h3 className="text-5xl font-serif italic">{toPTDateLabel(selectedDate)}</h3>
-            </div>
-
-            <div className="space-y-4 max-h-[640px] overflow-y-auto pr-2 custom-scrollbar">
-              {TIMES.map(time => {
-                const app = (dayApps as any[]).find(a => String(a.time) === time)
-                const status = app ? String(app.status || '') : ''
-                const key = `${selectedDate}-${time}`
-                const busy = !!app
-                const blocked = status === 'bloqueado'
-                const pending = status === 'por_confirmar'
-                const confirmed = status === 'confirmado'
-
-                const name = app ? String(app.name || '') : ''
-                const whatsapp = app ? String(app.whatsapp || '') : ''
-                const services = app ? serviceLabels(safeParseServices((app as any).services)) : []
-                const obs = app ? String((app as any).observation || '').trim() : ''
-
-                const msgConfirm = `Olá ${name}! A sua marcação no Rosa Maria Cabeleireiros ficou confirmada para ${toPTDateLabel(selectedDate)} às ${time}. Até breve.`
-                const msgReject = `Olá ${name}! Obrigado pelo seu pedido. Infelizmente não conseguimos confirmar ${toPTDateLabel(selectedDate)} às ${time}. Pode responder com outro horário/dia para tentarmos ajustar.`
-                const msgPending = `Olá ${name}! Recebemos o seu pedido para ${toPTDateLabel(selectedDate)} às ${time}. Iremos confirmar o mais rápido possível.`
-
-                return (
-                  <div
-                    key={time}
-                    className={cn(
-                      "p-6 rounded-2xl border-2 transition-all",
-                      blocked && "bg-stone-50 border-stone-200 opacity-70",
-                      !blocked && busy && "bg-white border-brand-gold shadow-md",
-                      !busy && "bg-white border-stone-100"
-                    )}
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-2xl font-serif font-black text-brand-gold">{time}</span>
-                      {busy ? (
-                        blocked ? (
-                          <span className="text-[10px] font-black uppercase tracking-widest text-stone-400">Bloqueado</span>
-                        ) : (
-                          <span className={cn(
-                            "text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded",
-                            pending && "bg-amber-100 text-amber-800",
-                            confirmed && "bg-emerald-100 text-emerald-700",
-                            !pending && !confirmed && "bg-stone-100 text-stone-500"
-                          )}>
-                            {pending ? 'Por confirmar' : confirmed ? 'Confirmado' : status}
-                          </span>
-                        )
-                      ) : (
-                        <span className="text-[10px] font-black uppercase tracking-widest text-stone-200">Livre</span>
-                      )}
-                    </div>
-
-                    {busy ? (
-                      blocked ? (
-                        <button
-                          type="button"
-                          onClick={() => toggleBlock(time)}
-                          disabled={actionLoading === key}
-                          className="w-full py-3 text-[10px] font-black uppercase tracking-widest bg-stone-800 text-white border border-stone-800 rounded-xl hover:bg-stone-900 disabled:opacity-50"
-                        >
-                          {actionLoading === key ? 'A processar...' : 'Desbloquear Horário'}
-                        </button>
-                      ) : (
-                        <div className="space-y-4">
-                          <div>
-                            <p className="text-xl font-serif font-bold">{name || 'Sem nome'}</p>
-                            <p className="text-xs font-black text-brand-gold uppercase tracking-widest">
-                              {services.length ? services.join(' · ') : '—'}
-                            </p>
-                            <p className="text-xs font-bold text-stone-400 mt-1">{whatsapp || '—'}</p>
-                            {obs && <p className="text-xs text-stone-500 mt-2">{obs}</p>}
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              type="button"
-                              onClick={() => updateStatus(String((app as any).id), 'confirmado')}
-                              disabled={actionLoading === String((app as any).id)}
-                              className="bg-emerald-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 disabled:opacity-50"
-                            >
-                              Confirmar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => updateStatus(String((app as any).id), 'bloqueado')}
-                              disabled={actionLoading === String((app as any).id)}
-                              className="bg-red-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-700 disabled:opacity-50"
-                            >
-                              Rejeitar
-                            </button>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-2">
-                            <a
-                              className="py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-brand-gold text-center"
-                              href={waLink(whatsapp, confirmed ? msgConfirm : status === 'bloqueado' ? msgReject : msgPending)}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              WhatsApp
-                            </a>
-                            <button
-                              type="button"
-                              onClick={() => deleteAppointment(String((app as any).id))}
-                              disabled={actionLoading === String((app as any).id)}
-                              className="py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-red-300 hover:text-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
-                            >
-                              <Trash2 size={16} /> Apagar
-                            </button>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => toggleBlock(time)}
-                            disabled={actionLoading === key}
-                            className="w-full py-3 text-[10px] font-black uppercase tracking-widest text-stone-300 border border-stone-100 rounded-xl hover:border-brand-gold hover:text-brand-gold disabled:opacity-50"
-                          >
-                            {actionLoading === key ? 'A processar...' : 'Bloquear este horário'}
-                          </button>
-                        </div>
-                      )
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => toggleBlock(time)}
-                        disabled={actionLoading === key}
-                        className="w-full py-3 text-[10px] font-black uppercase tracking-widest text-stone-300 border border-stone-100 rounded-xl hover:border-brand-gold hover:text-brand-gold disabled:opacity-50"
-                      >
-                        {actionLoading === key ? 'A processar...' : 'Bloquear Horário'}
-                      </button>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-
-            <div className="pt-10 flex items-center justify-center gap-3 text-xs uppercase tracking-[0.3em] text-stone-300 font-bold">
-              <Calendar size={16} /> {loading ? 'A carregar…' : 'Atualizado'}
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -1024,7 +555,6 @@ function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-brand-paper">
       <Navbar />
       <main>{children}</main>
-
       <footer className="bg-brand-ink text-white py-32 mt-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-20 mb-20">
@@ -1039,7 +569,6 @@ function AppShell({ children }: { children: React.ReactNode }) {
                 <a href="#" className="text-stone-500 hover:text-brand-gold transition-all transform hover:scale-110"><Instagram size={28} /></a>
               </div>
             </div>
-
             <div className="space-y-8">
               <h4 className="text-xs uppercase tracking-[0.5em] text-brand-gold font-bold">Contacto</h4>
               <div className="space-y-6 text-stone-300 font-medium text-lg">
@@ -1049,7 +578,6 @@ function AppShell({ children }: { children: React.ReactNode }) {
                 </p>
               </div>
             </div>
-
             <div className="space-y-8">
               <h4 className="text-xs uppercase tracking-[0.5em] text-brand-gold font-bold">Horário</h4>
               <div className="space-y-4 text-stone-300 font-medium text-lg">
@@ -1064,7 +592,6 @@ function AppShell({ children }: { children: React.ReactNode }) {
               </div>
             </div>
           </div>
-
           <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
             <p className="text-xs uppercase tracking-[0.2em] text-stone-600 font-bold">© 2026 Cabeleireiro Rosa Maria. Todos os direitos reservados.</p>
           </div>
