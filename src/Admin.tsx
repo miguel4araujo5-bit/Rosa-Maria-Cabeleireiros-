@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Calendar, ChevronRight, Check, LogOut, MessageSquare, RefreshCw, Trash2 } from 'lucide-react'
+import { Calendar, ChevronRight, Check, LogOut, MessageSquare, RefreshCw, Trash2, X } from 'lucide-react'
 import { api } from './services/api'
 import type { Appointment } from './types'
 
@@ -26,52 +26,6 @@ function cn(...parts: Array<string | false | null | undefined>) {
 
 function todayISO() {
   return new Date().toISOString().split('T')[0]
-}
-
-function isClosedDayISO(dateISO: string) {
-  if (!dateISO) return false
-  const d = new Date(`${dateISO}T00:00:00`)
-  const day = d.getDay()
-  return day === 0 || day === 1
-}
-
-function normalizePhone(raw: string) {
-  const s = String(raw || '').trim()
-  const digits = s.replace(/[^\d+]/g, '')
-  if (!digits) return ''
-  if (digits.startsWith('+')) return digits
-  if (digits.startsWith('351')) return `+${digits}`
-  if (digits.startsWith('0')) return `+351${digits.slice(1)}`
-  if (digits.length === 9) return `+351${digits}`
-  return digits
-}
-
-function waLink(phoneRaw: string, message: string) {
-  const phone = normalizePhone(phoneRaw).replace('+', '')
-  const text = encodeURIComponent(message)
-  if (!phone) return `https://wa.me/?text=${text}`
-  return `https://wa.me/${phone}?text=${text}`
-}
-
-function safeParseServices(services: unknown) {
-  try {
-    if (Array.isArray(services)) return services.map(String)
-    if (typeof services === 'string') {
-      const trimmed = services.trim()
-      if (!trimmed) return []
-      const parsed = JSON.parse(trimmed)
-      if (Array.isArray(parsed)) return parsed.map(String)
-      return [trimmed]
-    }
-    return []
-  } catch {
-    return typeof services === 'string' && services ? [services] : []
-  }
-}
-
-function serviceLabels(ids: string[]) {
-  const map = new Map(SERVICES.map((s) => [s.id, s.label] as const))
-  return ids.map((id) => map.get(id) || id)
 }
 
 function toPTDateLabel(dateISO: string) {
@@ -131,6 +85,45 @@ function daysBetweenInclusive(start: Date, end: Date) {
   return out
 }
 
+function normalizePhone(raw: string) {
+  const s = String(raw || '').trim()
+  const digits = s.replace(/[^\d+]/g, '')
+  if (!digits) return ''
+  if (digits.startsWith('+')) return digits
+  if (digits.startsWith('351')) return `+${digits}`
+  if (digits.startsWith('0')) return `+351${digits.slice(1)}`
+  if (digits.length === 9) return `+351${digits}`
+  return digits
+}
+
+function waLink(phoneRaw: string, message: string) {
+  const phone = normalizePhone(phoneRaw).replace('+', '')
+  const text = encodeURIComponent(message)
+  if (!phone) return `https://wa.me/?text=${text}`
+  return `https://wa.me/${phone}?text=${text}`
+}
+
+function safeParseServices(services: unknown) {
+  try {
+    if (Array.isArray(services)) return services.map(String)
+    if (typeof services === 'string') {
+      const trimmed = services.trim()
+      if (!trimmed) return []
+      const parsed = JSON.parse(trimmed)
+      if (Array.isArray(parsed)) return parsed.map(String)
+      return [trimmed]
+    }
+    return []
+  } catch {
+    return typeof services === 'string' && services ? [services] : []
+  }
+}
+
+function serviceLabels(ids: string[]) {
+  const map = new Map(SERVICES.map((s) => [s.id, s.label] as const))
+  return ids.map((id) => map.get(id) || id)
+}
+
 async function createBlockAndReturnId(date: string, time: string) {
   const res = await fetch('/api/appointments', {
     method: 'POST',
@@ -165,6 +158,12 @@ export default function Admin() {
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(false)
+
+  // New states for Reagendar
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false)
+  const [rescheduleAppointment, setRescheduleAppointment] = useState<Appointment | null>(null)
+  const [newRescheduleDate, setNewRescheduleDate] = useState(todayISO())
+  const [newRescheduleTime, setNewRescheduleTime] = useState('')
 
   const fetchAppointments = async () => {
     setLoading(true)
@@ -254,6 +253,43 @@ export default function Admin() {
       await fetchAppointments()
     } catch (err: any) {
       alert(err?.message ? String(err.message) : 'Erro ao bloquear/desbloquear.')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  // New: Open reschedule modal
+  const openReschedule = (app: Appointment) => {
+    setRescheduleAppointment(app)
+    setNewRescheduleDate(String(app.date || todayISO()))
+    setNewRescheduleTime(String(app.time || ''))
+    setShowRescheduleModal(true)
+  }
+
+  // New: Save reschedule
+  const saveReschedule = async () => {
+    if (!rescheduleAppointment || !newRescheduleDate || !newRescheduleTime) {
+      alert('Escolha data e hora válidas.')
+      return
+    }
+    const id = String(rescheduleAppointment.id || '')
+    if (!id) {
+      alert('Marcação inválida.')
+      return
+    }
+    setActionLoading(id)
+    try {
+      await api.updateAppointment(id, {
+        date: newRescheduleDate,
+        time: newRescheduleTime,
+        status: 'por_confirmar' // reset to pending for confirmation
+      } as any)
+      setShowRescheduleModal(false)
+      setRescheduleAppointment(null)
+      await fetchAppointments()
+      alert('Marcação reagendada com sucesso!')
+    } catch (err: any) {
+      alert(err?.message ? String(err.message) : 'Erro ao reagendar.')
     } finally {
       setActionLoading(null)
     }
@@ -481,7 +517,7 @@ export default function Admin() {
                             {obs && <p className="text-xs text-stone-500 mt-2">{obs}</p>}
                           </div>
 
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-3 gap-2">
                             <button
                               type="button"
                               onClick={() => updateStatus(String(app?.id || ''), 'confirmado')}
@@ -497,6 +533,14 @@ export default function Admin() {
                               className="bg-red-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-700 disabled:opacity-50"
                             >
                               Rejeitar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openReschedule(app)}
+                              disabled={actionLoading === String(app?.id || '')}
+                              className="bg-blue-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 disabled:opacity-50"
+                            >
+                              Reagendar
                             </button>
                           </div>
 
@@ -550,6 +594,79 @@ export default function Admin() {
           </div>
         </div>
       </div>
+
+      {/* Reagendar Modal */}
+      {showRescheduleModal && rescheduleAppointment && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative">
+            <button
+              onClick={() => setShowRescheduleModal(false)}
+              className="absolute top-4 right-4 text-stone-500 hover:text-stone-800"
+            >
+              <X size={24} />
+            </button>
+
+            <h3 className="text-2xl font-serif italic mb-6 text-center">Reagendar Marcação</h3>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">
+                  Nova Data
+                </label>
+                <input
+                  type="date"
+                  min={todayISO()}
+                  value={newRescheduleDate}
+                  onChange={e => {
+                    setNewRescheduleDate(e.target.value)
+                    setNewRescheduleTime('')
+                  }}
+                  className="w-full border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-brand-gold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">
+                  Novo Horário
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  {TIMES.map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setNewRescheduleTime(t)}
+                      className={cn(
+                        "py-3 px-2 text-sm font-medium rounded-lg border transition-all",
+                        newRescheduleTime === t
+                          ? "bg-brand-gold text-white border-brand-gold"
+                          : "border-stone-300 hover:border-brand-gold"
+                      )}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button
+                  onClick={() => setShowRescheduleModal(false)}
+                  className="flex-1 py-4 border border-stone-300 rounded-xl text-stone-600 font-bold uppercase tracking-widest hover:bg-stone-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={saveReschedule}
+                  disabled={!newRescheduleDate || !newRescheduleTime}
+                  className="flex-1 py-4 bg-brand-gold text-white rounded-xl font-bold uppercase tracking-widest hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Guardar Nova Data/Hora
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
