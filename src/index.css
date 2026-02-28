@@ -16,16 +16,27 @@
 }
 
 @layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
   html {
     font-size: 18px;
   }
 
   body {
     @apply font-sans bg-brand-paper text-brand-ink antialiased leading-relaxed;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif font-medium tracking-tight;
+  }
+
+  button, a {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -38,7 +49,9 @@
     font-family: var(--font-cursive);
     @apply text-brand-gold-light leading-[0.82] tracking-[2px];
     background: linear-gradient(135deg, #f0d288 0%, #d4af37 40%, #b8860b 70%, #a67c00 100%);
+    background-clip: text;
     -webkit-background-clip: text;
+    color: transparent;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
@@ -46,7 +59,9 @@
   .logo-cabeleireiros {
     @apply font-serif uppercase font-semibold tracking-[4px] -mt-2 text-brand-gold-light;
     background: linear-gradient(135deg, #f0d288 0%, #e6c070 50%, #d4af37 100%);
+    background-clip: text;
     -webkit-background-clip: text;
+    color: transparent;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 1px 2px rgba(0,0,0,0.2);
   }
