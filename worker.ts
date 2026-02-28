@@ -215,13 +215,54 @@ export default {
           const body = await readJson(request)
           if (!id || !body) return json({ error: 'Invalid request' }, 400)
 
-          const nextStatus = body.status ? String(body.status) : ''
-          if (!nextStatus) return json({ error: 'Missing status' }, 400)
+          const fields: string[] = []
+          const values: any[] = []
+
+          if (body.name !== undefined) {
+            fields.push('name = ?')
+            values.push(String(body.name).trim())
+          }
+
+          if (body.whatsapp !== undefined) {
+            fields.push('whatsapp = ?')
+            values.push(String(body.whatsapp).trim())
+          }
+
+          if (body.services !== undefined) {
+            fields.push('services = ?')
+            values.push(String(body.services))
+          }
+
+          if (body.date !== undefined) {
+            fields.push('date = ?')
+            values.push(String(body.date))
+          }
+
+          if (body.time !== undefined) {
+            fields.push('time = ?')
+            values.push(String(body.time))
+          }
+
+          if (body.observation !== undefined) {
+            fields.push('observation = ?')
+            values.push(String(body.observation))
+          }
+
+          if (body.status !== undefined) {
+            fields.push('status = ?')
+            values.push(String(body.status))
+          }
+
+          if (fields.length === 0) {
+            return json({ error: 'No fields to update' }, 400)
+          }
+
+          values.push(id)
 
           await env.DB.prepare(
-            `UPDATE appointments SET status = ? WHERE id = ?`
+            `UPDATE appointments SET ${fields.join(', ')} WHERE id = ?`
           )
-            .bind(nextStatus, id)
+            .bind(...values)
             .run()
 
           return json({ success: true })
