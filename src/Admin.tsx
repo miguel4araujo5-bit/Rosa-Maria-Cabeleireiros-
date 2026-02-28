@@ -4,6 +4,133 @@ import { Calendar, ChevronRight, Check, LogOut, MessageSquare, RefreshCw, Trash2
 import { api } from './services/api'
 import type { Appointment } from './types'
 
+const TIMES = [
+  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+  '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00',
+] as const
+
+const SERVICES = [
+  { id: 'corte_mulher', label: 'Corte Mulher', category: 'Cortes' },
+  { id: 'corte_homem', label: 'Corte Homem', category: 'Cortes' },
+  { id: 'brushing', label: 'Brushing', category: 'Styling' },
+  { id: 'tratamento', label: 'Tratamento Capilar', category: 'Tratamentos' },
+  { id: 'coloracao', label: 'Coloração', category: 'Cor' },
+  { id: 'madeixas', label: 'Madeixas', category: 'Cor' },
+  { id: 'alisamento', label: 'Alisamento / Queratina', category: 'Tratamentos' },
+  { id: 'outro', label: 'Outro', category: 'Outros' },
+] as const
+
+function cn(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(' ')
+}
+
+function todayISO() {
+  return new Date().toISOString().split('T')[0]
+}
+
+function isClosedDayISO(dateISO: string) {
+  if (!dateISO) return false
+  const d = new Date(`${dateISO}T00:00:00`)
+  const day = d.getDay()
+  return day === 0 || day === 1
+}
+
+function normalizePhone(raw: string) {
+  const s = String(raw || '').trim()
+  const digits = s.replace(/[^\d+]/g, '')
+  if (!digits) return ''
+  if (digits.startsWith('+')) return digits
+  if (digits.startsWith('351')) return `+${digits}`
+  if (digits.startsWith('0')) return `+351${digits.slice(1)}`
+  if (digits.length === 9) return `+351${digits}`
+  return digits
+}
+
+function waLink(phoneRaw: string, message: string) {
+  const phone = normalizePhone(phoneRaw).replace('+', '')
+  const text = encodeURIComponent(message)
+  if (!phone) return `https://wa.me/?text=${text}`
+  return `https://wa.me/${phone}?text=${text}`
+}
+
+function safeParseServices(services: unknown) {
+  try {
+    if (Array.isArray(services)) return services.map(String)
+    if (typeof services === 'string') {
+      const trimmed = services.trim()
+      if (!trimmed) return []
+      const parsed = JSON.parse(trimmed)
+      if (Array.isArray(parsed)) return parsed.map(String)
+      return [trimmed]
+    }
+    return []
+  } catch {
+    return typeof services === 'string' && services ? [services] : []
+  }
+}
+
+function serviceLabels(ids: string[]) {
+  const map = new Map(SERVICES.map((s) => [s.id, s.label] as const))
+  return ids.map((id) => map.get(id) || id)
+}
+
+function toPTDateLabel(dateISO: string) {
+  if (!dateISO) return ''
+  const d = new Date(`${dateISO}T00:00:00`)
+  const fmt = new Intl.DateTimeFormat('pt-PT', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' })
+  return fmt.format(d).replace('.', '')
+}
+
+function monthTitle(d: Date) {
+  const fmt = new Intl.DateTimeFormat('pt-PT', { month: 'long', year: 'numeric' })
+  const s = fmt.format(d)
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
+function pad2(n: number) {
+  return String(n).padStart(2, '0')
+}
+
+function toISODate(d: Date) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
+}
+
+function addDays(d: Date, days: number) {
+  const x = new Date(d)
+  x.setDate(x.getDate() + days)
+  return x
+}
+
+function startOfMonth(d: Date) {
+  return new Date(d.getFullYear(), d.getMonth(), 1)
+}
+
+function endOfMonth(d: Date) {
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0)
+}
+
+function startOfWeekMonday(d: Date) {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  const day = x.getDay()
+  const diff = (day === 0 ? -6 : 1 - day)
+  return addDays(x, diff)
+}
+
+function endOfWeekMonday(d: Date) {
+  return addDays(startOfWeekMonday(d), 6)
+}
+
+function daysBetweenInclusive(start: Date, end: Date) {
+  const out: Date[] = []
+  let cur = new Date(start.getFullYear(), start.getMonth(), start.getDate())
+  const last = new Date(end.getFullYear(), end.getMonth(), end.getDate())
+  while (cur.getTime() <= last.getTime()) {
+    out.push(new Date(cur))
+    cur = addDays(cur, 1)
+  }
+  return out
+}
+
 async function createBlockAndReturnId(date: string, time: string) {
   const res = await fetch('/api/appointments', {
     method: 'POST',
@@ -105,13 +232,13 @@ export default function Admin() {
   }
 
   const toggleBlock = async (time: string) => {
-    const existing = (appointments as any[]).find(a => String(a.date) === selectedDate && String(a.time) === time)
+    const existing = appointments.find(a => String(a.date) === selectedDate && String(a.time) === time)
     const key = `${selectedDate}-${time}`
     setActionLoading(key)
     try {
       if (existing) {
         const id = String(existing.id || '')
-        if (!id) throw new Error('Marcaçāo inválida.')
+        if (!id) throw new Error('Marcação inválida.')
         if (String(existing.status) === 'bloqueado') {
           await api.deleteAppointment(id)
           await fetchAppointments()
@@ -140,7 +267,7 @@ export default function Admin() {
 
   const hasBookingOnDay = (date: Date) => {
     const dateStr = toISODate(date)
-    return (appointments as any[]).some(a =>
+    return appointments.some(a =>
       String(a.date) === dateStr &&
       (String(a.status) === 'por_confirmar' || String(a.status) === 'confirmado')
     )
@@ -148,14 +275,14 @@ export default function Admin() {
 
   const hasBlockOnDay = (date: Date) => {
     const dateStr = toISODate(date)
-    return (appointments as any[]).some(a =>
+    return appointments.some(a =>
       String(a.date) === dateStr &&
       String(a.status) === 'bloqueado'
     )
   }
 
   const dayApps = useMemo(() => {
-    return (appointments as any[]).filter(a => String(a.date) === selectedDate)
+    return appointments.filter(a => String(a.date) === selectedDate)
   }, [appointments, selectedDate])
 
   if (!isLoggedIn) {
@@ -288,7 +415,7 @@ export default function Admin() {
 
             <div className="space-y-4 max-h-[640px] overflow-y-auto pr-2 custom-scrollbar">
               {TIMES.map(time => {
-                const app = (dayApps as any[]).find(a => String(a.time) === time)
+                const app = dayApps.find(a => String(a.time) === time)
                 const status = app ? String(app.status || '') : ''
                 const key = `${selectedDate}-${time}`
                 const busy = !!app
@@ -297,8 +424,8 @@ export default function Admin() {
                 const confirmed = status === 'confirmado'
                 const name = app ? String(app.name || '') : ''
                 const whatsapp = app ? String(app.whatsapp || '') : ''
-                const services = app ? serviceLabels(safeParseServices((app as any).services)) : []
-                const obs = app ? String((app as any).observation || '').trim() : ''
+                const services = app ? serviceLabels(safeParseServices(app.services)) : []
+                const obs = app ? String(app.observation || '').trim() : ''
                 const msgConfirm = `Olá ${name}! A sua marcação no Rosa Maria Cabeleireiros ficou confirmada para ${toPTDateLabel(selectedDate)} às ${time}. Até breve.`
                 const msgReject = `Olá ${name}! Obrigado pelo seu pedido. Infelizmente não conseguimos confirmar ${toPTDateLabel(selectedDate)} às ${time}. Pode responder com outro horário/dia para tentarmos ajustar.`
                 const msgPending = `Olá ${name}! Recebemos o seu pedido para ${toPTDateLabel(selectedDate)} às ${time}. Iremos confirmar o mais rápido possível.`
@@ -357,16 +484,16 @@ export default function Admin() {
                           <div className="grid grid-cols-2 gap-2">
                             <button
                               type="button"
-                              onClick={() => updateStatus(String((app as any).id), 'confirmado')}
-                              disabled={actionLoading === String((app as any).id)}
+                              onClick={() => updateStatus(String(app?.id || ''), 'confirmado')}
+                              disabled={actionLoading === String(app?.id || '')}
                               className="bg-emerald-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 disabled:opacity-50"
                             >
                               Confirmar
                             </button>
                             <button
                               type="button"
-                              onClick={() => updateStatus(String((app as any).id), 'bloqueado')}
-                              disabled={actionLoading === String((app as any).id)}
+                              onClick={() => updateStatus(String(app?.id || ''), 'bloqueado')}
+                              disabled={actionLoading === String(app?.id || '')}
                               className="bg-red-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-700 disabled:opacity-50"
                             >
                               Rejeitar
@@ -384,8 +511,8 @@ export default function Admin() {
                             </a>
                             <button
                               type="button"
-                              onClick={() => deleteAppointment(String((app as any).id))}
-                              disabled={actionLoading === String((app as any).id)}
+                              onClick={() => deleteAppointment(String(app?.id || ''))}
+                              disabled={actionLoading === String(app?.id || '')}
                               className="py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-red-300 hover:text-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                               <Trash2 size={16} /> Apagar
