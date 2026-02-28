@@ -3,23 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { Calendar, ChevronRight, Check, LogOut, MessageSquare, RefreshCw, Trash2 } from 'lucide-react'
 import { api } from './services/api'
 import type { Appointment } from './types'
-import {
-  addDays,
-  cn,
-  daysBetweenInclusive,
-  endOfMonth,
-  endOfWeekMonday,
-  isClosedDayISO,
-  monthTitle,
-  safeParseServices,
-  serviceLabels,
-  startOfMonth,
-  startOfWeekMonday,
-  toISODate,
-  toPTDateLabel,
-  todayISO,
-  waLink
-} from './utils' // ← adjust if your utils are in a different place
 
 async function createBlockAndReturnId(date: string, time: string) {
   const res = await fetch('/api/appointments', {
