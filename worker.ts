@@ -38,9 +38,29 @@ function getBearerToken(request: Request): string | null {
   return m?.[1]?.trim() || null
 }
 
-async function requireAdmin(request: Request, env: Env): Promise<{ ok: true } | { ok: false; res: Response }> {
+function timingSafeEqual(a: string, b: string) {
+  const enc = new TextEncoder()
+  const aBytes = enc.encode(a)
+  const bBytes = enc.encode(b)
+  if (aBytes.length !== bBytes.length) return false
+  let diff = 0
+  for (let i = 0; i < aBytes.length; i++) diff |= aBytes[i] ^ bBytes[i]
+  return diff === 0
+}
+
+async function cleanupExpiredSessions(db: D1Database) {
+  const now = new Date().toISOString()
+  await db.prepare(`DELETE FROM admin_sessions WHERE expires_at <= ?`).bind(now).run()
+}
+
+async function requireAdmin(
+  request: Request,
+  env: Env
+): Promise<{ ok: true } | { ok: false; res: Response }> {
   const token = getBearerToken(request)
   if (!token) return { ok: false, res: json({ error: 'Unauthorized' }, 401) }
+
+  await cleanupExpiredSessions(env.DB)
 
   const session = await env.DB.prepare(
     `SELECT token, expires_at FROM admin_sessions WHERE token = ?`
@@ -100,6 +120,13 @@ async function initSchema(db: D1Database) {
   }
 }
 
+let schemaReady: Promise<void> | null = null
+
+function ensureSchema(db: D1Database) {
+  if (!schemaReady) schemaReady = initSchema(db)
+  return schemaReady
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     try {
@@ -117,7 +144,11 @@ export default {
           return json({ error: 'Missing DB binding' }, 500)
         }
 
+        await ensureSchema(env.DB)
+
         if (pathname === '/api/init' && request.method === 'GET') {
+          const auth = await requireAdmin(request, env)
+          if (!auth.ok) return auth.res
           await initSchema(env.DB)
           return json({ success: true })
         }
@@ -173,7 +204,12 @@ export default {
           const password = body?.password ? String(body.password) : ''
           if (!password) return json({ error: 'Password required' }, 400)
           if (!env.ADMIN_PASSWORD) return json({ error: 'Missing ADMIN_PASSWORD secret' }, 500)
-          if (password !== env.ADMIN_PASSWORD) return json({ error: 'Invalid password' }, 401)
+
+          if (!timingSafeEqual(password, env.ADMIN_PASSWORD)) {
+            return json({ error: 'Invalid password' }, 401)
+          }
+
+          await cleanupExpiredSessions(env.DB)
 
           const token = crypto.randomUUID()
           const now = new Date()
