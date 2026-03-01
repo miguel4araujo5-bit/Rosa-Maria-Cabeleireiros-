@@ -160,7 +160,7 @@ function Home() {
           <img
             src="/IMG_6695.jpg"
             alt="Rosa Maria Cabeleireiros"
-            className="w-full h-full object-cover opacity-60 scale-105"
+           className="w-full h-full object-cover object-top opacity-60 scale-105"
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-brand-paper/80 via-transparent to-brand-paper"></div>
