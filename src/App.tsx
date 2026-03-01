@@ -163,7 +163,7 @@ function Home() {
             className="w-full h-full object-cover object-top opacity-70 scale-105"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-black/35"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/20"></div>
         </div>
 
         <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
