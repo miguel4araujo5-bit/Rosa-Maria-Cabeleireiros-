@@ -163,7 +163,7 @@ function Home() {
            className="w-full h-full object-cover object-top opacity-60 scale-105"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-white/75 backdrop-blur-[1px]"></div>
+          <div className="absolute inset-0 bg-black/40"></div>
         </div>
         <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
           <span className="section-subtitle">Marcação online</span>
