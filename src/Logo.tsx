@@ -5,10 +5,10 @@ const Logo: React.FC = () => {
   return (
     <Link
       to="/"
-      className="flex flex-col justify-center leading-tight select-none"
+      className="flex flex-col justify-center py-2 select-none"
       aria-label="Rosa Maria Cabeleireiros - Página inicial"
     >
-      <h1 className="logo-rosa-maria text-4xl md:text-5xl leading-none">
+      <h1 className="logo-rosa-maria text-4xl md:text-5xl leading-tight">
         Rosa Maria
       </h1>
       <span className="logo-cabeleireiros text-sm md:text-base tracking-[0.3em] uppercase">
