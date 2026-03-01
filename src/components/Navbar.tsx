@@ -12,7 +12,7 @@ export default function Navbar() {
   const isAdmin = location.pathname.startsWith('/admin')
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f6f1e8]/95 backdrop-blur-md border-b border-[#e8dfcf] shadow-sm">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="flex justify-between h-28 items-center">
           <div onClick={() => setIsOpen(false)}>
@@ -22,7 +22,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-16">
             <Link
               to="/"
-              className="text-sm uppercase tracking-[0.25em] font-bold text-stone-600 hover:text-brand-ink transition-colors"
+              className="text-sm uppercase tracking-[0.25em] font-bold text-stone-700 hover:text-brand-ink transition-colors"
             >
               Início
             </Link>
@@ -49,7 +49,7 @@ export default function Navbar() {
             ) : (
               <Link
                 to={ADMIN_PATH}
-                className="text-stone-300 hover:text-stone-500 text-[10px] uppercase tracking-[0.2em] font-bold"
+                className="text-stone-400 hover:text-stone-600 text-[10px] uppercase tracking-[0.2em] font-bold"
               >
                 Admin
               </Link>
@@ -58,7 +58,7 @@ export default function Navbar() {
 
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden text-brand-ink p-2 border-2 border-stone-100"
+            className="md:hidden text-brand-ink p-2 border-2 border-[#e8dfcf]"
           >
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
@@ -66,12 +66,12 @@ export default function Navbar() {
       </div>
 
       {isOpen && (
-        <div className="md:hidden bg-white border-b border-stone-200 overflow-hidden">
+        <div className="md:hidden bg-[#f6f1e8] border-b border-[#e8dfcf] overflow-hidden">
           <div className="px-8 py-16 space-y-10 text-center">
             <Link
               to="/"
               onClick={() => setIsOpen(false)}
-              className="block text-lg uppercase tracking-[0.3em] text-stone-600 font-bold"
+              className="block text-lg uppercase tracking-[0.3em] text-stone-700 font-bold"
             >
               Início
             </Link>
@@ -87,7 +87,7 @@ export default function Navbar() {
             <Link
               to={ADMIN_PATH}
               onClick={() => setIsOpen(false)}
-              className="block text-xs uppercase tracking-[0.3em] text-stone-300 font-bold"
+              className="block text-xs uppercase tracking-[0.3em] text-stone-400 font-bold"
             >
               Admin
             </Link>
