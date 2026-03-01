@@ -168,10 +168,6 @@ function Home() {
 
         <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
 
-          {/* premium spotlight behind logo */}
-          <div className="absolute inset-0 -z-10 flex justify-center items-center">
-            <div className="w-[600px] h-[320px] bg-black/40 rounded-full blur-3xl opacity-70"></div>
-          </div>
 
           <span className="section-subtitle text-white/80">
             Marcação online
