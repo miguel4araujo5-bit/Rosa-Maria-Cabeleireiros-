@@ -158,7 +158,7 @@ function Home() {
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&q=80&w=1920&h=1080"
+            src="/IMG_6695.jpg"
             alt="Rosa Maria Cabeleireiros"
             className="w-full h-full object-cover opacity-60 scale-105"
             referrerPolicy="no-referrer"
