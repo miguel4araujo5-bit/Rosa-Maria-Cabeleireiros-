@@ -170,7 +170,7 @@ function Home() {
           <div className="mb-10 drop-shadow-[0_4px_12px_rgba(0,0,0,0.25)]">
             <Logo />
           </div>
-          <p className="text-xl md:text-2xl text-stone-600 mb-16 max-w-2xl mx-auto font-medium leading-relaxed">
+          <p className="text-xl md:text-2xl text-white/90 mb-16 max-w-2xl mx-auto font-medium leading-relaxed">
             Escolha serviços, dia e hora. O pedido fica pendente até confirmação do salão.
           </p>
           <div className="flex flex-col md:flex-row items-center justify-center gap-8">
