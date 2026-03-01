@@ -173,7 +173,7 @@ function Home() {
             Marcação online
           </span>
 
-          <div className="mb-10 drop-shadow-[0_6px_18px_rgba(0,0,0,0.65)]">
+          <div className="mt-6 mb-14 drop-shadow-[0_6px_18px_rgba(0,0,0,0.65)]">
             <Logo />
           </div>
 
