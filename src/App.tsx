@@ -167,7 +167,7 @@ function Home() {
         </div>
         <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
           <span className="section-subtitle">Marcação online</span>
-          <div className="mb-10">
+          <div className="mb-10 drop-shadow-[0_4px_12px_rgba(0,0,0,0.25)]">
             <Logo />
           </div>
           <p className="text-xl md:text-2xl text-stone-600 mb-16 max-w-2xl mx-auto font-medium leading-relaxed">
