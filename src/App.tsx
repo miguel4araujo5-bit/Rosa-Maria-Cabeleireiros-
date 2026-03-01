@@ -155,7 +155,7 @@ function daysBetweenInclusive(start: Date, end: Date) {
 function Home() {
   return (
     <div className="bg-brand-paper">
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+     <section className="relative h-screen pt-28 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
             src="/IMG_6695.jpg"
