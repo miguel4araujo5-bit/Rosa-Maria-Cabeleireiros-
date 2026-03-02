@@ -160,31 +160,29 @@ function Home() {
           <img
             src="/IMG_6695.jpg"
             alt="Rosa Maria Cabeleireiros"
-            className="w-full h-full object-cover object-top opacity-70 scale-105"
+            className="w-full h-full object-cover object-top opacity-75 scale-105"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/45 to-black/25"></div>
         </div>
 
         <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
-
-
-          <span className="section-subtitle text-white/80">
+          <span className="section-subtitle text-white/75">
             Marcação online
           </span>
 
-          <div className="mt-6 mb-14 drop-shadow-[0_6px_18px_rgba(0,0,0,0.65)]">
+          <div className="mt-8 mb-16 drop-shadow-[0_6px_18px_rgba(0,0,0,0.65)]">
             <Logo />
           </div>
 
-          <p className="text-xl md:text-2xl text-white/85 mb-16 max-w-2xl mx-auto font-medium leading-relaxed">
+          <p className="text-lg md:text-xl text-white/80 mb-20 max-w-2xl mx-auto font-light leading-relaxed">
             Escolha serviços, dia e hora. O pedido fica pendente até confirmação do salão.
           </p>
 
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-10">
             <Link
               to="/marcacao"
-              className="btn-primary text-lg px-16 py-6 w-full md:w-auto shadow-2xl"
+              className="btn-primary text-lg px-20 py-6 w-full md:w-auto shadow-[0_20px_50px_rgba(0,0,0,0.4)] tracking-[0.25em]"
             >
               Marcar a minha Visita
             </Link>
