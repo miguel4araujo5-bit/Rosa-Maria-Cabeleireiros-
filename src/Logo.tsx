@@ -8,11 +8,11 @@ const Logo: React.FC = () => {
       className="flex flex-col justify-center py-3 select-none"
       aria-label="Rosa Maria Cabeleireiros - Página inicial"
     >
-      <h1 className="logo-rosa-maria text-4xl md:text-5xl leading-tight drop-shadow-[0_6px_18px_rgba(0,0,0,0.65)] [text-shadow:0_0_18px_rgba(212,175,55,0.28)]">
+      <h1 className="logo-rosa-maria text-4xl md:text-5xl leading-[0.95] tracking-tight drop-shadow-[0_8px_24px_rgba(0,0,0,0.7)]">
         Rosa Maria
       </h1>
 
-      <span className="logo-cabeleireiros text-sm md:text-base tracking-[0.35em] uppercase text-brand-gold/90">
+      <span className="logo-cabeleireiros mt-2 text-xs md:text-sm tracking-[0.45em] uppercase text-brand-gold">
         Cabeleireiros
       </span>
     </Link>
