@@ -41,37 +41,66 @@
 }
 
 @layer components {
+
   .logo-container {
     @apply flex flex-col items-center text-center leading-none;
   }
 
   .logo-rosa-maria {
     font-family: var(--font-cursive);
-    @apply text-brand-gold-light leading-[0.82] tracking-[2px];
-    background: linear-gradient(135deg, #f0d288 0%, #d4af37 40%, #b8860b 70%, #a67c00 100%);
+    @apply leading-[0.9] tracking-[1px];
+    background: linear-gradient(
+      140deg,
+      #f5e3a1 0%,
+      #d4af37 35%,
+      #b8860b 65%,
+      #8c6a00 100%
+    );
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
 
   .logo-cabeleireiros {
-    @apply font-serif uppercase font-semibold tracking-[4px] -mt-2 text-brand-gold-light;
-    background: linear-gradient(135deg, #f0d288 0%, #e6c070 50%, #d4af37 100%);
+    @apply font-serif uppercase font-semibold tracking-[5px];
+    background: linear-gradient(
+      140deg,
+      #e6c070 0%,
+      #caa53b 60%,
+      #a67c00 100%
+    );
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
   }
 
   .btn-primary {
-    @apply bg-brand-ink text-white px-12 py-5 font-sans text-sm uppercase tracking-[0.25em] font-semibold transition-all hover:bg-brand-gold active:scale-95 flex items-center justify-center gap-3;
+    @apply bg-brand-ink text-white px-14 py-6 font-sans text-sm uppercase tracking-[0.28em] font-semibold transition-all flex items-center justify-center gap-3;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-brand-gold);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.97);
   }
 
   .btn-outline {
-    @apply border-2 border-brand-ink text-brand-ink px-12 py-5 font-sans text-sm uppercase tracking-[0.25em] font-semibold transition-all hover:bg-brand-ink hover:text-white active:scale-95 flex items-center justify-center gap-3;
+    @apply border-2 border-brand-ink text-brand-ink px-14 py-6 font-sans text-sm uppercase tracking-[0.28em] font-semibold transition-all flex items-center justify-center gap-3;
+  }
+
+  .btn-outline:hover {
+    background-color: var(--color-brand-ink);
+    color: white;
+  }
+
+  .btn-outline:active {
+    transform: scale(0.97);
   }
 
   .input-field {
