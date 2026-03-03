@@ -15,9 +15,14 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f6f1e8]/95 backdrop-blur-md border-b border-[#e8dfcf] shadow-sm">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="flex justify-between h-28 items-center">
-          <div onClick={() => setIsOpen(false)}>
+
+          <Link
+            to="/"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center py-3"
+          >
             <Logo />
-          </div>
+          </Link>
 
           <div className="hidden md:flex items-center gap-16">
             <Link
