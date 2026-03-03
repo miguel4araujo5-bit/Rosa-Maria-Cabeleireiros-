@@ -497,7 +497,15 @@ export default function App() {
     <Router>
       <AppShell>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route
+            path="/"
+            element={
+              <Home
+                SERVICES={SERVICES}
+                SERVICE_CATEGORIES={SERVICE_CATEGORIES}
+              />
+            }
+          />
           <Route path="/marcacao" element={<Booking />} />
           <Route path="/agendar" element={<Booking />} />
           <Route path="/admin/*" element={<Admin />} />
