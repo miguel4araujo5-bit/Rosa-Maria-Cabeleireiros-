@@ -15,7 +15,7 @@ type HomeProps = {
 export default function Home({ SERVICES, SERVICE_CATEGORIES }: HomeProps) {
   return (
     <div className="bg-brand-paper">
-      <section className="relative h-screen pt-28 flex items-center justify-center overflow-hidden">
+      <section className="relative h-screen pt-28 flex items-center justify-center">
         <div className="absolute inset-0 z-0">
           <img
             src="/IMG_6695.jpg"
