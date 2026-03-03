@@ -1,4 +1,18 @@
-export default function Home() {
+import { Link } from 'react-router-dom'
+import Logo from './Logo'
+
+type Service = {
+  id: string
+  label: string
+  category: string
+}
+
+type HomeProps = {
+  SERVICES: Service[]
+  SERVICE_CATEGORIES: string[]
+}
+
+export default function Home({ SERVICES, SERVICE_CATEGORIES }: HomeProps) {
   return (
     <div className="bg-brand-paper">
       <section className="relative h-screen pt-28 flex items-center justify-center overflow-hidden">
@@ -67,13 +81,15 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-2">
-                  {SERVICES.filter(s => s.category === category).map(service => (
-                    <div key={service.id} className="price-item group">
-                      <span className="price-name">{service.label}</span>
-                      <div className="flex-1 border-b border-dotted border-stone-200 mx-6 mb-2 opacity-50"></div>
-                      <span className="price-value">—</span>
-                    </div>
-                  ))}
+                  {SERVICES
+                    .filter(s => s.category === category)
+                    .map(service => (
+                      <div key={service.id} className="price-item group">
+                        <span className="price-name">{service.label}</span>
+                        <div className="flex-1 border-b border-dotted border-stone-200 mx-6 mb-2 opacity-50"></div>
+                        <span className="price-value">—</span>
+                      </div>
+                    ))}
                 </div>
               </div>
             ))}
