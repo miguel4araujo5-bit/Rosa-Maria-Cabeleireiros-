@@ -26,7 +26,7 @@ export default function Home({ SERVICES, SERVICE_CATEGORIES }: HomeProps) {
           <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/45 to-black/25"></div>
         </div>
 
-        <div className="relative z-10 text-center px-6 max-w-5xl mx-auto translate-y-8 md:translate-y-12">
+        <div className="relative z-10 text-center px-6 max-w-5xl mx-auto translate-y-12 md:translate-y-16">
           <span className="section-subtitle text-white/75">
             Marcação online
           </span>
