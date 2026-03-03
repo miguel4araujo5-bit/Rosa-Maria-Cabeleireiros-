@@ -1,4 +1,4 @@
-function Home() {
+export default function Home() {
   return (
     <div className="bg-brand-paper">
       <section className="relative h-screen pt-28 flex items-center justify-center overflow-hidden">
