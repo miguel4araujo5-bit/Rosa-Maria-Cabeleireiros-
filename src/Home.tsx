@@ -23,7 +23,7 @@ export default function Home({ SERVICES, SERVICE_CATEGORIES }: HomeProps) {
             className="w-full h-full object-cover object-top opacity-75 scale-105"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/45 to-black/25"></div>
+          <div className="absolute inset-0 bg-black/55"></div>
         </div>
 
         <div className="relative z-10 text-center px-6 max-w-5xl mx-auto translate-y-12 md:translate-y-16">
