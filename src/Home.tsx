@@ -15,78 +15,80 @@ type HomeProps = {
 export default function Home({ SERVICES, SERVICE_CATEGORIES }: HomeProps) {
   return (
     <div className="bg-brand-paper">
-      <section className="relative h-screen pt-28 flex items-center justify-center">
+      <section className="relative h-screen pt-32 flex items-center justify-center">
         <div className="absolute inset-0 z-0">
           <img
             src="/IMG_6695.jpg"
             alt="Rosa Maria Cabeleireiros"
-            className="w-full h-full object-cover object-top opacity-75 scale-105"
+            className="w-full h-full object-cover object-top opacity-90 scale-105"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-black/55"></div>
+          <div className="absolute inset-0 bg-black/60"></div>
         </div>
 
-        <div className="relative z-10 text-center px-6 max-w-5xl mx-auto translate-y-12 md:translate-y-16">
-          <span className="section-subtitle text-white/75">
+        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto translate-y-14 md:translate-y-20">
+          <span className="section-subtitle text-white/60 tracking-[0.5em]">
             Marcação online
           </span>
 
-          <div className="mt-8 mb-16 drop-shadow-[0_6px_18px_rgba(0,0,0,0.65)]">
+          <div className="mt-10 mb-20 transition-transform duration-700 hover:scale-[1.02]">
             <Logo />
           </div>
 
-          <p className="text-lg md:text-xl text-white/80 mb-20 max-w-2xl mx-auto font-light leading-relaxed">
+          <p className="text-base md:text-lg text-white/75 mb-24 max-w-xl mx-auto font-light leading-relaxed">
             Escolha serviços, dia e hora. O pedido fica pendente até confirmação do salão.
           </p>
 
-          <div className="flex flex-col md:flex-row items-center justify-center gap-10">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-12">
             <Link
               to="/marcacao"
-              className="btn-primary text-lg px-20 py-6 w-full md:w-auto shadow-[0_20px_50px_rgba(0,0,0,0.4)] tracking-[0.25em]"
+              className="btn-primary text-sm tracking-[0.4em] px-24 py-7 w-full md:w-auto shadow-[0_25px_60px_rgba(0,0,0,0.35)] transition-all duration-500 hover:scale-[1.02]"
             >
-              Marcar a minha Visita
+              MARCAR A MINHA VISITA
             </Link>
 
             <a
               href="#servicos"
-              className="text-sm uppercase tracking-[0.4em] font-bold text-white/60 hover:text-white transition-all"
+              className="text-xs uppercase tracking-[0.45em] font-bold text-white/50 hover:text-white transition-colors duration-300"
             >
               Ver serviços
             </a>
           </div>
         </div>
 
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 hidden md:block">
-          <div className="w-px h-24 bg-gradient-to-b from-brand-gold to-transparent"></div>
+        <div className="absolute bottom-14 left-1/2 -translate-x-1/2 hidden md:block">
+          <div className="w-px h-28 bg-gradient-to-b from-brand-gold to-transparent opacity-80"></div>
         </div>
       </section>
 
-      <section id="servicos" className="py-36 px-6 bg-white">
+      <section id="servicos" className="py-44 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-24">
-            <span className="section-subtitle">Serviços</span>
+          <div className="text-center mb-28">
+            <span className="section-subtitle tracking-[0.4em]">Serviços</span>
             <h2 className="section-title">Seleção</h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24">
             {SERVICE_CATEGORIES.map((category, idx) => (
-              <div key={category} className="space-y-10">
+              <div key={category} className="space-y-12">
                 <div className="flex items-center gap-6">
                   <span className="text-4xl font-serif italic text-brand-gold">
                     0{idx + 1}
                   </span>
-                  <h3 className="text-4xl font-serif border-b-2 border-brand-pink-soft pb-2 flex-1">
+                  <h3 className="text-4xl font-serif border-b border-brand-pink-soft pb-3 flex-1">
                     {category}
                   </h3>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   {SERVICES
                     .filter(s => s.category === category)
                     .map(service => (
                       <div key={service.id} className="price-item group">
-                        <span className="price-name">{service.label}</span>
-                        <div className="flex-1 border-b border-dotted border-stone-200 mx-6 mb-2 opacity-50"></div>
+                        <span className="price-name transition-colors duration-300 group-hover:text-brand-ink">
+                          {service.label}
+                        </span>
+                        <div className="flex-1 border-b border-dotted border-stone-200 mx-6 mb-2 opacity-40 group-hover:opacity-70 transition-all duration-300"></div>
                         <span className="price-value">—</span>
                       </div>
                     ))}
@@ -95,9 +97,12 @@ export default function Home({ SERVICES, SERVICE_CATEGORIES }: HomeProps) {
             ))}
           </div>
 
-          <div className="pt-20 flex justify-center">
-            <Link to="/marcacao" className="btn-primary px-16 py-6 text-lg">
-              Agendar
+          <div className="pt-24 flex justify-center">
+            <Link
+              to="/marcacao"
+              className="btn-primary px-20 py-7 text-sm tracking-[0.4em] transition-all duration-500 hover:scale-[1.02]"
+            >
+              AGENDAR
             </Link>
           </div>
         </div>
