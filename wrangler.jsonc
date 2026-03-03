@@ -17,9 +17,5 @@
       "database_name": "rosa-maria-db",
       "database_id": "5af59c80-8496-476a-bced-a630423af767"
     }
-  ],
-
-  "env": {
-    "production": {}
-  }
+  ]
 }
