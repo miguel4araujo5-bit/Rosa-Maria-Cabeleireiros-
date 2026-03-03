@@ -12,7 +12,6 @@
   --color-brand-pink-soft: #fdf2f2;
   --color-brand-pink-deep: #e2a5a5;
 
-  /* Refined luxury gold tones */
   --color-brand-gold: #a67c00;
   --color-brand-gold-light: #c9a227;
 }
@@ -58,7 +57,9 @@
 
   .logo-rosa-maria {
     font-family: var(--font-cursive);
-    @apply leading-[1.15] tracking-[1px];
+    @apply tracking-[1px];
+    line-height: 1.28;
+    padding-top: 0.12em;
     background: linear-gradient(
       140deg,
       #f5e3a1 0%,
