@@ -89,7 +89,7 @@ export default function Home({ SERVICES, SERVICE_CATEGORIES }: HomeProps) {
                           {service.label}
                         </span>
                         <div className="flex-1 border-b border-dotted border-stone-200 mx-6 mb-2 opacity-40 group-hover:opacity-70 transition-all duration-300"></div>
-                        <span className="price-value">—</span>
+                        <span className="price-value">{service.price}</span>
                       </div>
                     ))}
                 </div>
