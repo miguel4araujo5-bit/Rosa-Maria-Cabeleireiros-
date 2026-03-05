@@ -209,45 +209,61 @@ function Booking() {
     window.open(`https://wa.me/${MANAGER_WHATSAPP}?text=${encodeURIComponent(message)}`, '_blank', 'noreferrer')
   }
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!formData.name.trim() || !formData.whatsapp.trim()) {
-      alert('Preencha nome e WhatsApp.')
-      return
-    }
-    if (formData.selectedServices.length === 0) {
-      alert('Selecione pelo menos um serviço.')
-      return
-    }
-    if (!formData.date || closed) {
-      alert('Escolha uma data válida.')
-      return
-    }
-    if (!formData.time || isSlotTaken(formData.time)) {
-      alert('Escolha um horário disponível.')
-      return
-    }
-    setLoading(true)
-    try {
-      await api.createAppointment({
-        name: formData.name.trim(),
-        whatsapp: formData.whatsapp.trim(),
-        services: JSON.stringify(formData.selectedServices),
-        date: formData.date,
-        time: formData.time,
-        observation: formData.observation || '',
-        status: 'por_confirmar',
-      } as any)
-      setStep(3)
-      try {
-        sendWhatsAppToManager()
-      } catch { }
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    } catch (err: any) {
-      alert(err?.message ? String(err.message) : 'Erro ao agendar.')
-    } finally {
-      setLoading(false)
-    }
+  e.preventDefault()
+
+  if (loading) return
+
+  if (!formData.name.trim() || !formData.whatsapp.trim()) {
+    alert('Preencha nome e WhatsApp.')
+    return
   }
+
+  if (formData.selectedServices.length === 0) {
+    alert('Selecione pelo menos um serviço.')
+    return
+  }
+
+  if (!formData.date || closed) {
+    alert('Escolha uma data válida.')
+    return
+  }
+
+  if (!formData.time || isSlotTaken(formData.time)) {
+    alert('Escolha um horário disponível.')
+    return
+  }
+
+  setLoading(true)
+
+  try {
+    await api.createAppointment({
+      name: formData.name.trim(),
+      whatsapp: formData.whatsapp.trim(),
+      services: JSON.stringify(formData.selectedServices),
+      date: formData.date,
+      time: formData.time,
+      observation: formData.observation || '',
+      status: 'por_confirmar',
+    } as any)
+
+    setStep(3)
+
+    try {
+      sendWhatsAppToManager()
+    } catch {}
+
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch {
+      window.scrollTo(0, 0)
+    }
+
+  } catch (err: any) {
+    alert(err?.message ? String(err.message) : 'Erro ao agendar.')
+  } finally {
+    setLoading(false)
+  }
+}
   return (
     <div className="pt-48 pb-32 px-6 bg-brand-paper min-h-screen">
       <div className="max-w-4xl mx-auto">
