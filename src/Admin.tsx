@@ -791,7 +791,7 @@ export default function Admin() {
                           {obs && <p className="text-xs text-stone-500 mt-2">{obs}</p>}
                         </div>
 
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-3 gap-2">
                           <button
                             type="button"
                             onClick={() => updateStatus(String((app as any)?.id || ''), 'confirmado')}
