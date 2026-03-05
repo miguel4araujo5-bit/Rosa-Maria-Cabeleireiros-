@@ -125,24 +125,16 @@ function safeParseTimes(raw: unknown): string[] {
 }
 
 function appointmentCoversTime(app: Appointment, dateISO: string, time: string) {
-  if (String(app.date) !== dateISO) return false
+  if (String((app as any).date) !== dateISO) return false
   const times = safeParseTimes((app as any).time)
   return times.includes(time)
 }
 
-async function createBlockAndReturnId(date: string, time: string, extra: { name?: string; observation?: string } = {}) {
+async function postAppointmentAndReturnId(payload: any) {
   const res = await fetch('/api/appointments', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name: extra.name || 'HORÁRIO BLOQUEADO',
-      whatsapp: '-',
-      services: JSON.stringify(['bloqueio_manual']),
-      date,
-      time,
-      observation: extra.observation || '',
-      status: 'por_confirmar',
-    }),
+    body: JSON.stringify(payload),
   })
   const data = await res.json().catch(() => null)
   if (!res.ok) {
@@ -150,8 +142,20 @@ async function createBlockAndReturnId(date: string, time: string, extra: { name?
     throw new Error(String(msg))
   }
   const id = (data as any)?.id ? String((data as any).id) : ''
-  if (!id) throw new Error('Falha ao criar bloqueio.')
+  if (!id) throw new Error('Falha ao criar marcação.')
   return id
+}
+
+async function createBlockAndReturnId(date: string, time: string, extra: { name?: string; observation?: string } = {}) {
+  return postAppointmentAndReturnId({
+    name: extra.name || 'HORÁRIO BLOQUEADO',
+    whatsapp: '-',
+    services: JSON.stringify(['bloqueio_manual']),
+    date,
+    time,
+    observation: extra.observation || '',
+    status: 'por_confirmar',
+  })
 }
 
 export default function Admin() {
@@ -341,30 +345,73 @@ export default function Admin() {
     setShowEditModal(true)
   }
 
+  function openCreate(date: string, time: string) {
+    setEditAppointment({
+      id: '',
+      name: '',
+      whatsapp: '',
+      services: '[]',
+      date,
+      time,
+      observation: '',
+      status: 'confirmado',
+      created_at: ''
+    } as any)
+
+    setEditName('')
+    setEditWhatsapp('')
+    setEditServices([])
+    setEditObservation('')
+    setShowEditModal(true)
+  }
+
   const saveEdit = async () => {
     if (!editAppointment) return
     const id = String((editAppointment as any).id || '')
-    if (!id) {
-      alert('Marcação inválida.')
+    const date = String((editAppointment as any).date || selectedDate)
+    const time = String((editAppointment as any).time || '')
+
+    if (!editName.trim() || !editWhatsapp.trim() || editServices.length === 0 || !date || !time) {
+      alert('Preencha nome, WhatsApp, serviços, data e hora.')
       return
     }
 
-    setActionLoading(id)
+    setActionLoading(id || `create-${date}-${time}`)
 
     try {
-      await api.updateAppointment(id, {
-        name: editName,
-        whatsapp: editWhatsapp,
-        services: JSON.stringify(editServices),
-        observation: editObservation
-      } as any)
+      if (!id) {
+        const createdId = await postAppointmentAndReturnId({
+          name: editName,
+          whatsapp: editWhatsapp,
+          services: JSON.stringify(editServices),
+          date,
+          time,
+          observation: editObservation,
+          status: 'por_confirmar'
+        })
+
+        await api.updateAppointment(createdId, {
+          status: 'confirmado',
+          name: editName,
+          whatsapp: editWhatsapp,
+          services: JSON.stringify(editServices),
+          observation: editObservation
+        } as any)
+      } else {
+        await api.updateAppointment(id, {
+          name: editName,
+          whatsapp: editWhatsapp,
+          services: JSON.stringify(editServices),
+          observation: editObservation
+        } as any)
+      }
 
       setShowEditModal(false)
       setEditAppointment(null)
       await fetchAppointments()
-      alert('Marcação atualizada com sucesso!')
+      alert('Marcação guardada com sucesso!')
     } catch (err: any) {
-      alert(err?.message ? String(err.message) : 'Erro ao atualizar.')
+      alert(err?.message ? String(err.message) : 'Erro ao guardar marcação.')
     } finally {
       setActionLoading(null)
     }
@@ -391,15 +438,15 @@ export default function Admin() {
       String((a as any).status) === 'bloqueado'
     )
   }
-  
-function bookingsCountOnDay(date: Date, appointments: Appointment[]) {
-  const dateStr = toISODate(date)
-  return appointments.filter(a =>
-    String((a as any).date) === dateStr &&
-    (String((a as any).status) === 'por_confirmar' || String((a as any).status) === 'confirmado')
-  ).length
-}
-  
+
+  function bookingsCountOnDay(date: Date, apps: Appointment[]) {
+    const dateStr = toISODate(date)
+    return apps.filter(a =>
+      String((a as any).date) === dateStr &&
+      (String((a as any).status) === 'por_confirmar' || String((a as any).status) === 'confirmado')
+    ).length
+  }
+
   const dayApps = useMemo(() => {
     return appointments.filter(a => String((a as any).date) === selectedDate)
   }, [appointments, selectedDate])
@@ -482,8 +529,8 @@ function bookingsCountOnDay(date: Date, appointments: Appointment[]) {
                 const booking = hasBookingOnDay(day)
                 const block = hasBlockOnDay(day)
                 const count = bookingsCountOnDay(day, appointments)
-      
                 const today = toISODate(new Date()) === dateStr
+
                 return (
                   <button
                     key={idx}
@@ -500,6 +547,7 @@ function bookingsCountOnDay(date: Date, appointments: Appointment[]) {
                     )}
                   >
                     <span className="text-2xl font-serif font-bold">{day.getDate()}</span>
+
                     {count > 0 && (
                       <div className="mt-1 min-w-[16px] text-center text-[10px] font-black bg-red-500 text-white rounded-full px-1.5 leading-4">
                         {count}
@@ -546,10 +594,12 @@ function bookingsCountOnDay(date: Date, appointments: Appointment[]) {
                 const app = dayApps.find(a => appointmentCoversTime(a, selectedDate, time))
                 const status = app ? String((app as any).status || '') : ''
                 const key = `${selectedDate}-${time}`
+
                 const busy = !!app
                 const blocked = status === 'bloqueado'
                 const pending = status === 'por_confirmar'
                 const confirmed = status === 'confirmado'
+
                 const name = app ? String((app as any).name || '') : ''
                 const whatsapp = app ? String((app as any).whatsapp || '') : ''
                 const services = app ? serviceLabels(safeParseServices((app as any).services)) : []
@@ -571,6 +621,7 @@ function bookingsCountOnDay(date: Date, appointments: Appointment[]) {
                   >
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-2xl font-serif font-black text-brand-gold">{time}</span>
+
                       {busy ? (
                         blocked ? (
                           <span className="text-[10px] font-black uppercase tracking-widest text-stone-400">Bloqueado</span>
@@ -589,100 +640,112 @@ function bookingsCountOnDay(date: Date, appointments: Appointment[]) {
                       )}
                     </div>
 
-                    {busy ? (
-                      blocked ? (
+                    {!busy && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openCreate(selectedDate, time)}
+                          className="py-3 text-[10px] font-black uppercase tracking-widest bg-brand-gold text-white rounded-xl hover:bg-yellow-600"
+                        >
+                          Adicionar Cliente
+                        </button>
+
                         <button
                           type="button"
                           onClick={() => toggleBlock(time)}
                           disabled={actionLoading === key}
-                          className="w-full py-3 text-[10px] font-black uppercase tracking-widest bg-stone-800 text-white border border-stone-800 rounded-xl hover:bg-stone-900 disabled:opacity-50"
+                          className="py-3 text-[10px] font-black uppercase tracking-widest text-stone-300 border border-stone-100 rounded-xl hover:border-brand-gold hover:text-brand-gold disabled:opacity-50"
                         >
-                          {actionLoading === key ? 'A processar...' : 'Desbloquear Horário'}
+                          {actionLoading === key ? 'A processar...' : 'Bloquear'}
                         </button>
-                      ) : (
-                        <div className="space-y-4">
-                          <div>
-                            <p className="text-xl font-serif font-bold">{name || 'Sem nome'}</p>
-                            <p className="text-xs font-black text-brand-gold uppercase tracking-widest">
-                              {services.length ? services.join(' · ') : '—'}
-                            </p>
-                            <p className="text-xs font-bold text-stone-400 mt-1">{whatsapp || '—'}</p>
-                            {obs && <p className="text-xs text-stone-500 mt-2">{obs}</p>}
-                          </div>
+                      </div>
+                    )}
 
-                          <div className="grid grid-cols-4 gap-2">
-                            <button
-                              type="button"
-                              onClick={() => updateStatus(String((app as any)?.id || ''), 'confirmado')}
-                              disabled={actionLoading === String((app as any)?.id || '')}
-                              className="bg-emerald-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 disabled:opacity-50"
-                            >
-                              Confirmar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => updateStatus(String((app as any)?.id || ''), 'bloqueado')}
-                              disabled={actionLoading === String((app as any)?.id || '')}
-                              className="bg-red-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-700 disabled:opacity-50"
-                            >
-                              Rejeitar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openReschedule(app as any)}
-                              disabled={actionLoading === String((app as any)?.id || '')}
-                              className="bg-blue-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 disabled:opacity-50"
-                            >
-                              Reagendar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openEdit(app as any)}
-                              disabled={actionLoading === String((app as any)?.id || '')}
-                              className="bg-stone-800 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-stone-900 disabled:opacity-50"
-                            >
-                              Editar
-                            </button>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-2">
-                            <a
-                              className="py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-brand-gold text-center"
-                              href={waLink(whatsapp, confirmed ? msgConfirm : status === 'bloqueado' ? msgReject : msgPending)}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              WhatsApp
-                            </a>
-                            <button
-                              type="button"
-                              onClick={() => deleteAppointment(String((app as any)?.id || ''))}
-                              disabled={actionLoading === String((app as any)?.id || '')}
-                              className="py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-red-300 hover:text-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
-                            >
-                              <Trash2 size={16} /> Apagar
-                            </button>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => toggleBlock(time)}
-                            disabled={actionLoading === key}
-                            className="w-full py-3 text-[10px] font-black uppercase tracking-widest text-stone-300 border border-stone-100 rounded-xl hover:border-brand-gold hover:text-brand-gold disabled:opacity-50"
-                          >
-                            {actionLoading === key ? 'A processar...' : 'Bloquear este horário'}
-                          </button>
-                        </div>
-                      )
-                    ) : (
+                    {busy && blocked && (
                       <button
                         type="button"
                         onClick={() => toggleBlock(time)}
                         disabled={actionLoading === key}
-                        className="w-full py-3 text-[10px] font-black uppercase tracking-widest text-stone-300 border border-stone-100 rounded-xl hover:border-brand-gold hover:text-brand-gold disabled:opacity-50"
+                        className="w-full py-3 text-[10px] font-black uppercase tracking-widest bg-stone-800 text-white border border-stone-800 rounded-xl hover:bg-stone-900 disabled:opacity-50"
                       >
-                        {actionLoading === key ? 'A processar...' : 'Bloquear Horário'}
+                        {actionLoading === key ? 'A processar...' : 'Desbloquear Horário'}
                       </button>
+                    )}
+
+                    {busy && !blocked && (
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-xl font-serif font-bold">{name || 'Sem nome'}</p>
+                          <p className="text-xs font-black text-brand-gold uppercase tracking-widest">
+                            {services.length ? services.join(' · ') : '—'}
+                          </p>
+                          <p className="text-xs font-bold text-stone-400 mt-1">{whatsapp || '—'}</p>
+                          {obs && <p className="text-xs text-stone-500 mt-2">{obs}</p>}
+                        </div>
+
+                        <div className="grid grid-cols-4 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => updateStatus(String((app as any)?.id || ''), 'confirmado')}
+                            disabled={actionLoading === String((app as any)?.id || '')}
+                            className="bg-emerald-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 disabled:opacity-50"
+                          >
+                            Confirmar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => updateStatus(String((app as any)?.id || ''), 'bloqueado')}
+                            disabled={actionLoading === String((app as any)?.id || '')}
+                            className="bg-red-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-700 disabled:opacity-50"
+                          >
+                            Rejeitar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openReschedule(app as any)}
+                            disabled={actionLoading === String((app as any)?.id || '')}
+                            className="bg-blue-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 disabled:opacity-50"
+                          >
+                            Reagendar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openEdit(app as any)}
+                            disabled={actionLoading === String((app as any)?.id || '')}
+                            className="bg-stone-800 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-stone-900 disabled:opacity-50"
+                          >
+                            Editar
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <a
+                            className="py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-brand-gold text-center"
+                            href={waLink(whatsapp, confirmed ? msgConfirm : status === 'bloqueado' ? msgReject : msgPending)}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            WhatsApp
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => deleteAppointment(String((app as any)?.id || ''))}
+                            disabled={actionLoading === String((app as any)?.id || '')}
+                            className="py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-red-300 hover:text-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                          >
+                            <Trash2 size={16} /> Apagar
+                          </button>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => toggleBlock(time)}
+                          disabled={actionLoading === key}
+                          className="w-full py-3 text-[10px] font-black uppercase tracking-widest text-stone-300 border border-stone-100 rounded-xl hover:border-brand-gold hover:text-brand-gold disabled:opacity-50"
+                        >
+                          {actionLoading === key ? 'A processar...' : 'Bloquear este horário'}
+                        </button>
+                      </div>
                     )}
                   </div>
                 )
@@ -779,7 +842,7 @@ function bookingsCountOnDay(date: Date, appointments: Appointment[]) {
             >
               <X size={24} />
             </button>
-            <h3 className="text-2xl font-serif italic mb-6 text-center">Editar Marcação</h3>
+            <h3 className="text-2xl font-serif italic mb-6 text-center">{String((editAppointment as any)?.id || '') ? 'Editar Marcação' : 'Adicionar Cliente'}</h3>
 
             <div className="space-y-5">
               <div>
@@ -802,7 +865,7 @@ function bookingsCountOnDay(date: Date, appointments: Appointment[]) {
 
               <div>
                 <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">Serviços</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
                   {SERVICES.map(s => (
                     <button
                       key={s.id}
@@ -846,9 +909,10 @@ function bookingsCountOnDay(date: Date, appointments: Appointment[]) {
                 </button>
                 <button
                   onClick={saveEdit}
-                  className="flex-1 py-4 bg-brand-gold text-white rounded-xl font-bold uppercase tracking-widest hover:bg-yellow-600"
+                  disabled={actionLoading !== null}
+                  className="flex-1 py-4 bg-brand-gold text-white rounded-xl font-bold uppercase tracking-widest hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Guardar
+                  {actionLoading ? 'A guardar...' : 'Guardar'}
                 </button>
               </div>
             </div>
