@@ -179,22 +179,30 @@ export default {
           if (existing) return json({ error: 'Horário já ocupado' }, 400)
 
           const id = crypto.randomUUID()
-          await env.DB.prepare(
-            `INSERT INTO appointments (id, name, whatsapp, services, date, time, observation, status, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-          )
-            .bind(
-              id,
-              String(name).trim(),
-              String(whatsapp).trim(),
-              String(services),
-              String(date),
-              String(time),
-              observation ? String(observation) : '',
-              'por_confirmar',
-              new Date().toISOString()
+
+          try {
+            await env.DB.prepare(
+              `INSERT INTO appointments (id, name, whatsapp, services, date, time, observation, status, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
             )
-            .run()
+              .bind(
+                id,
+                String(name).trim(),
+                String(whatsapp).trim(),
+                String(services),
+                String(date),
+                String(time),
+                observation ? String(observation) : '',
+                'por_confirmar',
+                new Date().toISOString()
+              )
+              .run()
+          } catch (err: any) {
+            if (String(err.message || '').includes('UNIQUE')) {
+              return json({ error: 'Horário já ocupado' }, 400)
+            }
+            throw err
+          }
 
           return json({ success: true, id })
         }
