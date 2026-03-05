@@ -36,7 +36,7 @@ export default function Home({ SERVICES, SERVICE_CATEGORIES }: HomeProps) {
           </div>
 
           <p className="text-base md:text-lg text-white/75 mb-24 max-w-xl mx-auto font-light leading-relaxed">
-            Escolha serviços, dia e hora. O pedido fica pendente até confirmação do salão.
+            Escolha serviços, dia e hora. Receba a confirmação do salão por WhatsApp.
           </p>
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-12">
