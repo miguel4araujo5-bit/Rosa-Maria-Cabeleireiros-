@@ -2,6 +2,7 @@ import Home from './Home'
 import Admin from './Admin'
 import Navbar from './components/Navbar'
 import React, { useEffect, useMemo, useState } from 'react'
+import { SERVICES, SERVICE_CATEGORIES } from './servicesData'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
 import { Calendar, ChevronRight, Check, MessageSquare, Menu, X, Phone, Instagram, LogOut } from 'lucide-react'
 import { api } from './services/api'
@@ -16,17 +17,6 @@ type AvailabilitySlot = {
 
 const ADMIN_PATH = '/admin'
 const MANAGER_WHATSAPP = '351932939817'
-
-const SERVICES = [
-  { id: 'corte_mulher', label: 'Corte Mulher', category: 'Cortes' },
-  { id: 'corte_homem', label: 'Corte Homem', category: 'Cortes' },
-  { id: 'brushing', label: 'Brushing', category: 'Styling' },
-  { id: 'tratamento', label: 'Tratamento Capilar', category: 'Tratamentos' },
-  { id: 'coloracao', label: 'Coloração', category: 'Cor' },
-  { id: 'madeixas', label: 'Madeixas', category: 'Cor' },
-  { id: 'alisamento', label: 'Alisamento / Queratina', category: 'Tratamentos' },
-  { id: 'outro', label: 'Outro', category: 'Outros' },
-] as const
 
 const SERVICE_CATEGORIES = Array.from(new Set(SERVICES.map(s => s.category)))
 
