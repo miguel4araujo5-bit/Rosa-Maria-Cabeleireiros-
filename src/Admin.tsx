@@ -158,6 +158,22 @@ async function createBlockAndReturnId(date: string, time: string, extra: { name?
   })
 }
 
+function priceToCents(price: unknown) {
+  const s = String(price ?? '').trim().toLowerCase()
+  if (!s) return 0
+  if (s.includes('consulta')) return 0
+  const m = s.match(/(\d+(?:[.,]\d+)?)/)
+  if (!m) return 0
+  const n = Number(m[1].replace(',', '.'))
+  if (!Number.isFinite(n)) return 0
+  return Math.round(n * 100)
+}
+
+function formatEUR(cents: number) {
+  const v = (cents / 100).toFixed(2).replace('.', ',')
+  return `${v}€`
+}
+
 export default function Admin() {
   const navigate = useNavigate()
 
@@ -183,6 +199,26 @@ export default function Admin() {
   const [editWhatsapp, setEditWhatsapp] = useState('')
   const [editServices, setEditServices] = useState<string[]>([])
   const [editObservation, setEditObservation] = useState('')
+
+  const serviceById = useMemo(() => {
+    const m = new Map<string, any>()
+    SERVICES.forEach((s: any) => m.set(String(s.id), s))
+    return m
+  }, [])
+
+  const servicePriceLabel = (id: string) => {
+    const s: any = serviceById.get(id)
+    const p = s?.price
+    const out = String(p ?? '').trim()
+    return out || '—'
+  }
+
+  const servicesTotalCents = (ids: string[]) => {
+    return ids.reduce((sum, id) => {
+      const s: any = serviceById.get(id)
+      return sum + priceToCents(s?.price)
+    }, 0)
+  }
 
   const fetchAppointments = async () => {
     setLoading(true)
@@ -451,6 +487,32 @@ export default function Admin() {
     return appointments.filter(a => String((a as any).date) === selectedDate)
   }, [appointments, selectedDate])
 
+  const dayTotals = useMemo(() => {
+    let confirmed = 0
+    let pending = 0
+    let anyConsult = 0
+
+    dayApps.forEach((a: any) => {
+      const st = String(a?.status || '')
+      if (st === 'bloqueado') return
+
+      const ids = safeParseServices(a?.services)
+      const cents = servicesTotalCents(ids)
+
+      const hasConsult = ids.some((id) => {
+        const p = String((serviceById.get(id) as any)?.price ?? '').toLowerCase()
+        return p.includes('consulta')
+      })
+
+      if (hasConsult) anyConsult++
+
+      if (st === 'confirmado') confirmed += cents
+      else pending += cents
+    })
+
+    return { confirmed, pending, anyConsult }
+  }, [dayApps, serviceById])
+
   if (!isLoggedIn) {
     return (
       <div className="pt-48 pb-32 px-6 flex items-center justify-center min-h-screen bg-stone-50">
@@ -584,12 +646,31 @@ export default function Admin() {
 
         <div className="lg:col-span-5 space-y-8">
           <div className="bg-white p-8 rounded-3xl shadow-2xl border-4 border-brand-gold sticky top-32">
-            <div className="text-center mb-10">
+            <div className="text-center mb-8">
               <p className="text-xs uppercase tracking-[0.4em] font-black text-brand-gold mb-2">Horários para o dia</p>
               <h3 className="text-5xl font-serif italic">{toPTDateLabel(selectedDate)}</h3>
             </div>
 
-            <div className="space-y-4 max-h-[640px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="grid grid-cols-2 gap-3 mb-8">
+              <div className="rounded-2xl border border-stone-100 p-4 bg-stone-50">
+                <div className="text-[10px] font-black uppercase tracking-widest text-stone-400">Total Confirmado</div>
+                <div className="text-2xl font-serif font-black text-stone-800 mt-1">{formatEUR(dayTotals.confirmed)}</div>
+              </div>
+              <div className="rounded-2xl border border-stone-100 p-4 bg-stone-50">
+                <div className="text-[10px] font-black uppercase tracking-widest text-stone-400">Total Pedidos</div>
+                <div className="text-2xl font-serif font-black text-stone-800 mt-1">{formatEUR(dayTotals.pending)}</div>
+              </div>
+              {dayTotals.anyConsult > 0 && (
+                <div className="col-span-2 rounded-2xl border border-amber-200 p-4 bg-amber-50">
+                  <div className="text-[10px] font-black uppercase tracking-widest text-amber-800">Nota</div>
+                  <div className="text-xs font-bold text-amber-800 mt-1">
+                    Existem serviços “sob consulta” neste dia (não entram no total).
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4 max-h-[560px] overflow-y-auto pr-2 custom-scrollbar">
               {TIMES.map(time => {
                 const app = dayApps.find(a => appointmentCoversTime(a, selectedDate, time))
                 const status = app ? String((app as any).status || '') : ''
@@ -602,8 +683,11 @@ export default function Admin() {
 
                 const name = app ? String((app as any).name || '') : ''
                 const whatsapp = app ? String((app as any).whatsapp || '') : ''
-                const services = app ? serviceLabels(safeParseServices((app as any).services)) : []
+                const serviceIds = app ? safeParseServices((app as any).services) : []
+                const services = app ? serviceLabels(serviceIds) : []
                 const obs = app ? String((app as any).observation || '').trim() : ''
+
+                const slotTotal = servicesTotalCents(serviceIds)
 
                 const msgConfirm = `Olá ${name}! A sua marcação no Rosa Maria Cabeleireiros ficou confirmada para ${toPTDateLabel(selectedDate)} às ${time}. Até breve.`
                 const msgReject = `Olá ${name}! Obrigado pelo seu pedido. Infelizmente não conseguimos confirmar ${toPTDateLabel(selectedDate)} às ${time}. Pode responder com outro horário/dia para tentarmos ajustar.`
@@ -676,10 +760,34 @@ export default function Admin() {
                       <div className="space-y-4">
                         <div>
                           <p className="text-xl font-serif font-bold">{name || 'Sem nome'}</p>
+
                           <p className="text-xs font-black text-brand-gold uppercase tracking-widest">
                             {services.length ? services.join(' · ') : '—'}
                           </p>
-                          <p className="text-xs font-bold text-stone-400 mt-1">{whatsapp || '—'}</p>
+
+                          <div className="mt-2 rounded-xl border border-stone-100 bg-stone-50 px-4 py-3">
+                            <div className="flex items-center justify-between gap-3">
+                              <span className="text-[10px] font-black uppercase tracking-widest text-stone-400">Preço</span>
+                              <span className="text-sm font-black text-stone-800">{formatEUR(slotTotal)}</span>
+                            </div>
+
+                            {serviceIds.length > 0 && (
+                              <div className="mt-2 space-y-1">
+                                {serviceIds.map((id) => {
+                                  const label = (serviceById.get(id) as any)?.label || id
+                                  const p = servicePriceLabel(id)
+                                  return (
+                                    <div key={id} className="flex items-center justify-between text-xs text-stone-600">
+                                      <span className="font-bold">{label}</span>
+                                      <span className="font-black">{p}</span>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )}
+                          </div>
+
+                          <p className="text-xs font-bold text-stone-400 mt-3">{whatsapp || '—'}</p>
                           {obs && <p className="text-xs text-stone-500 mt-2">{obs}</p>}
                         </div>
 
@@ -866,7 +974,7 @@ export default function Admin() {
               <div>
                 <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">Serviços</label>
                 <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
-                  {SERVICES.map(s => (
+                  {SERVICES.map((s: any) => (
                     <button
                       key={s.id}
                       type="button"
@@ -887,6 +995,13 @@ export default function Admin() {
                       {s.label}
                     </button>
                   ))}
+                </div>
+
+                <div className="mt-3 rounded-xl border border-stone-100 bg-stone-50 px-4 py-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-stone-400">Total (auto)</span>
+                    <span className="text-sm font-black text-stone-800">{formatEUR(servicesTotalCents(editServices))}</span>
+                  </div>
                 </div>
               </div>
 
