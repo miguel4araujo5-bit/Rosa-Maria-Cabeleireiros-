@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { SERVICES } from './servicesData'
 import { useNavigate } from 'react-router-dom'
 import { Calendar, ChevronRight, LogOut, RefreshCw, Trash2, X } from 'lucide-react'
 import { api } from './services/api'
@@ -7,17 +8,6 @@ import type { Appointment } from './types'
 const TIMES = [
   '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
   '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00',
-] as const
-
-const SERVICES = [
-  { id: 'corte_mulher', label: 'Corte Mulher', category: 'Cortes' },
-  { id: 'corte_homem', label: 'Corte Homem', category: 'Cortes' },
-  { id: 'brushing', label: 'Brushing', category: 'Styling' },
-  { id: 'tratamento', label: 'Tratamento Capilar', category: 'Tratamentos' },
-  { id: 'coloracao', label: 'Coloração', category: 'Cor' },
-  { id: 'madeixas', label: 'Madeixas', category: 'Cor' },
-  { id: 'alisamento', label: 'Alisamento / Queratina', category: 'Tratamentos' },
-  { id: 'outro', label: 'Outro', category: 'Outros' },
 ] as const
 
 function cn(...parts: Array<string | false | null | undefined>) {
@@ -401,7 +391,15 @@ export default function Admin() {
       String((a as any).status) === 'bloqueado'
     )
   }
-
+  
+function bookingsCountOnDay(date: Date, appointments: Appointment[]) {
+  const dateStr = toISODate(date)
+  return appointments.filter(a =>
+    String((a as any).date) === dateStr &&
+    (String((a as any).status) === 'por_confirmar' || String((a as any).status) === 'confirmado')
+  ).length
+}
+  
   const dayApps = useMemo(() => {
     return appointments.filter(a => String((a as any).date) === selectedDate)
   }, [appointments, selectedDate])
@@ -483,6 +481,8 @@ export default function Admin() {
                 const isCurrent = day.getMonth() === monthStart.getMonth()
                 const booking = hasBookingOnDay(day)
                 const block = hasBlockOnDay(day)
+                const count = bookingsCountOnDay(day, appointments)
+      
                 const today = toISODate(new Date()) === dateStr
                 return (
                   <button
@@ -500,8 +500,15 @@ export default function Admin() {
                     )}
                   >
                     <span className="text-2xl font-serif font-bold">{day.getDate()}</span>
-                    {booking && <div className="w-2 h-2 bg-red-500 rounded-full mt-1"></div>}
-                    {block && !booking && <div className="w-2 h-2 bg-stone-400 rounded-full mt-1"></div>}
+                    {count > 0 && (
+                      <div className="mt-1 min-w-[16px] text-center text-[10px] font-black bg-red-500 text-white rounded-full px-1.5 leading-4">
+                        {count}
+                      </div>
+                    )}
+
+                    {count === 0 && block && (
+                      <div className="w-2 h-2 bg-stone-400 rounded-full mt-1"></div>
+                    )}
                   </button>
                 )
               })}
