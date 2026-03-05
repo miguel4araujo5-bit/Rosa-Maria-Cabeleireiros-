@@ -802,14 +802,6 @@ export default function Admin() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => updateStatus(String((app as any)?.id || ''), 'bloqueado')}
-                            disabled={actionLoading === String((app as any)?.id || '')}
-                            className="bg-red-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-700 disabled:opacity-50"
-                          >
-                            Rejeitar
-                          </button>
-                          <button
-                            type="button"
                             onClick={() => openReschedule(app as any)}
                             disabled={actionLoading === String((app as any)?.id || '')}
                             className="bg-blue-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 disabled:opacity-50"
