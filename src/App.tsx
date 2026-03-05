@@ -42,7 +42,11 @@ function cn(...parts: Array<string | false | null | undefined>) {
 function useScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => {
-    window.scrollTo({ top: 0 })
+    try {
+      window.scrollTo({ top: 0 })
+    } catch {
+      window.scrollTo(0, 0)
+    }
   }, [pathname])
 }
 
@@ -413,7 +417,7 @@ function Booking() {
               <div className="flex flex-col md:flex-row gap-6 pt-10">
                 <button type="button" onClick={() => setStep(1)} className="btn-outline flex-1 py-6">Voltar</button>
                 <button type="submit" disabled={loading} className="btn-primary flex-1 py-6 text-lg flex items-center justify-center gap-3 disabled:opacity-50">
-                  {loading ? 'A processar...' : 'Confirmar Marcação'}
+                  {loading ? 'A marcar...' : 'Confirmar Marcação'}
                 </button>
               </div>
             </form>
