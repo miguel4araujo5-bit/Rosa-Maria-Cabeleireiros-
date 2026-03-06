@@ -1,4 +1,5 @@
 import React from 'react'
+import { MessageCircle } from 'lucide-react'
 
 const TIMES = [
 '09:00','09:30','10:00','10:30','11:00','11:30',
@@ -34,23 +35,41 @@ return a.time===time
 
 }
 
-const dayAppointments = appointments.filter((a:any)=>a.date===selectedDate)
+function displayTime(time:string,app:any){
+
+if(!app) return time
+
+try{
+
+const t = JSON.parse(app.time)
+
+if(Array.isArray(t) && t.length>1){
+
+const start = t[0]
+const end = t[t.length-1]
+
+return `${start}–${end}`
+
+}
+
+}catch{}
+
+return time
+
+}
+
+function waLink(phone:string,name:string){
+
+const digits = String(phone||'').replace(/\D/g,'')
+const text = encodeURIComponent(`Olá ${name}, relativamente à sua marcação.`)
+
+if(!digits) return `https://wa.me/?text=${text}`
+
+return `https://wa.me/${digits}?text=${text}`
+
+}
 
 return(
-
-<div className="space-y-6">
-
-<div className="text-center">
-
-<p className="text-xs uppercase tracking-widest text-stone-400">
-Marcações no dia
-</p>
-
-<p className="text-3xl font-serif">
-{dayAppointments.length}
-</p>
-
-</div>
 
 <div className="space-y-4">
 
@@ -60,24 +79,17 @@ const app = appointmentAt(time)
 
 return(
 
-<div
-key={time}
-className={`p-6 border rounded-2xl ${
-app?.status==='por_confirmar'
-? 'border-amber-400 bg-amber-50'
-: app?.status==='confirmado'
-? 'border-emerald-200'
-: ''
-}`}
->
+<div key={time} className="p-6 border rounded-2xl">
 
 <div className="flex justify-between mb-2">
 
-<span className="font-serif text-xl">{time}</span>
+<span className="font-serif text-xl">
+{displayTime(time,app)}
+</span>
 
 {app && (
 <span className="text-xs font-bold uppercase tracking-widest">
-{app.status==='confirmado'?'Confirmado':'Pedido'}
+{app.status==='confirmado'?'Confirmado':'Por confirmar'}
 </span>
 )}
 
@@ -144,12 +156,25 @@ Editar
 
 </div>
 
+<div className="grid grid-cols-2 gap-2">
+
+<a
+href={waLink(app.whatsapp,app.name)}
+target="_blank"
+rel="noreferrer"
+className="flex items-center justify-center border border-green-300 text-green-700 py-2 rounded-xl"
+>
+<MessageCircle size={18}/>
+</a>
+
 <button
 onClick={()=>deleteAppointment(app.id)}
-className="border border-red-300 text-red-600 py-2 rounded-xl w-full"
+className="border border-red-300 text-red-600 py-2 rounded-xl"
 >
 Apagar
 </button>
+
+</div>
 
 </div>
 
@@ -160,8 +185,6 @@ Apagar
 )
 
 })}
-
-</div>
 
 </div>
 
