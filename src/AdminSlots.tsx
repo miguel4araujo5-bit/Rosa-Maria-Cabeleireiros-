@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{useEffect,useRef} from 'react'
 import { MessageCircle } from 'lucide-react'
 
 const TIMES = [
@@ -17,6 +17,8 @@ openReschedule,
 updateStatus,
 deleteAppointment
 }:any){
+
+const slotRefs = useRef<Record<string,HTMLDivElement|null>>({})
 
 function appointmentAt(time:string){
 
@@ -69,9 +71,30 @@ return `https://wa.me/${digits}?text=${text}`
 
 }
 
+useEffect(()=>{
+
+const now = new Date()
+
+const current =
+String(now.getHours()).padStart(2,'0') +
+':' +
+(now.getMinutes()<30?'00':'30')
+
+const closest = TIMES.find(t=>t>=current)
+
+if(!closest) return
+
+const el = slotRefs.current[closest]
+
+if(el){
+el.scrollIntoView({behavior:'smooth',block:'center'})
+}
+
+},[selectedDate])
+
 return(
 
-<div className="space-y-4">
+<div className="space-y-4 max-h-[700px] overflow-y-auto pr-2">
 
 {TIMES.map(time=>{
 
@@ -79,7 +102,11 @@ const app = appointmentAt(time)
 
 return(
 
-<div key={time} className="p-6 border rounded-2xl">
+<div
+key={time}
+ref={el=>slotRefs.current[time]=el}
+className="p-6 border rounded-2xl"
+>
 
 <div className="flex justify-between mb-2">
 
