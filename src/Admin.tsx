@@ -112,15 +112,19 @@ navigate('/')
 
 async function updateStatus(id:string,status:string){
 
+const updated = appointments.map(a=>{
+if(a.id===id){
+return {...a,status}
+}
+return a
+})
+
+setAppointments(updated)
+
 try{
-
 await api.updateAppointment(id,{status})
-await fetchAppointments()
-
 }catch{
-
-alert('Erro ao atualizar marcação')
-
+fetchAppointments()
 }
 
 }
@@ -131,15 +135,12 @@ const ok = confirm('Tem a certeza que deseja apagar esta marcação?')
 
 if(!ok) return
 
+setAppointments(appointments.filter(a=>a.id!==id))
+
 try{
-
 await api.deleteAppointment(id)
-await fetchAppointments()
-
 }catch{
-
-alert('Erro ao apagar marcação')
-
+fetchAppointments()
 }
 
 }
@@ -207,25 +208,23 @@ if(!name) return
 const whatsapp = prompt('WhatsApp',app.whatsapp)
 if(!whatsapp) return
 
-api.updateAppointment(app.id,{
-name,
-whatsapp
-}).then(fetchAppointments)
+const updated = appointments.map(a=>{
+if(a.id===app.id){
+return {...a,name,whatsapp}
+}
+return a
+})
+
+setAppointments(updated)
+
+api.updateAppointment(app.id,{name,whatsapp}).catch(fetchAppointments)
 
 }
 
 function openReschedule(app:any){
 
 setRescheduleApp(app)
-
-let currentDate = app.date
-
-try{
-const parsed = JSON.parse(app.time)
-if(Array.isArray(parsed) && parsed.length){
 setSelectedDate(app.date)
-}
-}catch{}
 
 }
 
@@ -235,14 +234,29 @@ if(!rescheduleApp) return
 
 const formatted = JSON.stringify([time])
 
+const updated = appointments.map(a=>{
+if(a.id===rescheduleApp.id){
+return {...a,date:selectedDate,time:formatted}
+}
+return a
+})
+
+setAppointments(updated)
+
+setRescheduleApp(null)
+
+try{
+
 await api.updateAppointment(rescheduleApp.id,{
 date:selectedDate,
 time:formatted
 })
 
-setRescheduleApp(null)
+}catch{
 
-await fetchAppointments()
+fetchAppointments()
+
+}
 
 }
 
@@ -355,4 +369,3 @@ deleteAppointment={deleteAppointment}
 )
 
 }
-
