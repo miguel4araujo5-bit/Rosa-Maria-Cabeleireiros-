@@ -42,7 +42,6 @@ setAppointments([])
 }catch{
 
 setAppointments([])
-
 }
 
 setLoading(false)
@@ -67,7 +66,7 @@ useEffect(()=>{
 
 if(!isLoggedIn) return
 
-const interval = setInterval(()=>{
+const interval=setInterval(()=>{
 
 if(document.visibilityState==='visible'){
 fetchAppointments()
@@ -112,35 +111,33 @@ navigate('/')
 
 async function updateStatus(id:string,status:string){
 
-const updated = appointments.map(a=>{
-if(a.id===id){
-return {...a,status}
-}
-return a
-})
-
-setAppointments(updated)
-
 try{
+
 await api.updateAppointment(id,{status})
+await fetchAppointments()
+
 }catch{
-fetchAppointments()
+
+alert('Erro ao atualizar marcação')
+
 }
 
 }
 
 async function deleteAppointment(id:string){
 
-const ok = confirm('Tem a certeza que deseja apagar esta marcação?')
-
+const ok=confirm('Tem a certeza que deseja apagar esta marcação?')
 if(!ok) return
 
-setAppointments(appointments.filter(a=>a.id!==id))
-
 try{
+
 await api.deleteAppointment(id)
+await fetchAppointments()
+
 }catch{
-fetchAppointments()
+
+alert('Erro ao apagar marcação')
+
 }
 
 }
@@ -174,10 +171,10 @@ alert('Erro ao bloquear horário')
 
 async function openCreate(date:string,time:string){
 
-const name = prompt('Nome da cliente')
+const name=prompt('Nome da cliente')
 if(!name) return
 
-const whatsapp = prompt('WhatsApp')
+const whatsapp=prompt('WhatsApp')
 if(!whatsapp) return
 
 try{
@@ -202,22 +199,13 @@ alert('Erro ao criar marcação')
 
 function openEdit(app:any){
 
-const name = prompt('Nome',app.name)
+const name=prompt('Nome',app.name)
 if(!name) return
 
-const whatsapp = prompt('WhatsApp',app.whatsapp)
+const whatsapp=prompt('WhatsApp',app.whatsapp)
 if(!whatsapp) return
 
-const updated = appointments.map(a=>{
-if(a.id===app.id){
-return {...a,name,whatsapp}
-}
-return a
-})
-
-setAppointments(updated)
-
-api.updateAppointment(app.id,{name,whatsapp}).catch(fetchAppointments)
+api.updateAppointment(app.id,{name,whatsapp}).then(fetchAppointments)
 
 }
 
@@ -228,39 +216,24 @@ setSelectedDate(app.date)
 
 }
 
-async function completeReschedule(time:string){
+async function confirmReschedule(time:string){
 
 if(!rescheduleApp) return
 
-const formatted = JSON.stringify([time])
-
-const updated = appointments.map(a=>{
-if(a.id===rescheduleApp.id){
-return {...a,date:selectedDate,time:formatted}
-}
-return a
-})
-
-setAppointments(updated)
-
-setRescheduleApp(null)
-
-try{
+const formatted=JSON.stringify([time])
 
 await api.updateAppointment(rescheduleApp.id,{
 date:selectedDate,
 time:formatted
 })
 
-}catch{
+setRescheduleApp(null)
 
-fetchAppointments()
-
-}
+await fetchAppointments()
 
 }
 
-const dayAppointments = appointments.filter((a:any)=>a.date===selectedDate)
+const dayAppointments=appointments.filter((a:any)=>a.date===selectedDate)
 
 if(!isLoggedIn){
 
@@ -353,7 +326,7 @@ appointments={appointments}
 selectedDate={selectedDate}
 appointments={appointments}
 openCreate={openCreate}
-toggleBlock={rescheduleApp?completeReschedule:toggleBlock}
+toggleBlock={rescheduleApp?confirmReschedule:toggleBlock}
 openEdit={openEdit}
 openReschedule={openReschedule}
 updateStatus={updateStatus}
@@ -363,6 +336,34 @@ deleteAppointment={deleteAppointment}
 </div>
 
 </div>
+
+{rescheduleApp && (
+
+<div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+<div className="bg-white p-10 rounded-3xl max-w-lg w-full">
+
+<h2 className="font-serif text-3xl mb-6">
+Mudar hora / dia
+</h2>
+
+<p className="text-sm text-stone-500 mb-6">
+Selecione um novo dia no calendário e depois escolha um horário.
+</p>
+
+<button
+onClick={()=>setRescheduleApp(null)}
+className="mt-6 border px-6 py-3 rounded-xl"
+
+>
+
+Cancelar </button>
+
+</div>
+
+</div>
+
+)}
 
 </div>
 
