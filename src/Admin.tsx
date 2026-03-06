@@ -820,19 +820,19 @@ export default function Admin() {
 
                         <div className="grid grid-cols-2 gap-2">
                           <a
-                            className="py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-brand-gold text-center flex items-center justify-center gap-2"
+                            className="py-3 text-[10px] font-black uppercase tracking-widest rounded-xl text-center flex items-center justify-center gap-2 border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-300"
                             href={waLink(whatsapp, confirmed ? msgConfirm : status === 'bloqueado' ? msgReject : msgPending)}
                             target="_blank"
                             rel="noreferrer"
                           >
                             <MessageCircle size={16} />
-                            Enviar SMS
+                            WhatsApp
                           </a>
                           <button
                             type="button"
                             onClick={() => deleteAppointment(String((app as any)?.id || ''))}
                             disabled={actionLoading === String((app as any)?.id || '')}
-                            className="py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-red-300 hover:text-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="py-3 text-[10px] font-black uppercase tracking-widest rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:border-red-300 disabled:opacity-50 flex items-center justify-center gap-2"
                           >
                             <Trash2 size={16} /> Apagar
                           </button>
