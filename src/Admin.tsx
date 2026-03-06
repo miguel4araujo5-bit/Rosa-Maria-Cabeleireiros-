@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { SERVICES } from './servicesData'
 import { useNavigate } from 'react-router-dom'
-import { Calendar, ChevronRight, LogOut, RefreshCw, Trash2, X } from 'lucide-react'
+import { Calendar, ChevronRight, LogOut, RefreshCw, Trash2, X, MessageCircle } from 'lucide-react'
 import { api } from './services/api'
 import type { Appointment } from './types'
 
@@ -820,11 +820,12 @@ export default function Admin() {
 
                         <div className="grid grid-cols-2 gap-2">
                           <a
-                            className="py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-brand-gold text-center"
+                            className="py-3 text-[10px] font-black uppercase tracking-widest border border-stone-200 rounded-xl hover:border-brand-gold text-center flex items-center justify-center gap-2"
                             href={waLink(whatsapp, confirmed ? msgConfirm : status === 'bloqueado' ? msgReject : msgPending)}
                             target="_blank"
                             rel="noreferrer"
                           >
+                            <MessageCircle size={16} />
                             Enviar SMS
                           </a>
                           <button
