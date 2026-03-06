@@ -21,6 +21,8 @@ const [selectedDate,setSelectedDate]=useState(todayISO())
 const [currentMonth,setCurrentMonth]=useState(new Date())
 const [loading,setLoading]=useState(false)
 
+const [rescheduleApp,setRescheduleApp]=useState<any|null>(null)
+
 async function fetchAppointments(){
 
 if(loading) return
@@ -214,27 +216,33 @@ whatsapp
 
 function openReschedule(app:any){
 
-let currentTime = app.time
+setRescheduleApp(app)
+
+let currentDate = app.date
 
 try{
 const parsed = JSON.parse(app.time)
 if(Array.isArray(parsed) && parsed.length){
-currentTime = parsed[0]
+setSelectedDate(app.date)
 }
 }catch{}
 
-const newDate = prompt('Nova data (AAAA-MM-DD)',app.date)
-if(!newDate) return
+}
 
-const newTime = prompt('Nova hora (ex: 14:30)',currentTime)
-if(!newTime) return
+async function completeReschedule(time:string){
 
-const timeFormatted = JSON.stringify([newTime])
+if(!rescheduleApp) return
 
-api.updateAppointment(app.id,{
-date:newDate,
-time:timeFormatted
-}).then(fetchAppointments)
+const formatted = JSON.stringify([time])
+
+await api.updateAppointment(rescheduleApp.id,{
+date:selectedDate,
+time:formatted
+})
+
+setRescheduleApp(null)
+
+await fetchAppointments()
 
 }
 
@@ -261,9 +269,10 @@ autoFocus
 type="submit"
 disabled={!password}
 className="bg-brand-gold text-white px-8 py-4 disabled:opacity-50"
+
 >
-Entrar
-</button>
+
+Entrar </button>
 
 </form>
 
@@ -301,9 +310,10 @@ Marcações hoje
 <button
 onClick={handleLogout}
 className="bg-red-50 text-red-700 px-6 py-3 rounded-full"
+
 >
-Sair
-</button>
+
+Sair </button>
 
 </div>
 
@@ -329,7 +339,7 @@ appointments={appointments}
 selectedDate={selectedDate}
 appointments={appointments}
 openCreate={openCreate}
-toggleBlock={toggleBlock}
+toggleBlock={rescheduleApp?completeReschedule:toggleBlock}
 openEdit={openEdit}
 openReschedule={openReschedule}
 updateStatus={updateStatus}
@@ -345,3 +355,4 @@ deleteAppointment={deleteAppointment}
 )
 
 }
+
