@@ -101,9 +101,7 @@ alert('Password incorreta')
 async function handleLogout(){
 
 try{
-
 await api.adminLogout()
-
 }catch{}
 
 setIsLoggedIn(false)
