@@ -71,6 +71,40 @@ return `https://wa.me/${digits}?text=${text}`
 
 }
 
+function priceToCents(v:any){
+const n = Number(v)
+if(!n) return 0
+return Math.round(n*100)
+}
+
+function servicesTotalCents(app:any){
+
+if(!app.services) return 0
+
+try{
+
+const s = JSON.parse(app.services)
+
+if(Array.isArray(s)){
+return s.reduce((sum:any,x:any)=>sum+priceToCents(x.price),0)
+}
+
+}catch{}
+
+return 0
+
+}
+
+const dayAppointments = appointments.filter((a:any)=>a.date===selectedDate)
+
+const confirmedTotal = dayAppointments
+.filter((a:any)=>a.status==='confirmado')
+.reduce((sum:any,a:any)=>sum+servicesTotalCents(a),0)
+
+const pendingTotal = dayAppointments
+.filter((a:any)=>a.status==='por_confirmar')
+.reduce((sum:any,a:any)=>sum+servicesTotalCents(a),0)
+
 useEffect(()=>{
 
 const now = new Date()
@@ -95,6 +129,28 @@ el.scrollIntoView({behavior:'smooth',block:'center'})
 return(
 
 <div className="space-y-4 max-h-[700px] overflow-y-auto pr-2">
+
+<div className="p-6 border rounded-2xl bg-stone-50 flex justify-between">
+
+<div>
+<p className="text-xs uppercase tracking-widest text-stone-400">
+Confirmado
+</p>
+<p className="text-2xl font-serif">
+{(confirmedTotal/100).toFixed(2)}€
+</p>
+</div>
+
+<div>
+<p className="text-xs uppercase tracking-widest text-stone-400">
+Pedidos
+</p>
+<p className="text-2xl font-serif">
+{(pendingTotal/100).toFixed(2)}€
+</p>
+</div>
+
+</div>
 
 {TIMES.map(time=>{
 
@@ -189,9 +245,10 @@ Editar
 href={waLink(app.whatsapp,app.name)}
 target="_blank"
 rel="noreferrer"
-className="flex items-center justify-center border border-green-300 text-green-700 py-2 rounded-xl"
+className="flex items-center justify-center gap-2 border border-green-300 text-green-700 py-2 rounded-xl"
 >
 <MessageCircle size={18}/>
+Enviar SMS
 </a>
 
 <button
