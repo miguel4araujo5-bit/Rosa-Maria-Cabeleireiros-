@@ -214,11 +214,26 @@ whatsapp
 
 function openReschedule(app:any){
 
-const time = prompt('Nova hora',app.time)
-if(!time) return
+let currentTime = app.time
+
+try{
+const parsed = JSON.parse(app.time)
+if(Array.isArray(parsed) && parsed.length){
+currentTime = parsed[0]
+}
+}catch{}
+
+const newDate = prompt('Nova data (AAAA-MM-DD)',app.date)
+if(!newDate) return
+
+const newTime = prompt('Nova hora (ex: 14:30)',currentTime)
+if(!newTime) return
+
+const timeFormatted = JSON.stringify([newTime])
 
 api.updateAppointment(app.id,{
-time
+date:newDate,
+time:timeFormatted
 }).then(fetchAppointments)
 
 }
