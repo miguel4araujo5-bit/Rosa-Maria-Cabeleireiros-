@@ -7,122 +7,164 @@ const TIMES = [
 ]
 
 export default function AdminSlots({
-  selectedDate,
-  appointments,
-  openCreate,
-  toggleBlock,
-  openEdit,
-  openReschedule,
-  updateStatus,
-  deleteAppointment
-}: any){
+selectedDate,
+appointments,
+openCreate,
+toggleBlock,
+openEdit,
+openReschedule,
+updateStatus,
+deleteAppointment
+}:any){
 
-  function appointmentAt(time:string){
+function appointmentAt(time:string){
 
-    return appointments.find((a:any)=>{
-      if(a.date !== selectedDate) return false
+return appointments.find((a:any)=>{
 
-      try{
-        const t = JSON.parse(a.time)
-        return t.includes(time)
-      }catch{
-        return a.time === time
-      }
-    })
-  }
+if(a.date!==selectedDate) return false
 
-  return(
+try{
+const t = JSON.parse(a.time)
+return t.includes(time)
+}catch{
+return a.time===time
+}
 
-  <div className="space-y-4">
+})
 
-    {TIMES.map(time=>{
+}
 
-      const app = appointmentAt(time)
+const dayAppointments = appointments.filter((a:any)=>a.date===selectedDate)
 
-      return(
+return(
 
-      <div key={time} className="p-6 border rounded-2xl">
+<div className="space-y-6">
 
-        <div className="flex justify-between mb-2">
-          <span className="font-serif text-xl">{time}</span>
-        </div>
+<div className="text-center">
 
-        {!app && (
+<p className="text-xs uppercase tracking-widest text-stone-400">
+Marcações no dia
+</p>
 
-          <div className="grid grid-cols-2 gap-2">
+<p className="text-3xl font-serif">
+{dayAppointments.length}
+</p>
 
-            <button
-              onClick={()=>openCreate(selectedDate,time)}
-              className="bg-brand-gold text-white py-2 rounded-xl"
-            >
-              Nova
-            </button>
+</div>
 
-            <button
-              onClick={()=>toggleBlock(time)}
-              className="border py-2 rounded-xl"
-            >
-              Bloquear
-            </button>
+<div className="space-y-4">
 
-          </div>
+{TIMES.map(time=>{
 
-        )}
+const app = appointmentAt(time)
 
-        {app && (
+return(
 
-          <div className="space-y-3">
+<div
+key={time}
+className={`p-6 border rounded-2xl ${
+app?.status==='por_confirmar'
+? 'border-amber-400 bg-amber-50'
+: app?.status==='confirmado'
+? 'border-emerald-200'
+: ''
+}`}
+>
 
-            <div>
+<div className="flex justify-between mb-2">
 
-              <p className="font-serif text-lg">{app.name}</p>
-              <p className="text-xs text-stone-400">{app.whatsapp}</p>
+<span className="font-serif text-xl">{time}</span>
 
-            </div>
+{app && (
+<span className="text-xs font-bold uppercase tracking-widest">
+{app.status==='confirmado'?'Confirmado':'Pedido'}
+</span>
+)}
 
-            <div className="grid grid-cols-3 gap-2">
+</div>
 
-              <button
-                onClick={()=>updateStatus(app.id,'confirmado')}
-                className="bg-emerald-600 text-white py-2 rounded-xl"
-              >
-                Confirmar
-              </button>
+{!app && (
 
-              <button
-                onClick={()=>openReschedule(app)}
-                className="bg-blue-600 text-white py-2 rounded-xl"
-              >
-                Reagendar
-              </button>
+<div className="grid grid-cols-2 gap-2">
 
-              <button
-                onClick={()=>openEdit(app)}
-                className="bg-stone-800 text-white py-2 rounded-xl"
-              >
-                Editar
-              </button>
+<button
+onClick={()=>openCreate(selectedDate,time)}
+className="bg-brand-gold text-white py-2 rounded-xl"
+>
+Nova
+</button>
 
-            </div>
+<button
+onClick={()=>toggleBlock(time)}
+className="border py-2 rounded-xl"
+>
+Bloquear
+</button>
 
-            <button
-              onClick={()=>deleteAppointment(app.id)}
-              className="border border-red-300 text-red-600 py-2 rounded-xl w-full"
-            >
-              Apagar
-            </button>
+</div>
 
-          </div>
+)}
 
-        )}
+{app && (
 
-      </div>
+<div className="space-y-3">
 
-      )
+<div>
 
-    })}
+<p className="font-serif text-lg">{app.name}</p>
 
-  </div>
+<p className="text-xs text-stone-400">
+{app.whatsapp}
+</p>
 
-  )
+</div>
+
+<div className="grid grid-cols-3 gap-2">
+
+<button
+onClick={()=>updateStatus(app.id,'confirmado')}
+className="bg-emerald-600 text-white py-2 rounded-xl"
+>
+Confirmar
+</button>
+
+<button
+onClick={()=>openReschedule(app)}
+className="bg-blue-600 text-white py-2 rounded-xl"
+>
+Reagendar
+</button>
+
+<button
+onClick={()=>openEdit(app)}
+className="bg-stone-800 text-white py-2 rounded-xl"
+>
+Editar
+</button>
+
+</div>
+
+<button
+onClick={()=>deleteAppointment(app.id)}
+className="border border-red-300 text-red-600 py-2 rounded-xl w-full"
+>
+Apagar
+</button>
+
+</div>
+
+)}
+
+</div>
+
+)
+
+})}
+
+</div>
+
+</div>
+
+)
+
 }
