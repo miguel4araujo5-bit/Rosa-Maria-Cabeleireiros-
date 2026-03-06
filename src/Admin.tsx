@@ -7,7 +7,7 @@ import AdminCalendar from './AdminCalendar'
 import AdminSlots from './AdminSlots'
 
 function todayISO(){
-  return new Date().toISOString().split('T')[0]
+return new Date().toISOString().split('T')[0]
 }
 
 export default function Admin(){
@@ -19,14 +19,18 @@ const [password,setPassword]=useState('')
 const [appointments,setAppointments]=useState<Appointment[]>([])
 const [selectedDate,setSelectedDate]=useState(todayISO())
 const [currentMonth,setCurrentMonth]=useState(new Date())
+const [loading,setLoading]=useState(false)
 
 async function fetchAppointments(){
+
+if(loading) return
+
+setLoading(true)
 
 try{
 
 const data = await api.getAdminAppointments()
-setAppointments(data||[])
-setIsLoggedIn(true)
+setAppointments(Array.isArray(data)?data:[])
 
 }catch{
 
@@ -34,15 +38,35 @@ setAppointments([])
 
 }
 
+setLoading(false)
+
 }
 
 useEffect(()=>{
 
+if(!isLoggedIn) return
+
 fetchAppointments()
 
-},[])
+},[isLoggedIn])
 
-async function handleLogin(e:any){
+useEffect(()=>{
+
+if(!isLoggedIn) return
+
+const interval = setInterval(()=>{
+
+if(document.visibilityState==='visible'){
+fetchAppointments()
+}
+
+},20000)
+
+return ()=>clearInterval(interval)
+
+},[isLoggedIn,loading])
+
+async function handleLogin(e:React.FormEvent){
 
 e.preventDefault()
 
@@ -52,8 +76,7 @@ await api.adminLogin(password)
 
 setPassword('')
 setIsLoggedIn(true)
-
-await fetchAppointments()
+fetchAppointments()
 
 }catch{
 
@@ -65,7 +88,11 @@ alert('Password incorreta')
 
 async function handleLogout(){
 
+try{
+
 await api.adminLogout()
+
+}catch{}
 
 setIsLoggedIn(false)
 setAppointments([])
@@ -74,24 +101,43 @@ navigate('/')
 
 }
 
-async function updateStatus(id:string,status:any){
+async function updateStatus(id:string,status:string){
+
+try{
 
 await api.updateAppointment(id,{status})
 await fetchAppointments()
+
+}catch{
+
+alert('Erro ao atualizar marcação')
+
+}
 
 }
 
 async function deleteAppointment(id:string){
 
-if(!confirm('Apagar marcação?')) return
+const ok = confirm('Tem a certeza que deseja apagar esta marcação?')
+
+if(!ok) return
+
+try{
 
 await api.deleteAppointment(id)
-
 await fetchAppointments()
+
+}catch{
+
+alert('Erro ao apagar marcação')
+
+}
 
 }
 
 async function toggleBlock(time:string){
+
+try{
 
 await fetch('/api/appointments',{
 method:'POST',
@@ -108,12 +154,16 @@ status:'bloqueado'
 
 await fetchAppointments()
 
+}catch{
+
+alert('Erro ao bloquear horário')
+
+}
+
 }
 
 function openCreate(){}
-
 function openEdit(){}
-
 function openReschedule(){}
 
 if(!isLoggedIn){
@@ -122,16 +172,22 @@ return(
 
 <div className="pt-40 flex justify-center">
 
-<form onSubmit={handleLogin} className="space-y-6">
+<form onSubmit={handleLogin} className="space-y-6 text-center">
 
 <input
 type="password"
 value={password}
 onChange={e=>setPassword(e.target.value)}
-className="border px-6 py-4"
+className="border px-6 py-4 w-64 text-center"
+placeholder="Password"
+autoFocus
 />
 
-<button className="bg-brand-gold text-white px-8 py-4">
+<button
+type="submit"
+disabled={!password}
+className="bg-brand-gold text-white px-8 py-4 disabled:opacity-50"
+>
 Entrar
 </button>
 
@@ -147,11 +203,17 @@ return(
 
 <div className="pt-32 pb-24 px-6 max-w-6xl mx-auto">
 
-<div className="flex justify-between mb-12">
+<div className="flex justify-between items-center mb-12">
 
 <h1 className="text-5xl font-serif italic">
 Admin
 </h1>
+
+<div className="flex items-center gap-4">
+
+<span className="text-xs text-stone-400">
+{loading?'Atualizar…':'Atualizado'}
+</span>
 
 <button
 onClick={handleLogout}
@@ -159,6 +221,8 @@ className="bg-red-50 text-red-700 px-6 py-3 rounded-full"
 >
 Sair
 </button>
+
+</div>
 
 </div>
 
