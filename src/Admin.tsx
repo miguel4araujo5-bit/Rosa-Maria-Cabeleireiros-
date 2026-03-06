@@ -50,7 +50,6 @@ setLoading(false)
 useEffect(()=>{
 
 if(!isLoggedIn) return
-
 fetchAppointments()
 
 },[isLoggedIn])
@@ -58,7 +57,6 @@ fetchAppointments()
 useEffect(()=>{
 
 if(!isLoggedIn) return
-
 fetchAppointments()
 
 },[selectedDate])
@@ -106,7 +104,6 @@ await api.adminLogout()
 
 setIsLoggedIn(false)
 setAppointments([])
-
 navigate('/')
 
 }
@@ -172,16 +169,58 @@ alert('Erro ao bloquear horário')
 
 }
 
-function openCreate(time:string){
-alert('Reservar manualmente ainda não configurado')
+async function openCreate(date:string,time:string){
+
+const name = prompt('Nome da cliente')
+if(!name) return
+
+const whatsapp = prompt('WhatsApp')
+if(!whatsapp) return
+
+try{
+
+await api.createAppointment({
+name,
+whatsapp,
+services:'[]',
+date,
+time
+})
+
+await fetchAppointments()
+
+}catch{
+
+alert('Erro ao criar marcação')
+
 }
 
-function openEdit(id:string){
-alert('Editar marcação em breve')
 }
 
-function openReschedule(id:string){
-alert('Mudar hora/dia em breve')
+function openEdit(app:any){
+
+const name = prompt('Nome',app.name)
+if(!name) return
+
+const whatsapp = prompt('WhatsApp',app.whatsapp)
+if(!whatsapp) return
+
+api.updateAppointment(app.id,{
+name,
+whatsapp
+}).then(fetchAppointments)
+
+}
+
+function openReschedule(app:any){
+
+const time = prompt('Nova hora',app.time)
+if(!time) return
+
+api.updateAppointment(app.id,{
+time
+}).then(fetchAppointments)
+
 }
 
 const dayAppointments = appointments.filter((a:any)=>a.date===selectedDate)
