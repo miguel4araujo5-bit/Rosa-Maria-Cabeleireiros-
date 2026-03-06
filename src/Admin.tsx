@@ -172,9 +172,17 @@ alert('Erro ao bloquear horário')
 
 }
 
-function openCreate(){}
-function openEdit(){}
-function openReschedule(){}
+function openCreate(time:string){
+alert('Reservar manualmente ainda não configurado')
+}
+
+function openEdit(id:string){
+alert('Editar marcação em breve')
+}
+
+function openReschedule(id:string){
+alert('Mudar hora/dia em breve')
+}
 
 const dayAppointments = appointments.filter((a:any)=>a.date===selectedDate)
 
@@ -283,4 +291,3 @@ deleteAppointment={deleteAppointment}
 )
 
 }
-
