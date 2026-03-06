@@ -186,7 +186,7 @@ className="p-6 border rounded-2xl"
 onClick={()=>openCreate(selectedDate,time)}
 className="bg-brand-gold text-white py-2 rounded-xl"
 >
-Nova
+Reservar
 </button>
 
 <button
@@ -227,7 +227,7 @@ Confirmar
 onClick={()=>openReschedule(app)}
 className="bg-blue-600 text-white py-2 rounded-xl"
 >
-Reagendar
+Mudar hora/dia
 </button>
 
 <button
