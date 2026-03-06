@@ -30,7 +30,12 @@ setLoading(true)
 try{
 
 const data = await api.getAdminAppointments()
-setAppointments(Array.isArray(data)?data:[])
+
+if(Array.isArray(data)){
+setAppointments(data)
+}else{
+setAppointments([])
+}
 
 }catch{
 
@@ -54,6 +59,14 @@ useEffect(()=>{
 
 if(!isLoggedIn) return
 
+fetchAppointments()
+
+},[selectedDate])
+
+useEffect(()=>{
+
+if(!isLoggedIn) return
+
 const interval = setInterval(()=>{
 
 if(document.visibilityState==='visible'){
@@ -64,7 +77,7 @@ fetchAppointments()
 
 return ()=>clearInterval(interval)
 
-},[isLoggedIn,loading])
+},[isLoggedIn])
 
 async function handleLogin(e:React.FormEvent){
 
@@ -76,7 +89,6 @@ await api.adminLogin(password)
 
 setPassword('')
 setIsLoggedIn(true)
-fetchAppointments()
 
 }catch{
 
@@ -166,6 +178,8 @@ function openCreate(){}
 function openEdit(){}
 function openReschedule(){}
 
+const dayAppointments = appointments.filter((a:any)=>a.date===selectedDate)
+
 if(!isLoggedIn){
 
 return(
@@ -209,7 +223,16 @@ return(
 Admin
 </h1>
 
-<div className="flex items-center gap-4">
+<div className="flex items-center gap-6">
+
+<div className="text-center">
+<p className="text-xs text-stone-400 uppercase tracking-widest">
+Marcações hoje
+</p>
+<p className="font-serif text-xl">
+{dayAppointments.length}
+</p>
+</div>
 
 <span className="text-xs text-stone-400">
 {loading?'Atualizar…':'Atualizado'}
