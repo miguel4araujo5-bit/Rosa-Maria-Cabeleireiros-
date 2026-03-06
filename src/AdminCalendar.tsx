@@ -72,6 +72,8 @@ export default function AdminCalendar({
     ).length
   }
 
+  const today = toISODate(new Date())
+
   return (
     <div className="bg-white p-8 rounded-3xl shadow-2xl border-2 border-stone-100">
 
@@ -123,14 +125,18 @@ export default function AdminCalendar({
           const dateStr = toISODate(day)
           const isSelected = selectedDate === dateStr
           const count = bookingsCountOnDay(day)
+          const isToday = dateStr === today
+          const inCurrentMonth = day.getMonth() === currentMonth.getMonth()
 
           return (
             <button
               key={idx}
               onClick={() => setSelectedDate(dateStr)}
               className={cn(
-                "aspect-square rounded-2xl border flex flex-col items-center justify-center",
-                isSelected && "bg-brand-ink text-white"
+                "aspect-square rounded-2xl border flex flex-col items-center justify-center transition-all",
+                !inCurrentMonth && "opacity-30",
+                isSelected && "bg-brand-ink text-white border-brand-ink",
+                isToday && !isSelected && "ring-2 ring-brand-gold ring-offset-2"
               )}
             >
 
@@ -139,7 +145,12 @@ export default function AdminCalendar({
               </span>
 
               {count > 0 && (
-                <span className="text-[10px] bg-red-500 text-white rounded-full px-1 mt-1">
+                <span className={cn(
+                  "text-[10px] text-white rounded-full px-1 mt-1",
+                  count === 1 && "bg-red-400",
+                  count === 2 && "bg-red-500",
+                  count >= 3 && "bg-red-700"
+                )}>
                   {count}
                 </span>
               )}
