@@ -1,18 +1,7 @@
 import { Link } from 'react-router-dom'
 import Logo from './Logo'
 
-type Service = {
-  id: string
-  label: string
-  category: string
-}
-
-type HomeProps = {
-  SERVICES: Service[]
-  SERVICE_CATEGORIES: string[]
-}
-
-export default function Home({ SERVICES, SERVICE_CATEGORIES }: HomeProps) {
+export default function Home() {
   return (
     <div className="bg-brand-paper">
       <section className="relative h-screen pt-32 flex items-center justify-center">
