@@ -47,64 +47,17 @@ export default function Home({ SERVICES, SERVICE_CATEGORIES }: HomeProps) {
               MARCAR A MINHA VISITA
             </Link>
 
-            <a
-              href="#servicos"
+            <Link
+              to="/servicos"
               className="text-xs uppercase tracking-[0.45em] font-bold text-white/50 hover:text-white transition-colors duration-300"
             >
               Ver serviços
-            </a>
+            </Link>
           </div>
         </div>
 
         <div className="absolute bottom-14 left-1/2 -translate-x-1/2 hidden md:block">
           <div className="w-px h-28 bg-gradient-to-b from-brand-gold to-transparent opacity-80"></div>
-        </div>
-      </section>
-
-      <section id="servicos" className="py-44 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-28">
-            <span className="section-subtitle tracking-[0.4em]">Serviços</span>
-            <h2 className="section-title">Seleção</h2>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24">
-            {SERVICE_CATEGORIES.map((category, idx) => (
-              <div key={category} className="space-y-12">
-                <div className="flex items-center gap-6">
-                  <span className="text-4xl font-serif italic text-brand-gold">
-                    0{idx + 1}
-                  </span>
-                  <h3 className="text-4xl font-serif border-b border-brand-pink-soft pb-3 flex-1">
-                    {category}
-                  </h3>
-                </div>
-
-                <div className="space-y-4">
-                  {SERVICES
-                    .filter(s => s.category === category)
-                    .map(service => (
-                      <div key={service.id} className="price-item group">
-                        <span className="price-name transition-colors duration-300 group-hover:text-brand-ink">
-                          {service.label}
-                        </span>
-                        <div className="flex-1 border-b border-dotted border-stone-200 mx-6 mb-2 opacity-40 group-hover:opacity-70 transition-all duration-300"></div>
-                        <span className="price-value">{service.price}</span>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="pt-24 flex justify-center">
-            <Link
-              to="/marcacao"
-              className="btn-primary px-20 py-7 text-sm tracking-[0.4em] transition-all duration-500 hover:scale-[1.02]"
-            >
-              AGENDAR
-            </Link>
-          </div>
         </div>
       </section>
     </div>
