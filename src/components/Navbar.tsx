@@ -25,11 +25,19 @@ export default function Navbar() {
           </Link>
 
           <div className="hidden md:flex items-center gap-16">
+
             <Link
               to="/"
               className="text-sm uppercase tracking-[0.25em] font-bold text-stone-700 hover:text-brand-ink transition-colors"
             >
               Início
+            </Link>
+
+            <Link
+              to="/servicos"
+              className="text-sm uppercase tracking-[0.25em] font-bold text-stone-700 hover:text-brand-ink transition-colors"
+            >
+              Serviços
             </Link>
 
             <Link
@@ -59,6 +67,7 @@ export default function Navbar() {
                 Admin
               </Link>
             )}
+
           </div>
 
           <button
@@ -67,18 +76,28 @@ export default function Navbar() {
           >
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
+
         </div>
       </div>
 
       {isOpen && (
         <div className="md:hidden bg-[#f6f1e8] border-b border-[#e8dfcf] overflow-hidden">
           <div className="px-8 py-16 space-y-10 text-center">
+
             <Link
               to="/"
               onClick={() => setIsOpen(false)}
               className="block text-lg uppercase tracking-[0.3em] text-stone-700 font-bold"
             >
               Início
+            </Link>
+
+            <Link
+              to="/servicos"
+              onClick={() => setIsOpen(false)}
+              className="block text-lg uppercase tracking-[0.3em] text-stone-700 font-bold"
+            >
+              Serviços
             </Link>
 
             <Link
@@ -96,6 +115,7 @@ export default function Navbar() {
             >
               Admin
             </Link>
+
           </div>
         </div>
       )}
