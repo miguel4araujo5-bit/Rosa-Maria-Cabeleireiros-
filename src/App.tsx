@@ -1,4 +1,5 @@
 import Home from './Home'
+import Services from './Services'
 import Admin from './Admin'
 import Navbar from './components/Navbar'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -17,8 +18,6 @@ type AvailabilitySlot = {
 
 const ADMIN_PATH = '/admin'
 const MANAGER_WHATSAPP = '351932939817'
-
-const SERVICE_CATEGORIES = Array.from(new Set(SERVICES.map(s => s.category)))
 
 const TIMES = [
   '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
@@ -516,6 +515,7 @@ export default function App() {
               />
             }
           />
+          <Route path="/servicos" element={<Services />} />
           <Route path="/marcacao" element={<Booking />} />
           <Route path="/agendar" element={<Booking />} />
           <Route path="/admin/*" element={<Admin />} />
