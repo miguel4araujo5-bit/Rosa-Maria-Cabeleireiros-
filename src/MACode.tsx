@@ -35,7 +35,7 @@ ${form.message}`
 
         <p className="text-lg text-stone-600 max-w-2xl mx-auto">
           Criamos websites e aplicações modernas para empresas que querem
-          uma presença digital profissional e eficiente.
+          uma presença digital profissional e eficiente. (A partir de 19€/mês)
         </p>
 
       </div>
