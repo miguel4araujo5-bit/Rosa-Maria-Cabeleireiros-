@@ -627,9 +627,16 @@ function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-            <p className="text-xs uppercase tracking-[0.2em] text-stone-600 font-bold">
-              © 2026 Cabeleireiro Rosa Maria. Todos os direitos reservados.
-            </p>
+            <div className="flex flex-col md:flex-row items-center gap-4 text-xs uppercase tracking-[0.2em] text-stone-600 font-bold">
+            <span>© 2026 Rosa Maria Cabeleireiros. Todos os direitos reservados.</span>
+
+              <Link
+                to="/ma-code"
+                  className="text-stone-500 hover:text-brand-gold transition-colors"
+                  >
+                     Criado por: MA-Code
+                      </Link>
+                  </div>
           </div>
         </div>
       </footer>
