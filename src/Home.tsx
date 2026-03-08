@@ -4,12 +4,12 @@ import Logo from './Logo'
 export default function Home() {
   return (
     <div className="bg-brand-paper">
-      <section className="relative h-screen pt-32 flex items-center justify-center">
+      <section className="relative min-h-screen pt-32 flex items-center justify-center">
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
             src="/IMG_6695.jpg"
             alt="Rosa Maria Cabeleireiros"
-            className="w-full h-full object-cover object-top opacity-90 scale-105"
+            className="w-full h-full object-cover object-center md:object-top opacity-90 scale-110 md:scale-105"
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80"></div>
