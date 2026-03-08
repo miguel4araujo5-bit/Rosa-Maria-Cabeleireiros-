@@ -6,7 +6,8 @@ export default function FloatingNav() {
       href="https://waze.com/ul?q=Rua%20de%20Cinco%20de%20Outubro%205498%20São%20Mamede%20de%20Infesta"
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-brand-gold text-black px-5 py-4 rounded-full shadow-xl font-bold text-sm hover:scale-105 transition-all"
+      aria-label="Abrir localização no Waze"
+      className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-full bg-brand-gold px-5 py-4 text-sm font-bold text-black shadow-xl transition-all hover:scale-105"
     >
       <Navigation size={20} />
       Como chegar
