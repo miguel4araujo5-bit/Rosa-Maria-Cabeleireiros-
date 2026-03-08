@@ -10,6 +10,7 @@ import { Calendar, ChevronRight, Check, MessageSquare, Menu, X, Phone, Instagram
 import { api } from './services/api'
 import type { Appointment } from './types'
 import Logo from './Logo'
+import MACode from './MACode'
 
 type AvailabilitySlot = {
   date: string
@@ -656,6 +657,7 @@ export default function App() {
           <Route path="/marcacao" element={<Booking />} />
           <Route path="/agendar" element={<Booking />} />
           <Route path="/admin/*" element={<Admin />} />
+          <Route path="/ma-code" element={<MACode />} />
         </Routes>
       </AppShell>
     </Router>
