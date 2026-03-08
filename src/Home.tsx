@@ -1,7 +1,19 @@
 import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import Logo from './Logo'
 
 export default function Home() {
+  const [offset, setOffset] = useState(0)
+
+useEffect(() => {
+  const handleScroll = () => {
+    setOffset(window.scrollY * 0.3)
+  }
+
+  window.addEventListener('scroll', handleScroll)
+
+  return () => window.removeEventListener('scroll', handleScroll)
+}, [])
   return (
     <div className="bg-brand-paper">
       <section className="relative h-screen pt-32 flex items-center justify-center">
@@ -9,7 +21,8 @@ export default function Home() {
           <img
             src="/IMG_6695.jpg"
             alt="Rosa Maria Cabeleireiros"
-            className="w-full h-full object-cover object-top opacity-90 scale-105"
+            style={{ transform: `translateY(${offset}px)` }}
+            className="w-full h-full object-cover object-top opacity-90 scale-105 transition-transform duration-75"
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80"></div>
