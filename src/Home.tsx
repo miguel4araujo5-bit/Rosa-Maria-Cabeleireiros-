@@ -12,19 +12,22 @@ export default function Home() {
             className="w-full h-full object-cover object-top opacity-90 scale-105"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-black/60"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80"></div>
         </div>
 
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto translate-y-14 md:translate-y-20">
-          <span className="section-subtitle text-white/60 tracking-[0.5em]">
+          <span className="section-subtitle text-white/70 tracking-[0.5em]">
             Marcação online
           </span>
 
-          <div className="mt-10 mb-20 transition-transform duration-700 hover:scale-[1.02]">
-            <Logo />
+         <div className="mt-10 mb-20 relative transition-transform duration-700 hover:scale-[1.02]">
+            <div className="absolute inset-0 blur-3xl opacity-30 bg-brand-gold scale-75"></div>
+             <div className="relative">
+              <Logo />
           </div>
+        </div>
 
-          <p className="text-base md:text-lg text-white/75 mb-24 max-w-xl mx-auto font-light leading-relaxed">
+          <p className="text-base md:text-lg text-white/85 mb-24 max-w-xl mx-auto font-light leading-relaxed">
             Escolha serviços, dia e hora. Receba a confirmação do salão por WhatsApp.
           </p>
 
