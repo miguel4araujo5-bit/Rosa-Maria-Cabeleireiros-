@@ -572,9 +572,9 @@ function AppShell({ children }: { children: React.ReactNode }) {
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-3 border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
                   >
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#33ccff] text-black text-[10px] font-black">
-                      W
-                    </span>
+                    <svg className="w-6 h-6" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="#33CCFF" d="M12 2c-5.5 0-10 3.8-10 8.5C2 14 4.8 17 8.5 17H9l-.8 2 3.5-2h1.8c5.5 0 10-3.8 10-8.5S17.5 2 12 2z"/>
+                    </svg>
                     <span>Waze</span>
                   </a>
 
@@ -584,12 +584,10 @@ function AppShell({ children }: { children: React.ReactNode }) {
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-3 border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
                   >
-                    <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-white text-[10px] font-black text-black overflow-hidden">
-                      <span className="absolute inset-x-0 top-0 h-1/2 bg-[#34a853]"></span>
-                      <span className="absolute left-0 top-0 h-full w-1/2 bg-[#4285f4] opacity-80"></span>
-                      <span className="absolute right-0 bottom-0 h-1/2 w-1/2 bg-[#fbbc05]"></span>
-                      <span className="absolute inset-0 flex items-center justify-center text-black font-black">G</span>
-                    </span>
+                    <svg className="w-6 h-6" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="#4285F4" d="M12 2C8 2 5 5 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-4-3-7-7-7z"/>
+                      <circle cx="12" cy="9" r="2.5" fill="white"/>
+                    </svg>
                     <span>Google Maps</span>
                   </a>
 
@@ -599,9 +597,10 @@ function AppShell({ children }: { children: React.ReactNode }) {
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-3 border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
                   >
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-black text-[10px] font-black">
-                      
-                    </span>
+                    <svg className="w-6 h-6" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="black" d="M16.365 1.43c0 1.14-.465 2.26-1.29 3.07-.84.83-1.97 1.33-3.15 1.24-.1-1.11.41-2.24 1.25-3.03.82-.78 2.17-1.34 3.19-1.28z"/>
+                      <path fill="black" d="M21.5 17.4c-.6 1.37-.89 1.98-1.67 3.2-1.09 1.73-2.62 3.89-4.53 3.91-1.69.02-2.13-1.1-4.42-1.09-2.29.01-2.78 1.11-4.47 1.09-1.91-.02-3.36-1.97-4.45-3.69C.37 17.78-.94 13.35.72 10.46c1.16-2.02 3.24-3.29 5.46-3.31 1.71-.02 3.33 1.17 4.42 1.17 1.09 0 3.13-1.45 5.28-1.24.9.04 3.44.36 5.07 2.74-.13.08-3.03 1.77-3 5.28.03 4.2 3.69 5.6 3.73 5.62z"/>
+                    </svg>
                     <span>Apple Maps</span>
                   </a>
                 </div>
