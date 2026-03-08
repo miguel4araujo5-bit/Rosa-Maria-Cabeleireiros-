@@ -126,6 +126,7 @@
     @apply font-serif text-5xl md:text-6xl tracking-tight;
   }
 }
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
