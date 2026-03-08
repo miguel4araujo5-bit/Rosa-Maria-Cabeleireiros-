@@ -33,10 +33,11 @@ ${form.message}`
           MA-Code
         </h1>
 
-        <p className="text-lg text-stone-600 max-w-2xl mx-auto">
-          Criamos websites e aplicações modernas para empresas que querem
-          uma presença digital profissional e eficiente. (A partir de 19€/mês)
-        </p>
+       <p className="text-lg text-stone-600 max-w-2xl mx-auto">
+  Criamos websites e aplicações modernas para empresas que querem
+  uma presença digital profissional e eficiente. 
+  <span className="font-bold">(A partir de 19€/mês)</span>
+</p>
 
       </div>
 
