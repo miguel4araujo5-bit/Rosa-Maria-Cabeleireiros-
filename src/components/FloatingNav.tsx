@@ -57,14 +57,14 @@ export default function FloatingNav() {
 
       <button
         onClick={handleNavigation}
-        aria-label="Navegar até ao salão"
+        aria-label="Direções para o salão"
         className="flex items-center gap-3 bg-[#33ccff] text-black px-5 py-4 rounded-full shadow-xl font-bold text-sm hover:scale-105 transition-all"
       >
         <svg className="w-6 h-6" viewBox="0 0 24 24">
           <path fill="#33CCFF" d="M12 2c-5.5 0-10 3.8-10 8.5C2 14 4.8 17 8.5 17H9l-.8 2 3.5-2h1.8c5.5 0 10-3.8 10-8.5S17.5 2 12 2z"/>
         </svg>
 
-        Navegar
+        Direções
       </button>
 
     </div>
