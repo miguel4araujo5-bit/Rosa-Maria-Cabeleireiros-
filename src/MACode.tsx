@@ -13,7 +13,7 @@ export default function MACode() {
     const subject = encodeURIComponent("Pedido de orçamento - MA-Code")
 
     const body = encodeURIComponent(
-      `Nome: ${form.name}
+`Nome: ${form.name}
 
 Email: ${form.email}
 
@@ -26,20 +26,61 @@ ${form.message}`
 
   return (
     <div className="min-h-screen bg-brand-paper pt-40 pb-32 px-6">
-      <div className="max-w-3xl mx-auto text-center">
 
-        <h1 className="text-5xl font-serif mb-6">
+      <div className="max-w-5xl mx-auto text-center mb-24">
+
+        <h1 className="text-6xl font-serif mb-6">
           MA-Code
         </h1>
 
-        <p className="text-lg text-stone-600 mb-16">
-          Desenvolvimento de websites e aplicações modernas para empresas.
+        <p className="text-lg text-stone-600 max-w-2xl mx-auto">
+          Criamos websites e aplicações modernas para empresas que querem
+          uma presença digital profissional e eficiente.
         </p>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-8 text-left"
-        >
+      </div>
+
+      <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-12 mb-32">
+
+        <div className="p-8 border border-stone-200 text-center">
+          <h3 className="text-xl font-serif mb-4">
+            Websites Profissionais
+          </h3>
+
+          <p className="text-stone-600">
+            Websites rápidos, modernos e otimizados para telemóvel.
+          </p>
+        </div>
+
+        <div className="p-8 border border-stone-200 text-center">
+          <h3 className="text-xl font-serif mb-4">
+            Sistemas de Marcação
+          </h3>
+
+          <p className="text-stone-600">
+            Sistemas de reservas online para salões, clínicas e serviços.
+          </p>
+        </div>
+
+        <div className="p-8 border border-stone-200 text-center">
+          <h3 className="text-xl font-serif mb-4">
+            Aplicações Web
+          </h3>
+
+          <p className="text-stone-600">
+            Plataformas personalizadas para automatizar o seu negócio.
+          </p>
+        </div>
+
+      </div>
+
+      <div className="max-w-3xl mx-auto">
+
+        <h2 className="text-4xl font-serif text-center mb-12">
+          Pedir Orçamento
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
 
           <div>
             <label className="input-label">
@@ -91,6 +132,7 @@ ${form.message}`
         </form>
 
       </div>
+
     </div>
   )
 }
