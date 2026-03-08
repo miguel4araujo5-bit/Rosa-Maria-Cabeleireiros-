@@ -555,7 +555,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
                 <div className="rounded-xl overflow-hidden border border-white/10">
                   <iframe
-                    src="https://www.google.com/maps?q=Rua+de+Cinco+de+Outubro+5498+São+Mamede+de+Infesta&output=embed"
+                    src="https://www.google.com/maps?q=Rosa+Maria+Cabeleireiros+São+Mamede+de+Infesta&output=embed"
                     width="100%"
                     height="180"
                     style={{ border: 0 }}
@@ -579,7 +579,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                   </a>
 
                   <a
-                    href="https://www.google.com/maps/search/?api=1&query=Rua+de+Cinco+de+Outubro+5498+São+Mamede+de+Infesta"
+                    href="https://maps.app.goo.gl/V1zjmbgj3yFsqsbS8"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-3 border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
