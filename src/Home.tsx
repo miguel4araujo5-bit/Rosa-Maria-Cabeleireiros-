@@ -5,24 +5,25 @@ import Logo from './Logo'
 export default function Home() {
   const [offset, setOffset] = useState(0)
 
-useEffect(() => {
-  const handleScroll = () => {
-    setOffset(window.scrollY * 0.3)
-  }
+  useEffect(() => {
+    const handleScroll = () => {
+      setOffset(Math.min(window.scrollY * 0.3, 120))
+    }
 
-  window.addEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll)
 
-  return () => window.removeEventListener('scroll', handleScroll)
-}, [])
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return (
     <div className="bg-brand-paper">
       <section className="relative h-screen pt-32 flex items-center justify-center">
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 overflow-hidden">
           <img
             src="/IMG_6695.jpg"
             alt="Rosa Maria Cabeleireiros"
             style={{ transform: `translateY(${offset}px)` }}
-            className="w-full h-full object-cover object-top opacity-90 scale-105 transition-transform duration-75"
+            className="w-full h-full object-cover object-top opacity-90 scale-105 transition-transform duration-75 will-change-transform"
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80"></div>
@@ -33,14 +34,18 @@ useEffect(() => {
             Marcação online
           </span>
 
-         <div className="mt-10 mb-20 relative transition-transform duration-700 hover:scale-[1.02]">
+          <div className="mt-10 mb-20 relative transition-transform duration-700 hover:scale-[1.02]">
             <div className="absolute inset-0 blur-3xl opacity-30 bg-brand-gold scale-75"></div>
-             <div className="relative">
+            <div className="relative">
               <Logo />
+            </div>
           </div>
-        </div>
 
-          <p className="text-base md:text-lg text-white/85 mb-24 max-w-xl mx-auto font-light leading-relaxed">
+          <h1 className="text-2xl md:text-3xl font-serif text-white/90 italic tracking-wide mb-8">
+            Confiança de gerações desde 1982
+          </h1>
+
+          <p className="text-base md:text-lg text-white/85 mb-16 max-w-xl mx-auto font-light leading-relaxed">
             Escolha serviços, dia e hora. Receba a confirmação do salão por WhatsApp.
           </p>
 
