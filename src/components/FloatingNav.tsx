@@ -22,7 +22,7 @@ export default function FloatingNav() {
 
   const openWhatsApp = () => {
 
-    const phone = "351229013475"
+    const phone = "351932939817"
 
     const message =
       "Olá! Gostaria de obter informações sobre marcações no Rosa Maria Cabeleireiros."
