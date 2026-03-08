@@ -582,6 +582,9 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
   </div>
 </footer>
+    </div>
+  )
+}
 
 export default function App() {
   return (
