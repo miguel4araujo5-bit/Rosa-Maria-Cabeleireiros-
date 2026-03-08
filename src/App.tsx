@@ -5,7 +5,7 @@ import Navbar from './components/Navbar'
 import React, { useEffect, useMemo, useState } from 'react'
 import { SERVICES, SERVICE_CATEGORIES } from './servicesData'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
-import { Calendar, ChevronRight, Check, MessageSquare, Menu, X, Phone, Instagram, LogOut } from 'lucide-react'
+import { Calendar, ChevronRight, Check, MessageSquare, Menu, X, Phone, Instagram, Facebook, LogOut } from 'lucide-react'
 import { api } from './services/api'
 import type { Appointment } from './types'
 import Logo from './Logo'
@@ -485,7 +485,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
             rel="noopener noreferrer"
             className="text-stone-500 hover:text-brand-gold transition-all transform hover:scale-110"
           >
-            <MessageSquare size={28} />
+            <Facebook size={28} />
           </a>
         </div>
       </div>
