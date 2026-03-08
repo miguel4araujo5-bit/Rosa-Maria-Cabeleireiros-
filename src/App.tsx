@@ -570,27 +570,39 @@ function AppShell({ children }: { children: React.ReactNode }) {
                     href="https://waze.com/ul?q=Rua%20de%20Cinco%20de%20Outubro%205498%20São%20Mamede%20de%20Infesta"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
+                    className="flex items-center justify-center gap-3 border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
                   >
-                    Abrir no Waze
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#33ccff] text-black text-[10px] font-black">
+                      W
+                    </span>
+                    <span>Waze</span>
                   </a>
 
                   <a
                     href="https://www.google.com/maps/search/?api=1&query=Rua+de+Cinco+de+Outubro+5498+São+Mamede+de+Infesta"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
+                    className="flex items-center justify-center gap-3 border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
                   >
-                    Abrir no Google Maps
+                    <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-white text-[10px] font-black text-black overflow-hidden">
+                      <span className="absolute inset-x-0 top-0 h-1/2 bg-[#34a853]"></span>
+                      <span className="absolute left-0 top-0 h-full w-1/2 bg-[#4285f4] opacity-80"></span>
+                      <span className="absolute right-0 bottom-0 h-1/2 w-1/2 bg-[#fbbc05]"></span>
+                      <span className="absolute inset-0 flex items-center justify-center text-black font-black">G</span>
+                    </span>
+                    <span>Google Maps</span>
                   </a>
 
                   <a
                     href="https://maps.apple/p/baWYLSXHXT5ELI"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
+                    className="flex items-center justify-center gap-3 border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
                   >
-                    Abrir no Apple Maps
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-black text-[10px] font-black">
+                      
+                    </span>
+                    <span>Apple Maps</span>
                   </a>
                 </div>
               </div>
