@@ -2,6 +2,7 @@ import Home from './Home'
 import Services from './Services'
 import Admin from './Admin'
 import Navbar from './components/Navbar'
+import FloatingNav from './components/FloatingNav'
 import React, { useEffect, useMemo, useState } from 'react'
 import { SERVICES, SERVICE_CATEGORIES } from './servicesData'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
@@ -127,7 +128,7 @@ function endOfMonth(d: Date) {
 function startOfWeekMonday(d: Date) {
   const x = new Date(d.getFullYear(), d.getMonth(), d.getDate())
   const day = x.getDay()
-  const diff = (day === 0 ? -6 : 1 - day)
+  const diff = day === 0 ? -6 : 1 - day
   return addDays(x, diff)
 }
 
@@ -159,7 +160,9 @@ function Booking() {
     time: '',
     observation: '',
   })
+
   const closed = useMemo(() => isClosedDayISO(formData.date), [formData.date])
+
   const fetchAvailability = async () => {
     try {
       const data = await api.getAvailability()
@@ -168,12 +171,15 @@ function Booking() {
       setAvailability([])
     }
   }
+
   useEffect(() => {
     fetchAvailability()
   }, [])
+
   useEffect(() => {
     if (step === 2) fetchAvailability()
   }, [step])
+
   const isSlotTaken = (time: string) => {
     return availability.some(a =>
       a.date === formData.date &&
@@ -181,6 +187,7 @@ function Booking() {
       (a.status === 'por_confirmar' || a.status === 'confirmado' || a.status === 'bloqueado')
     )
   }
+
   const toggleService = (id: string) => {
     setFormData(prev => ({
       ...prev,
@@ -189,6 +196,7 @@ function Booking() {
         : [...prev.selectedServices, id],
     }))
   }
+
   const sendWhatsAppToManager = () => {
     const labels = serviceLabels(formData.selectedServices)
     const message =
@@ -199,64 +207,66 @@ function Booking() {
       `Data: ${toPTDateLabel(formData.date)} às ${formData.time}\n` +
       (formData.observation ? `Obs: ${formData.observation}\n` : '') +
       `Estado: por confirmar`
+
     window.open(`https://wa.me/${MANAGER_WHATSAPP}?text=${encodeURIComponent(message)}`, '_blank', 'noreferrer')
   }
+
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
+    e.preventDefault()
 
-  if (loading) return
+    if (loading) return
 
-  if (!formData.name.trim() || !formData.whatsapp.trim()) {
-    alert('Preencha nome e WhatsApp.')
-    return
-  }
-
-  if (formData.selectedServices.length === 0) {
-    alert('Selecione pelo menos um serviço.')
-    return
-  }
-
-  if (!formData.date || closed) {
-    alert('Escolha uma data válida.')
-    return
-  }
-
-  if (!formData.time || isSlotTaken(formData.time)) {
-    alert('Escolha um horário disponível.')
-    return
-  }
-
-  setLoading(true)
-
-  try {
-    await api.createAppointment({
-      name: formData.name.trim(),
-      whatsapp: formData.whatsapp.trim(),
-      services: JSON.stringify(formData.selectedServices),
-      date: formData.date,
-      time: formData.time,
-      observation: formData.observation || '',
-      status: 'por_confirmar',
-    } as any)
-
-    setStep(3)
-
-    try {
-      sendWhatsAppToManager()
-    } catch {}
-
-    try {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    } catch {
-      window.scrollTo(0, 0)
+    if (!formData.name.trim() || !formData.whatsapp.trim()) {
+      alert('Preencha nome e WhatsApp.')
+      return
     }
 
-  } catch (err: any) {
-    alert(err?.message ? String(err.message) : 'Erro ao agendar.')
-  } finally {
-    setLoading(false)
+    if (formData.selectedServices.length === 0) {
+      alert('Selecione pelo menos um serviço.')
+      return
+    }
+
+    if (!formData.date || closed) {
+      alert('Escolha uma data válida.')
+      return
+    }
+
+    if (!formData.time || isSlotTaken(formData.time)) {
+      alert('Escolha um horário disponível.')
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      await api.createAppointment({
+        name: formData.name.trim(),
+        whatsapp: formData.whatsapp.trim(),
+        services: JSON.stringify(formData.selectedServices),
+        date: formData.date,
+        time: formData.time,
+        observation: formData.observation || '',
+        status: 'por_confirmar',
+      } as any)
+
+      setStep(3)
+
+      try {
+        sendWhatsAppToManager()
+      } catch {}
+
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      } catch {
+        window.scrollTo(0, 0)
+      }
+    } catch (err: any) {
+      alert(err?.message ? String(err.message) : 'Erro ao agendar.')
+    } finally {
+      setLoading(false)
+    }
   }
-}
+
   return (
     <div className="pt-48 pb-32 px-6 bg-brand-paper min-h-screen">
       <div className="max-w-4xl mx-auto">
@@ -265,18 +275,22 @@ function Booking() {
           <h1 className="section-title">Reserve o seu Momento</h1>
           <div className="flex justify-center gap-4 mt-8">
             {[1, 2, 3].map(s => (
-              <div key={s} className={cn(
-                "w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg border-2",
-                step >= s ? "bg-brand-gold border-brand-gold text-white" : "bg-white border-stone-200 text-stone-300"
-              )}>
+              <div
+                key={s}
+                className={cn(
+                  'w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg border-2',
+                  step >= s ? 'bg-brand-gold border-brand-gold text-white' : 'bg-white border-stone-200 text-stone-300'
+                )}
+              >
                 {s}
               </div>
             ))}
           </div>
           <p className="mt-4 text-stone-500 font-bold uppercase tracking-widest text-xs">
-            {step === 1 ? "Os seus dados" : step === 2 ? "Data e Hora" : "Concluído"}
+            {step === 1 ? 'Os seus dados' : step === 2 ? 'Data e Hora' : 'Concluído'}
           </p>
         </div>
+
         <div className="elegant-card p-10 md:p-20">
           {step === 1 && (
             <div className="space-y-16">
@@ -292,6 +306,7 @@ function Booking() {
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                   />
                 </div>
+
                 <div className="space-y-4">
                   <label className="input-label">O seu Telemóvel / WhatsApp</label>
                   <input
@@ -304,12 +319,16 @@ function Booking() {
                   />
                 </div>
               </div>
+
               <div className="space-y-6">
                 <label className="input-label">Escolha os Serviços</label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[420px] overflow-y-auto pr-4 custom-scrollbar">
                   {SERVICE_CATEGORIES.map(cat => (
                     <div key={cat} className="space-y-4">
-                      <h4 className="text-xs font-black text-brand-gold uppercase tracking-[0.3em] border-b border-stone-100 pb-2">{cat}</h4>
+                      <h4 className="text-xs font-black text-brand-gold uppercase tracking-[0.3em] border-b border-stone-100 pb-2">
+                        {cat}
+                      </h4>
+
                       <div className="space-y-2">
                         {SERVICES.filter(s => s.category === cat).map(s => {
                           const selected = formData.selectedServices.includes(s.id)
@@ -319,15 +338,19 @@ function Booking() {
                               type="button"
                               onClick={() => toggleService(s.id)}
                               className={cn(
-                                "w-full text-left p-4 rounded-xl border-2 transition-all flex justify-between items-center group",
-                                selected ? "bg-brand-ink border-brand-ink text-white" : "bg-white border-stone-50 text-stone-600 hover:border-brand-gold"
+                                'w-full text-left p-4 rounded-xl border-2 transition-all flex justify-between items-center group',
+                                selected
+                                  ? 'bg-brand-ink border-brand-ink text-white'
+                                  : 'bg-white border-stone-50 text-stone-600 hover:border-brand-gold'
                               )}
                             >
                               <span className="font-medium">{s.label}</span>
-                              <div className={cn(
-                                "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
-                                selected ? "bg-brand-gold border-brand-gold" : "border-stone-200 group-hover:border-brand-gold"
-                              )}>
+                              <div
+                                className={cn(
+                                  'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all',
+                                  selected ? 'bg-brand-gold border-brand-gold' : 'border-stone-200 group-hover:border-brand-gold'
+                                )}
+                              >
                                 {selected && <Check size={14} className="text-white" />}
                               </div>
                             </button>
@@ -338,6 +361,7 @@ function Booking() {
                   ))}
                 </div>
               </div>
+
               <div className="pt-10">
                 <button
                   type="button"
@@ -350,6 +374,7 @@ function Booking() {
               </div>
             </div>
           )}
+
           {step === 2 && (
             <form onSubmit={handleSubmit} className="space-y-16">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -366,6 +391,7 @@ function Booking() {
                     <p className="text-red-500 font-bold text-sm">Estamos encerrados aos Domingos e Segundas.</p>
                   )}
                 </div>
+
                 <div className="space-y-4">
                   <label className="input-label">Escolha a Hora</label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -373,6 +399,7 @@ function Booking() {
                       const taken = !closed && formData.date ? isSlotTaken(t) : false
                       const selected = formData.time === t
                       const disabled = closed || !formData.date || taken
+
                       return (
                         <button
                           key={t}
@@ -380,10 +407,12 @@ function Booking() {
                           disabled={disabled}
                           onClick={() => setFormData({ ...formData, time: t })}
                           className={cn(
-                            "py-5 text-lg font-bold tracking-widest border-2 transition-all flex flex-col items-center justify-center",
-                            selected ? "bg-brand-ink text-white border-brand-ink" :
-                              disabled ? "bg-stone-100 text-stone-300 border-stone-100 cursor-not-allowed" :
-                                "border-stone-100 text-stone-500 hover:border-brand-gold"
+                            'py-5 text-lg font-bold tracking-widest border-2 transition-all flex flex-col items-center justify-center',
+                            selected
+                              ? 'bg-brand-ink text-white border-brand-ink'
+                              : disabled
+                                ? 'bg-stone-100 text-stone-300 border-stone-100 cursor-not-allowed'
+                                : 'border-stone-100 text-stone-500 hover:border-brand-gold'
                           )}
                         >
                           <span>{t}</span>
@@ -394,6 +423,7 @@ function Booking() {
                   </div>
                 </div>
               </div>
+
               <div className="space-y-4">
                 <label className="input-label">Alguma observação importante?</label>
                 <textarea
@@ -403,25 +433,36 @@ function Booking() {
                   onChange={e => setFormData({ ...formData, observation: e.target.value })}
                 />
               </div>
+
               <div className="flex flex-col md:flex-row gap-6 pt-10">
-                <button type="button" onClick={() => setStep(1)} className="btn-outline flex-1 py-6">Voltar</button>
-                <button type="submit" disabled={loading} className="btn-primary flex-1 py-6 text-lg flex items-center justify-center gap-3 disabled:opacity-50">
+                <button type="button" onClick={() => setStep(1)} className="btn-outline flex-1 py-6">
+                  Voltar
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn-primary flex-1 py-6 text-lg flex items-center justify-center gap-3 disabled:opacity-50"
+                >
                   {loading ? 'A marcar...' : 'Confirmar Marcação'}
                 </button>
               </div>
             </form>
           )}
+
           {step === 3 && (
             <div className="text-center py-16">
               <div className="w-32 h-32 border-4 border-brand-gold rounded-full flex items-center justify-center mx-auto mb-12">
                 <Check size={48} className="text-brand-gold" />
               </div>
+
               <h2 className="text-6xl mb-8 font-serif italic">Pedido Enviado!</h2>
+
               <p className="text-xl text-stone-600 font-medium mb-16 max-w-xl mx-auto leading-relaxed">
                 Obrigado, <span className="text-brand-gold font-bold">{formData.name}</span>! O seu pedido ficou pendente até confirmação do salão.
                 <br /><br />
                 Se necessário, pode enviar a mensagem novamente.
               </p>
+
               <div className="space-y-8 flex flex-col items-center">
                 <button
                   type="button"
@@ -430,6 +471,7 @@ function Booking() {
                 >
                   <MessageSquare size={28} /> Enviar WhatsApp ao Salão
                 </button>
+
                 <button
                   type="button"
                   onClick={() => navigate('/')}
@@ -441,6 +483,7 @@ function Booking() {
             </div>
           )}
         </div>
+
         <div className="mt-10 text-center text-xs uppercase tracking-[0.3em] text-stone-300 font-bold">
           Encerrado aos Domingos e Segundas
         </div>
@@ -451,137 +494,136 @@ function Booking() {
 
 function AppShell({ children }: { children: React.ReactNode }) {
   useScrollToTop()
+
   return (
     <div className="min-h-screen bg-brand-paper">
       <Navbar />
       <main>{children}</main>
-     <footer className="bg-brand-ink text-white py-32 mt-24">
-  <div className="max-w-7xl mx-auto px-6 lg:px-12">
 
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-20 mb-20">
+      <footer className="bg-brand-ink text-white py-32 mt-24">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-20 mb-20">
+            <div className="space-y-8">
+              <Link to="/" className="flex flex-col group items-start">
+                <Logo />
+              </Link>
 
-      <div className="space-y-8">
-        <Link to="/" className="flex flex-col group items-start">
-          <Logo />
-        </Link>
+              <p className="text-stone-400 font-medium text-lg leading-relaxed">
+                Rosa Maria Cabeleireiros — 40 anos a conquistar a confiança das nossas clientes.
+              </p>
 
-        <p className="text-stone-400 font-medium text-lg leading-relaxed">
-          Rosa Maria Cabeleireiros — 40 anos a conquistar a confiança das nossas clientes.
-        </p>
+              <div className="flex gap-8">
+                <a
+                  href="https://www.instagram.com/cabeleireirorosamaria?igsh=YWh2dTh3aHd6aXNu"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-stone-500 hover:text-brand-gold transition-all transform hover:scale-110"
+                >
+                  <Instagram size={28} />
+                </a>
 
-        <div className="flex gap-8">
-          <a
-            href="https://www.instagram.com/cabeleireirorosamaria?igsh=YWh2dTh3aHd6aXNu"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-stone-500 hover:text-brand-gold transition-all transform hover:scale-110"
-          >
-            <Instagram size={28} />
-          </a>
+                <a
+                  href="https://www.facebook.com/rosamaria.cabeleireiro/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-stone-500 hover:text-brand-gold transition-all transform hover:scale-110"
+                >
+                  <Facebook size={28} />
+                </a>
+              </div>
+            </div>
 
-          <a
-            href="https://www.facebook.com/rosamaria.cabeleireiro/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-stone-500 hover:text-brand-gold transition-all transform hover:scale-110"
-          >
-            <Facebook size={28} />
-          </a>
-        </div>
-      </div>
+            <div className="space-y-8">
+              <h4 className="text-xs uppercase tracking-[0.5em] text-brand-gold font-bold">
+                Contacto
+              </h4>
 
+              <div className="space-y-6 text-stone-300 font-medium text-lg">
+                <a
+                  href="tel:+351229013475"
+                  className="flex items-start gap-4 hover:text-brand-gold transition-colors"
+                >
+                  <Phone size={24} className="text-brand-gold shrink-0" />
+                  +351 229 013 475
+                </a>
 
-      <div className="space-y-8">
+                <p className="leading-relaxed text-stone-400">
+                  Rua de Cinco de Outubro 5498<br />
+                  4465-080 São Mamede de Infesta<br />
+                  Portugal
+                </p>
 
-        <h4 className="text-xs uppercase tracking-[0.5em] text-brand-gold font-bold">
-          Contacto
-        </h4>
+                <div className="rounded-xl overflow-hidden border border-white/10">
+                  <iframe
+                    src="https://www.google.com/maps?q=Rua+de+Cinco+de+Outubro+5498+São+Mamede+de+Infesta&output=embed"
+                    width="100%"
+                    height="180"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Mapa Rosa Maria Cabeleireiros"
+                  />
+                </div>
 
-        <div className="space-y-6 text-stone-300 font-medium text-lg">
+                <div className="grid grid-cols-1 gap-3 text-sm">
+                  <a
+                    href="https://waze.com/ul?q=Rua%20de%20Cinco%20de%20Outubro%205498%20São%20Mamede%20de%20Infesta"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
+                  >
+                    Abrir no Waze
+                  </a>
 
-          <a
-            href="tel:+351229013475"
-            className="flex items-start gap-4 hover:text-brand-gold transition-colors"
-          >
-            <Phone size={24} className="text-brand-gold shrink-0" />
-            +351 229 013 475
-          </a>
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=Rua+de+Cinco+de+Outubro+5498+São+Mamede+de+Infesta"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
+                  >
+                    Abrir no Google Maps
+                  </a>
 
-          <p className="leading-relaxed text-stone-400">
-            Rua de Cinco de Outubro 5498<br />
-            4465-080 São Mamede de Infesta<br />
-            Portugal
-          </p>
+                  <a
+                    href="https://maps.apple/p/baWYLSXHXT5ELI"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
+                  >
+                    Abrir no Apple Maps
+                  </a>
+                </div>
+              </div>
+            </div>
 
-          <div className="flex flex-col gap-2 text-sm">
+            <div className="space-y-8">
+              <h4 className="text-xs uppercase tracking-[0.5em] text-brand-gold font-bold">
+                Horário
+              </h4>
 
-            <a
-              href="https://waze.com/ul?q=Rua%20de%20Cinco%20de%20Outubro%205498%20São%20Mamede%20de%20Infesta"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-brand-gold transition-colors"
-            >
-              Abrir no Waze
-            </a>
+              <div className="space-y-4 text-stone-300 font-medium text-lg">
+                <div className="flex justify-between border-b border-white/5 pb-2">
+                  <span>Terça — Sábado</span>
+                  <span className="text-brand-gold">09:00 — 19:00</span>
+                </div>
 
-            <a
-              href="https://www.google.com/maps/search/?api=1&query=Rua+de+Cinco+de+Outubro+5498+São+Mamede+de+Infesta"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-brand-gold transition-colors"
-            >
-              Abrir no Google Maps
-            </a>
-
-            <a
-              href="https://maps.apple/p/baWYLSXHXT5ELI"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-brand-gold transition-colors"
-            >
-              Abrir no Apple Maps
-            </a>
-
+                <div className="flex justify-between text-stone-600">
+                  <span>Domingo e Segunda</span>
+                  <span>Encerrado</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-        </div>
-
-      </div>
-
-
-      <div className="space-y-8">
-
-        <h4 className="text-xs uppercase tracking-[0.5em] text-brand-gold font-bold">
-          Horário
-        </h4>
-
-        <div className="space-y-4 text-stone-300 font-medium text-lg">
-
-          <div className="flex justify-between border-b border-white/5 pb-2">
-            <span>Terça — Sábado</span>
-            <span className="text-brand-gold">09:00 — 19:00</span>
+          <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
+            <p className="text-xs uppercase tracking-[0.2em] text-stone-600 font-bold">
+              © 2026 Cabeleireiro Rosa Maria. Todos os direitos reservados.
+            </p>
           </div>
-
-          <div className="flex justify-between text-stone-600">
-            <span>Domingo e Segunda</span>
-            <span>Encerrado</span>
-          </div>
-
         </div>
+      </footer>
 
-      </div>
-
-    </div>
-
-
-    <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-      <p className="text-xs uppercase tracking-[0.2em] text-stone-600 font-bold">
-        © 2026 Cabeleireiro Rosa Maria. Todos os direitos reservados.
-      </p>
-    </div>
-
-  </div>
-</footer>
+      <FloatingNav />
     </div>
   )
 }
