@@ -455,51 +455,133 @@ function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-brand-paper">
       <Navbar />
       <main>{children}</main>
-      <footer className="bg-brand-ink text-white py-32 mt-24">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-20 mb-20">
-            <div className="space-y-8">
-              <Link to="/" className="flex flex-col group items-start">
-                <Logo />
-              </Link>
-              <p className="text-stone-400 font-medium text-lg leading-relaxed">
-                Marcação online com confirmação manual e gestão simples de agenda.
-              </p>
-              <div className="flex gap-8">
-                <a href="#" className="text-stone-500 hover:text-brand-gold transition-all transform hover:scale-110"><Instagram size={28} /></a>
-              </div>
-            </div>
-            <div className="space-y-8">
-              <h4 className="text-xs uppercase tracking-[0.5em] text-brand-gold font-bold">Contacto</h4>
-              <div className="space-y-6 text-stone-300 font-medium text-lg">
-                <p className="flex items-start gap-4">
-                  <Phone size={24} className="text-brand-gold shrink-0" />
-                  +351 000 000 000
-                </p>
-              </div>
-            </div>
-            <div className="space-y-8">
-              <h4 className="text-xs uppercase tracking-[0.5em] text-brand-gold font-bold">Horário</h4>
-              <div className="space-y-4 text-stone-300 font-medium text-lg">
-                <div className="flex justify-between border-b border-white/5 pb-2">
-                  <span>Terça — Sábado</span>
-                  <span className="text-brand-gold">09:00 — 19:00</span>
-                </div>
-                <div className="flex justify-between text-stone-600">
-                  <span>Domingo e Segunda</span>
-                  <span>Encerrado</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-            <p className="text-xs uppercase tracking-[0.2em] text-stone-600 font-bold">© 2026 Cabeleireiro Rosa Maria. Todos os direitos reservados.</p>
-          </div>
+     <footer className="bg-brand-ink text-white py-32 mt-24">
+  <div className="max-w-7xl mx-auto px-6 lg:px-12">
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-20 mb-20">
+
+      <div className="space-y-8">
+        <Link to="/" className="flex flex-col group items-start">
+          <Logo />
+        </Link>
+
+        <p className="text-stone-400 font-medium text-lg leading-relaxed">
+          Rosa Maria Cabeleireiros — 40 anos a conquistar a confiança das nossas clientes.
+        </p>
+
+        <div className="flex gap-8">
+          <a
+            href="https://www.instagram.com/cabeleireirorosamaria?igsh=YWh2dTh3aHd6aXNu"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-stone-500 hover:text-brand-gold transition-all transform hover:scale-110"
+          >
+            <Instagram size={28} />
+          </a>
+
+          <a
+            href="https://www.facebook.com/rosamaria.cabeleireiro/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-stone-500 hover:text-brand-gold transition-all transform hover:scale-110"
+          >
+            <MessageSquare size={28} />
+          </a>
         </div>
-      </footer>
+      </div>
+
+
+      <div className="space-y-8">
+
+        <h4 className="text-xs uppercase tracking-[0.5em] text-brand-gold font-bold">
+          Contacto
+        </h4>
+
+        <div className="space-y-6 text-stone-300 font-medium text-lg">
+
+          <a
+            href="tel:+351229013475"
+            className="flex items-start gap-4 hover:text-brand-gold transition-colors"
+          >
+            <Phone size={24} className="text-brand-gold shrink-0" />
+            +351 229 013 475
+          </a>
+
+          <p className="leading-relaxed text-stone-400">
+            Rua de Cinco de Outubro 5498<br />
+            4465-080 São Mamede de Infesta<br />
+            Portugal
+          </p>
+
+          <div className="flex flex-col gap-2 text-sm">
+
+            <a
+              href="https://waze.com/ul?q=Rua%20de%20Cinco%20de%20Outubro%205498%20São%20Mamede%20de%20Infesta"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-brand-gold transition-colors"
+            >
+              Abrir no Waze
+            </a>
+
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=Rua+de+Cinco+de+Outubro+5498+São+Mamede+de+Infesta"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-brand-gold transition-colors"
+            >
+              Abrir no Google Maps
+            </a>
+
+            <a
+              href="https://maps.apple/p/baWYLSXHXT5ELI"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-brand-gold transition-colors"
+            >
+              Abrir no Apple Maps
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div className="space-y-8">
+
+        <h4 className="text-xs uppercase tracking-[0.5em] text-brand-gold font-bold">
+          Horário
+        </h4>
+
+        <div className="space-y-4 text-stone-300 font-medium text-lg">
+
+          <div className="flex justify-between border-b border-white/5 pb-2">
+            <span>Terça — Sábado</span>
+            <span className="text-brand-gold">09:00 — 19:00</span>
+          </div>
+
+          <div className="flex justify-between text-stone-600">
+            <span>Domingo e Segunda</span>
+            <span>Encerrado</span>
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
-  )
-}
+
+
+    <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
+      <p className="text-xs uppercase tracking-[0.2em] text-stone-600 font-bold">
+        © 2026 Cabeleireiro Rosa Maria. Todos os direitos reservados.
+      </p>
+    </div>
+
+  </div>
+</footer>
 
 export default function App() {
   return (
