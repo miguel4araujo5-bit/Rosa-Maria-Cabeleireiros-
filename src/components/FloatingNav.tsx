@@ -39,7 +39,7 @@ export default function FloatingNav() {
       <button
         onClick={openWhatsApp}
         aria-label="Contactar pelo WhatsApp"
-        className="flex items-center gap-3 bg-[#25D366] text-white px-5 py-4 rounded-full shadow-xl font-bold text-sm hover:scale-105 transition-all"
+        className="flex items-center gap-3 bg-[#25D366] text-white px-6 py-4 rounded-full shadow-xl font-bold text-sm hover:scale-105 transition-all"
       >
         <svg className="w-6 h-6" viewBox="0 0 32 32">
           <path
@@ -57,14 +57,17 @@ export default function FloatingNav() {
 
       <button
         onClick={handleNavigation}
-        aria-label="Direções para o salão"
-        className="flex items-center gap-3 bg-[#33ccff] text-black px-5 py-4 rounded-full shadow-xl font-bold text-sm hover:scale-105 transition-all"
+        aria-label="Localização do salão"
+        className="flex items-center gap-3 bg-brand-ink text-white px-6 py-4 rounded-full shadow-xl font-bold text-sm hover:scale-105 hover:bg-brand-gold transition-all"
       >
         <svg className="w-6 h-6" viewBox="0 0 24 24">
-          <path fill="#33CCFF" d="M12 2c-5.5 0-10 3.8-10 8.5C2 14 4.8 17 8.5 17H9l-.8 2 3.5-2h1.8c5.5 0 10-3.8 10-8.5S17.5 2 12 2z"/>
+          <path
+            fill="currentColor"
+            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z"
+          />
         </svg>
 
-        Direções
+        Localização
       </button>
 
     </div>
