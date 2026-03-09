@@ -20,20 +20,16 @@ export default function Home() {
             Marcação online
           </span>
 
-          <div className="mt-10 mb-20 relative transition-transform duration-700 hover:scale-[1.02]">
+          <div className="mt-10 mb-16 relative transition-transform duration-700 hover:scale-[1.02]">
             <div className="absolute inset-0 blur-3xl opacity-30 bg-brand-gold scale-75"></div>
             <div className="relative">
               <Logo />
             </div>
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-serif text-white/90 italic tracking-wide mb-8">
+          <h1 className="text-2xl md:text-3xl font-serif text-white/90 italic tracking-wide mb-12">
             Confiança de gerações desde 1982
           </h1>
-
-          <p className="text-base md:text-lg text-white/85 mb-16 max-w-xl mx-auto font-light leading-relaxed">
-            Escolha serviços, dia e hora. Receba a confirmação do salão por WhatsApp.
-          </p>
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-12">
             <Link
@@ -45,7 +41,7 @@ export default function Home() {
 
             <Link
               to="/servicos"
-              className="text-xs uppercase tracking-[0.45em] font-bold text-white/50 hover:text-white transition-colors duration-300"
+              className="text-xs uppercase tracking-[0.45em] font-bold text-white/60 hover:text-white transition-colors duration-300"
             >
               Ver serviços
             </Link>
