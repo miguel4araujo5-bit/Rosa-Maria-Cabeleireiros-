@@ -30,10 +30,16 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    letter-spacing: 0.01em;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif font-medium tracking-tight;
+  }
+
+  p {
+    line-height: 1.75;
+    letter-spacing: 0.015em;
   }
 
   button, a {
@@ -124,6 +130,13 @@
 
   .section-title {
     @apply font-serif text-5xl md:text-6xl tracking-tight;
+    letter-spacing: -0.025em;
+    line-height: 1.08;
+  }
+
+  .section-subtitle {
+    @apply text-xs uppercase font-semibold;
+    letter-spacing: 0.45em;
   }
 }
 
