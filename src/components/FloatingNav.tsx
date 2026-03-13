@@ -1,5 +1,5 @@
 import React from 'react'
-import whatsappIcon from './assets/icons/whatsapp.svg'
+import whatsappIcon from '../assets/icons/whatsapp.svg'
 
 export default function FloatingNav() {
 
