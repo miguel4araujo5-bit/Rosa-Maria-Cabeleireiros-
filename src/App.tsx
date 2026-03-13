@@ -13,6 +13,8 @@ import Logo from './Logo'
 import googleMapsIcon from './assets/icons/googlemaps.svg'
 import wazeIcon from './assets/icons/waze.svg'
 import appleIcon from './assets/icons/apple.svg'
+import visaIcon from './assets/icons/visa.svg'
+import applePayIcon from './assets/icons/applepay.svg'
 import MACode from './MACode'
 
 type AvailabilitySlot = {
