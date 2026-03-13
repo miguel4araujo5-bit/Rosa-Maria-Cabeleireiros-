@@ -10,6 +10,9 @@ import { Calendar, ChevronRight, Check, MessageSquare, Menu, X, Phone, Instagram
 import { api } from './services/api'
 import type { Appointment } from './types'
 import Logo from './Logo'
+import googleMapsIcon from './assets/icons/googlemaps.svg'
+import wazeIcon from './assets/icons/waze.svg'
+import appleIcon from './assets/icons/apple.svg'
 import MACode from './MACode'
 
 type AvailabilitySlot = {
@@ -585,11 +588,8 @@ function AppShell({ children }: { children: React.ReactNode }) {
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-3 border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
                   >
-                    <svg className="w-6 h-6" viewBox="0 0 24 24" aria-hidden="true">
-                      <path fill="#4285F4" d="M12 2C8 2 5 5 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-4-3-7-7-7z" />
-                      <circle cx="12" cy="9" r="2.5" fill="white" />
-                    </svg>
-                    <span>Google Maps</span>
+                   <img src={googleMapsIcon} className="w-5 h-5" alt="Google Maps" />
+                   <span>Google Maps</span>
                   </a>
 
                   <a
