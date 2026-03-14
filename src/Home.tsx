@@ -40,14 +40,14 @@ export default function Home() {
               to="/marcacao"
               className="inline-flex min-w-[300px] md:min-w-[340px] items-center justify-center rounded-full border border-brand-gold/60 bg-[linear-gradient(135deg,rgba(198,162,74,0.95),rgba(168,132,44,0.95))] px-10 md:px-12 py-5 md:py-6 text-[11px] md:text-[12px] uppercase tracking-[0.34em] font-semibold text-black/80 shadow-[0_20px_60px_rgba(0,0,0,0.35)] transition-all duration-500 hover:-translate-y-0.5 hover:scale-[1.01] hover:border-brand-gold hover:shadow-[0_28px_80px_rgba(0,0,0,0.42)]"
             >
-              Marcar a minha visita
+              Marque a sua visita
             </Link>
 
             <Link
               to="/servicos"
               className="inline-flex min-w-[220px] items-center justify-center rounded-full border border-white/20 bg-white/[0.03] px-9 md:px-10 py-4 md:py-5 text-[10px] md:text-[11px] uppercase tracking-[0.36em] font-semibold text-white/78 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/[0.07] hover:text-white"
             >
-              Ver serviços
+              Conheça os nossos serviços
             </Link>
           </div>
         </div>
@@ -63,7 +63,7 @@ export default function Home() {
             <div className="hidden sm:block w-12 md:w-16 h-px bg-gradient-to-r from-transparent to-stone-200"></div>
 
             <p className="text-[9px] md:text-[10px] uppercase tracking-[0.32em] font-bold text-center whitespace-nowrap">
-              Também aceitamos pagamento por
+              Também aceitamos pagamento por:
             </p>
 
             <div className="hidden sm:block w-12 md:w-16 h-px bg-gradient-to-l from-transparent to-stone-200"></div>
