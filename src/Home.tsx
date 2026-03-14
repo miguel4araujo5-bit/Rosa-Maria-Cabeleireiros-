@@ -61,8 +61,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-6 pt-2 md:pt-3 pb-1 md:pb-2 -mt-1">
-        <div className="max-w-5xl mx-auto flex flex-col items-center gap-3">
+      <section className="px-6 pt-2 md:pt-3 pb-0 -mt-1">
+        <div className="max-w-5xl mx-auto flex flex-col items-center gap-2">
           <div className="flex items-center justify-center gap-4 md:gap-5 text-stone-500">
             <div className="hidden sm:block w-12 md:w-16 h-px bg-gradient-to-r from-transparent to-stone-200"></div>
 
