@@ -15,6 +15,7 @@ import wazeIcon from './assets/icons/waze.svg'
 import appleIcon from './assets/icons/apple.svg'
 import visaIcon from './assets/icons/visa.svg'
 import applePayIcon from './assets/icons/applepay.svg'
+import mbwayIcon from './assets/icons/mbway-seeklogo.png'
 import MACode from './MACode'
 
 type AvailabilitySlot = {
