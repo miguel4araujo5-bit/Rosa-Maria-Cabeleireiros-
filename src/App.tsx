@@ -570,22 +570,21 @@ function AppShell({ children }: { children: React.ReactNode }) {
                 </div>
 
                 <div className="grid grid-cols-1 gap-3 text-sm">
-                  <a
-                    href="https://waze.com/ul?q=Rua%20de%20Cinco%20de%20Outubro%205498%20São%20Mamede%20de%20Infesta"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
-                  >
+                   <a
+                      href="https://waze.com/ul?q=Rua%20de%20Cinco%20de%20Outubro%205498%20São%20Mamede%20de%20Infesta"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-3 border border-stone-200 bg-white text-brand-ink px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
+                      >
                     <img src={wazeIcon} className="w-5 h-5 object-contain" alt="Waze" />
                     <span>Waze</span>
                   </a>
-
                   <a
-                    href="https://maps.app.goo.gl/V1zjmbgj3yFsqsbS8"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
-                  >
+                      href="https://maps.app.goo.gl/V1zjmbgj3yFsqsbS8"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-3 border border-stone-200 bg-white text-brand-ink px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
+                    >
                     <img src={googleMapsIcon} className="w-5 h-5 object-contain" alt="Google Maps" />
                     <span>Google Maps</span>
                   </a>
@@ -593,8 +592,8 @@ function AppShell({ children }: { children: React.ReactNode }) {
                   <a
                     href="https://maps.apple/p/baWYLSXHXT5ELI"
                     target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 border border-white/10 px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
+                     rel="noopener noreferrer"
+                     className="flex items-center justify-center gap-3 border border-stone-200 bg-white text-brand-ink px-4 py-3 rounded-lg text-center hover:bg-brand-gold hover:text-black transition-all"
                   >
                     <img src={appleIcon} className="w-5 h-5 object-contain" alt="Apple Maps" />
                     <span>Apple Maps</span>
