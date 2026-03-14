@@ -13,9 +13,6 @@ import Logo from './Logo'
 import googleMapsIcon from './assets/icons/googlemaps.svg'
 import wazeIcon from './assets/icons/waze.svg'
 import appleIcon from './assets/icons/apple.svg'
-import visaIcon from './assets/icons/visa.svg'
-import applePayIcon from './assets/icons/applepay.svg'
-import mbwayIcon from './assets/icons/mbway-seeklogo.png'
 import MACode from './MACode'
 
 type AvailabilitySlot = {
@@ -518,36 +515,6 @@ function AppShell({ children }: { children: React.ReactNode }) {
               <p className="text-stone-400 font-medium text-lg leading-relaxed">
                 Rosa Maria Cabeleireiros — 40 anos a conquistar a confiança das nossas clientes.
               </p>
-
-              <div className="pt-2">
-                <p className="text-[11px] uppercase tracking-[0.35em] text-stone-500 font-bold mb-4">
-                  Também aceitamos pagamento por:
-                </p>
-
-                <div className="flex flex-wrap items-center gap-4 rounded-full bg-white/90 px-5 py-3 shadow-lg border border-white/10 w-fit">
-                  <img
-                    src={visaIcon}
-                    alt="Visa"
-                    className="h-5 md:h-6 w-auto object-contain"
-                  />
-
-                  <div className="hidden sm:block h-5 w-px bg-stone-300"></div>
-
-                  <img
-                    src={applePayIcon}
-                    alt="Apple Pay"
-                    className="h-5 md:h-6 w-auto object-contain"
-                  />
-
-                  <div className="hidden sm:block h-5 w-px bg-stone-300"></div>
-
-                  <img
-                    src={mbwayIcon}
-                    alt="MB WAY"
-                    className="h-5 md:h-6 w-auto object-contain"
-                  />
-                </div>
-              </div>
 
               <div className="flex gap-8">
                 <a
