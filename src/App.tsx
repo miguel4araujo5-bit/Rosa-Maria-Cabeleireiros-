@@ -513,7 +513,8 @@ function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
 
               <p className="max-w-md text-stone-400 font-medium text-[17px] leading-8">
-                Rosa Maria Cabeleireiros — tradição, confiança e cuidado de gerações desde 1982.
+                Rosa Maria Cabeleireiros
+                40 anos a conquistar a confiança das nossas clientes.
               </p>
 
               <div className="flex items-center gap-4">
