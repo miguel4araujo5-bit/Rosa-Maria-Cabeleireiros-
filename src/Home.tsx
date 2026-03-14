@@ -19,25 +19,20 @@ export default function Home() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(198,162,74,0.16),transparent_38%)]"></div>
         </div>
 
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto translate-y-12 md:translate-y-16 animate-fade-in">
-          <span className="section-subtitle text-white/70 tracking-[0.5em]">
-            Marcação online
-          </span>
+       <h2 className="text-[30px] md:text-[40px] font-serif text-white/90 italic tracking-[0.04em] leading-tight">
+        Confiança de gerações desde 1982
+      </h2>
 
-          <div className="mt-8 mb-14 relative transition-transform duration-700 hover:scale-[1.015]">
-            <div className="absolute inset-0 blur-3xl opacity-25 bg-brand-gold scale-75"></div>
-            <div className="relative">
-              <Logo />
-            </div>
-          </div>
+     <div className="mt-8 mb-14 relative transition-transform duration-700 hover:scale-[1.015]">
+        <div className="absolute inset-0 blur-3xl opacity-25 bg-brand-gold scale-75"></div>
+        <div className="relative">
+          <Logo />
+      </div>
+  </div>
 
-          <h1 className="text-[30px] md:text-[40px] font-serif text-white/90 italic tracking-[0.04em] mb-6 leading-tight">
-            Confiança de gerações desde 1982
-          </h1>
-
-          <p className="max-w-2xl mx-auto text-white/65 text-sm md:text-[15px] leading-7 font-medium mb-12">
-            Um espaço de beleza, cuidado e confiança, onde a experiência se encontra com a elegância.
-          </p>
+      <p className="max-w-2xl mx-auto text-white/65 text-sm md:text-[15px] leading-7 font-medium mb-12">
+        Um espaço de beleza, cuidado e confiança, onde a experiência se encontra com a elegância.
+        </p>
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-5 md:gap-8">
             <Link
