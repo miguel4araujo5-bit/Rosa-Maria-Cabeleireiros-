@@ -56,14 +56,12 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-b from-transparent to-brand-paper"></div>
-
         <div className="absolute bottom-14 left-1/2 -translate-x-1/2 hidden md:block">
           <div className="w-px h-24 bg-gradient-to-b from-brand-gold to-transparent opacity-80"></div>
         </div>
       </section>
 
-      <section className="px-6 pt-1 pb-5 md:pt-2 md:pb-6">
+      <section className="px-6 pt-2 md:pt-3 pb-1 md:pb-2 -mt-1">
         <div className="max-w-5xl mx-auto flex flex-col items-center gap-3">
           <div className="flex items-center justify-center gap-4 md:gap-5 text-stone-500">
             <div className="hidden sm:block w-12 md:w-16 h-px bg-gradient-to-r from-transparent to-stone-200"></div>
