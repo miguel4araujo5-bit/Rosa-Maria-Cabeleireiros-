@@ -504,7 +504,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
       <Navbar />
       <main>{children}</main>
 
-      <footer className="bg-brand-ink text-white pt-28 pb-20 mt-20">
+      <footer className="bg-brand-ink text-white pt-28 pb-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16 lg:gap-20 mb-16">
             <div className="space-y-8">
