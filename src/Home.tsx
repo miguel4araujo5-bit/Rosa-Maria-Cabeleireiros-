@@ -59,14 +59,14 @@ export default function Home() {
       <section className="px-6 pt-2 pb-3 md:pt-3 md:pb-4">
         <div className="max-w-7xl mx-auto flex flex-col items-center gap-2">
           <p className="text-[9px] md:text-[10px] uppercase tracking-[0.32em] font-bold text-stone-500 text-center">
-            Também aceitamos pagamento por
+            Também disponível pagamento por:
           </p>
 
-          <div className="inline-flex flex-wrap items-center justify-center gap-3 rounded-full bg-white/95 px-4 md:px-5 py-2 md:py-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-stone-200/80 backdrop-blur-sm">
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-5">
             <img
               src={visaIcon}
               alt="Visa"
-              className="h-7 md:h-8 w-auto object-contain"
+              className="h-8 md:h-9 w-auto object-contain opacity-90"
             />
 
             <div className="hidden sm:block h-5 w-px bg-stone-200"></div>
@@ -74,7 +74,7 @@ export default function Home() {
             <img
               src={applePayIcon}
               alt="Apple Pay"
-              className="h-7 md:h-8 w-auto object-contain"
+              className="h-8 md:h-9 w-auto object-contain opacity-90"
             />
 
             <div className="hidden sm:block h-5 w-px bg-stone-200"></div>
@@ -82,7 +82,7 @@ export default function Home() {
             <img
               src={mbwayIcon}
               alt="MB WAY"
-              className="h-7 md:h-8 w-auto object-contain"
+              className="h-8 md:h-9 w-auto object-contain opacity-90"
             />
           </div>
         </div>
