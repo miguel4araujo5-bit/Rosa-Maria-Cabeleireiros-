@@ -603,6 +603,36 @@ function AppShell({ children }: { children: React.ReactNode }) {
                     <span>Apple Maps</span>
                   </a>
                 </div>
+
+                <div className="pt-4">
+                  <p className="text-[11px] uppercase tracking-[0.35em] text-stone-500 font-bold mb-4 text-center md:text-left">
+                    Também aceitamos pagamento por:
+                  </p>
+
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 rounded-full bg-white/90 px-5 py-3 shadow-lg border border-white/10">
+                    <img
+                      src={visaIcon}
+                      alt="Visa"
+                      className="h-5 md:h-6 w-auto object-contain"
+                    />
+
+                    <div className="hidden sm:block h-5 w-px bg-stone-300"></div>
+
+                    <img
+                      src={applePayIcon}
+                      alt="Apple Pay"
+                      className="h-5 md:h-6 w-auto object-contain"
+                    />
+
+                    <div className="hidden sm:block h-5 w-px bg-stone-300"></div>
+
+                    <img
+                      src={mbwayIcon}
+                      alt="MB WAY"
+                      className="h-5 md:h-6 w-auto object-contain"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
