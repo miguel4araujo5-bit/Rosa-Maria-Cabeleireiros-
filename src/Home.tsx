@@ -38,14 +38,14 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
             <Link
               to="/marcacao"
-              className="inline-flex min-w-[300px] md:min-w-[340px] items-center justify-center rounded-full border border-brand-gold/70 bg-[linear-gradient(135deg,rgba(210,175,84,0.98),rgba(168,132,44,0.96))] px-10 md:px-12 py-5 md:py-6 text-[11px] md:text-[12px] uppercase tracking-[0.34em] font-semibold text-black/80 shadow-[0_20px_60px_rgba(0,0,0,0.35)] transition-all duration-500 hover:-translate-y-1 hover:scale-[1.015] hover:border-[#e7c56a] hover:bg-[linear-gradient(135deg,rgba(233,198,103,1),rgba(190,148,48,1))] hover:shadow-[0_30px_90px_rgba(0,0,0,0.42),0_0_30px_rgba(198,162,74,0.30)]"
+              className="inline-flex min-w-[300px] md:min-w-[340px] items-center justify-center rounded-full border border-brand-gold/70 bg-[linear-gradient(135deg,rgba(210,175,84,0.98),rgba(168,132,44,0.96))] px-10 md:px-12 py-5 md:py-6 text-[11px] md:text-[12px] uppercase tracking-[0.34em] font-semibold text-black/80 shadow-[0_20px_60px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-[#ecd07f] hover:brightness-110 hover:shadow-[0_30px_90px_rgba(0,0,0,0.45),0_0_28px_rgba(198,162,74,0.32)]"
             >
               Marque a sua visita
             </Link>
 
             <Link
               to="/servicos"
-              className="inline-flex min-w-[220px] items-center justify-center rounded-full border border-white/20 bg-white/[0.04] px-9 md:px-10 py-4 md:py-5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-semibold text-white/80 backdrop-blur-md transition-all duration-500 shadow-[0_10px_30px_rgba(0,0,0,0.18)] hover:-translate-y-1 hover:scale-[1.01] hover:border-brand-gold/55 hover:bg-brand-gold/15 hover:text-white hover:shadow-[0_22px_55px_rgba(0,0,0,0.30),0_0_24px_rgba(198,162,74,0.18)]"
+              className="inline-flex min-w-[220px] items-center justify-center rounded-full border border-white/20 bg-white/5 px-9 md:px-10 py-4 md:py-5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-semibold text-white/80 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:border-brand-gold/60 hover:bg-white/10 hover:text-white hover:shadow-[0_22px_55px_rgba(0,0,0,0.32),0_0_22px_rgba(198,162,74,0.16)]"
             >
               Os nossos serviços
             </Link>
