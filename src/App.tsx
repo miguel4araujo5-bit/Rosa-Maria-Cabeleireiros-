@@ -513,8 +513,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
 
               <p className="text-stone-400 font-medium text-lg leading-relaxed">
-                Rosa Maria Cabeleireiros 
-                "40 anos a conquistar a confiança das nossas clientes."
+                Rosa Maria Cabeleireiros — 40 anos a conquistar a confiança das nossas clientes.
               </p>
 
               <div className="flex gap-8">
@@ -579,26 +578,26 @@ function AppShell({ children }: { children: React.ReactNode }) {
                   <img src={wazeIcon} className="w-5 h-5 object-contain" alt="Waze" />
                   <span>Waze</span>
                 </a>
-                 <a
-                    href="https://maps.app.goo.gl/V1zjmbgj3yFsqsbS8"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 rounded-xl border border-white/15 bg-white/95 text-brand-ink px-4 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-gold hover:text-black hover:shadow-[0_12px_30px_rgba(0,0,0,0.22)] active:translate-y-0 active:scale-[0.985] active:bg-[#b68a12] active:text-black"
+
+                <a
+                  href="https://maps.app.goo.gl/V1zjmbgj3yFsqsbS8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-3 rounded-xl border border-white/15 bg-white/95 text-brand-ink px-4 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-gold hover:text-black hover:shadow-[0_12px_30px_rgba(0,0,0,0.22)] active:translate-y-0 active:scale-[0.985] active:bg-[#b68a12] active:text-black"
                 >
-                    <img src={googleMapsIcon} className="w-5 h-5 object-contain" alt="Google Maps" />
-                    <span>Google Maps</span>
+                  <img src={googleMapsIcon} className="w-5 h-5 object-contain" alt="Google Maps" />
+                  <span>Google Maps</span>
                 </a>
 
-                  <a
-  href="https://maps.apple/p/baWYLSXHXT5ELI"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="flex items-center justify-center gap-3 rounded-xl border border-white/15 bg-white/95 text-brand-ink px-4 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-gold hover:text-black hover:shadow-[0_12px_30px_rgba(0,0,0,0.22)] active:translate-y-0 active:scale-[0.985] active:bg-[#b68a12] active:text-black"
->
-  <img src={appleIcon} className="w-5 h-5 object-contain" alt="Apple Maps" />
-  <span>Apple Maps</span>
-</a>
-                </div>
+                <a
+                  href="https://maps.apple/p/baWYLSXHXT5ELI"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-3 rounded-xl border border-white/15 bg-white/95 text-brand-ink px-4 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-gold hover:text-black hover:shadow-[0_12px_30px_rgba(0,0,0,0.22)] active:translate-y-0 active:scale-[0.985] active:bg-[#b68a12] active:text-black"
+                >
+                  <img src={appleIcon} className="w-5 h-5 object-contain" alt="Apple Maps" />
+                  <span>Apple Maps</span>
+                </a>
               </div>
             </div>
 
