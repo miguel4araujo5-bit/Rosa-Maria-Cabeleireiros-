@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom'
 import Logo from './Logo'
+import visaIcon from './assets/icons/visa.svg'
+import applePayIcon from './assets/icons/applepay.svg'
+import mbwayIcon from './assets/icons/mbway-seeklogo.png'
 
 export default function Home() {
   return (
@@ -50,6 +53,38 @@ export default function Home() {
 
         <div className="absolute bottom-14 left-1/2 -translate-x-1/2 hidden md:block">
           <div className="w-px h-28 bg-gradient-to-b from-brand-gold to-transparent opacity-80"></div>
+        </div>
+      </section>
+
+      <section className="px-6 py-10 md:py-14">
+        <div className="max-w-7xl mx-auto flex flex-col items-center gap-4">
+          <p className="text-[11px] md:text-xs uppercase tracking-[0.35em] font-bold text-stone-500 text-center">
+            Também aceitamos pagamento por:
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 rounded-full bg-white px-5 py-3 shadow-lg border border-stone-200">
+            <img
+              src={visaIcon}
+              alt="Visa"
+              className="h-5 md:h-6 w-auto object-contain"
+            />
+
+            <div className="hidden sm:block h-5 w-px bg-stone-300"></div>
+
+            <img
+              src={applePayIcon}
+              alt="Apple Pay"
+              className="h-5 md:h-6 w-auto object-contain"
+            />
+
+            <div className="hidden sm:block h-5 w-px bg-stone-300"></div>
+
+            <img
+              src={mbwayIcon}
+              alt="MB WAY"
+              className="h-5 md:h-6 w-auto object-contain"
+            />
+          </div>
         </div>
       </section>
     </div>
