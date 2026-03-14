@@ -34,7 +34,7 @@ export default function Home() {
             Confiança de gerações desde 1982
           </h1>
 
-          <div className="flex flex-col md:flex-row items-center justify-center gap-12">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10">
             <Link
               to="/marcacao"
               className="btn-primary text-sm tracking-[0.4em] px-24 py-7 w-full md:w-auto shadow-[0_25px_60px_rgba(0,0,0,0.35)] transition-all duration-500 hover:scale-[1.02]"
@@ -44,7 +44,7 @@ export default function Home() {
 
             <Link
               to="/servicos"
-              className="text-xs uppercase tracking-[0.45em] font-bold text-white/60 hover:text-white transition-colors duration-300"
+              className="inline-flex items-center justify-center text-[11px] uppercase tracking-[0.35em] font-bold text-white/75 border border-white/20 rounded-full px-8 py-4 hover:text-white hover:border-brand-gold/70 hover:bg-white/5 transition-all duration-300"
             >
               Ver serviços
             </Link>
@@ -56,17 +56,23 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-6 pt-2 pb-3 md:pt-3 md:pb-4">
-        <div className="max-w-7xl mx-auto flex flex-col items-center gap-2">
-          <p className="text-[9px] md:text-[10px] uppercase tracking-[0.32em] font-bold text-stone-500 text-center">
-            Também disponível pagamento por:
-          </p>
+      <section className="px-6 pt-2 pb-4 md:pt-3 md:pb-5">
+        <div className="max-w-5xl mx-auto flex flex-col items-center gap-2">
+          <div className="flex items-center justify-center gap-4 md:gap-5 text-stone-500">
+            <div className="hidden sm:block w-10 md:w-14 h-px bg-stone-200"></div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-5">
+            <p className="text-[9px] md:text-[10px] uppercase tracking-[0.32em] font-bold text-center whitespace-nowrap">
+              Também aceitamos pagamento por
+            </p>
+
+            <div className="hidden sm:block w-10 md:w-14 h-px bg-stone-200"></div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
             <img
               src={visaIcon}
               alt="Visa"
-              className="h-8 md:h-9 w-auto object-contain opacity-90"
+              className="h-8 md:h-9 w-auto object-contain opacity-90 transition-opacity duration-300 hover:opacity-100"
             />
 
             <div className="hidden sm:block h-5 w-px bg-stone-200"></div>
@@ -74,7 +80,7 @@ export default function Home() {
             <img
               src={applePayIcon}
               alt="Apple Pay"
-              className="h-8 md:h-9 w-auto object-contain opacity-90"
+              className="h-8 md:h-9 w-auto object-contain opacity-90 transition-opacity duration-300 hover:opacity-100"
             />
 
             <div className="hidden sm:block h-5 w-px bg-stone-200"></div>
@@ -82,7 +88,7 @@ export default function Home() {
             <img
               src={mbwayIcon}
               alt="MB WAY"
-              className="h-8 md:h-9 w-auto object-contain opacity-90"
+              className="h-8 md:h-9 w-auto object-contain opacity-90 transition-opacity duration-300 hover:opacity-100"
             />
           </div>
         </div>
