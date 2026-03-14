@@ -56,33 +56,33 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-6 py-10 md:py-14">
-        <div className="max-w-7xl mx-auto flex flex-col items-center gap-4">
-          <p className="text-[11px] md:text-xs uppercase tracking-[0.35em] font-bold text-stone-500 text-center">
+      <section className="px-6 py-4 md:py-5">
+        <div className="max-w-7xl mx-auto flex flex-col items-center gap-3">
+          <p className="text-[10px] md:text-[11px] uppercase tracking-[0.35em] font-bold text-stone-500 text-center">
             Também aceitamos pagamento por:
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 rounded-full bg-white px-5 py-3 shadow-lg border border-stone-200">
+          <div className="flex flex-wrap items-center justify-center gap-4 rounded-full bg-white px-4 py-2.5 shadow-md border border-stone-200">
             <img
               src={visaIcon}
               alt="Visa"
-              className="h-5 md:h-6 w-auto object-contain"
+              className="h-6 md:h-7 w-auto object-contain"
             />
 
-            <div className="hidden sm:block h-5 w-px bg-stone-300"></div>
+            <div className="hidden sm:block h-6 w-px bg-stone-300"></div>
 
             <img
               src={applePayIcon}
               alt="Apple Pay"
-              className="h-5 md:h-6 w-auto object-contain"
+              className="h-6 md:h-7 w-auto object-contain"
             />
 
-            <div className="hidden sm:block h-5 w-px bg-stone-300"></div>
+            <div className="hidden sm:block h-6 w-px bg-stone-300"></div>
 
             <img
               src={mbwayIcon}
               alt="MB WAY"
-              className="h-5 md:h-6 w-auto object-contain"
+              className="h-6 md:h-7 w-auto object-contain"
             />
           </div>
         </div>
