@@ -7,7 +7,7 @@ import mbwayIcon from './assets/icons/mbway-seeklogo.png'
 export default function Home() {
   return (
     <div className="bg-brand-paper">
-      <section className="relative min-h-[100dvh] pt-36 md:pt-32 flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[100dvh] pt-32 md:pt-32 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
             src="/IMG_6695.jpg"
@@ -19,23 +19,23 @@ export default function Home() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(198,162,74,0.16),transparent_38%)]"></div>
         </div>
 
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto translate-y-12 md:translate-y-16 animate-fade-in">
+        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto translate-y-8 md:translate-y-16 animate-fade-in">
           <h1 className="text-[clamp(20px,5vw,40px)] md:text-[40px] font-serif text-white/90 italic tracking-[0.02em] leading-tight whitespace-nowrap">
             Confiança de gerações desde 1982
           </h1>
 
-          <div className="mt-8 mb-14 relative transition-transform duration-700 hover:scale-[1.015]">
+          <div className="mt-6 mb-10 md:mt-8 md:mb-14 relative transition-transform duration-700 hover:scale-[1.015]">
             <div className="absolute inset-0 blur-3xl opacity-25 bg-brand-gold scale-75"></div>
             <div className="relative">
               <Logo />
             </div>
           </div>
 
-          <p className="max-w-2xl mx-auto text-white/65 text-sm md:text-[15px] leading-7 font-medium mb-12">
+          <p className="max-w-2xl mx-auto text-white/65 text-sm md:text-[15px] leading-7 font-medium mb-8 md:mb-12">
             Um espaço de beleza, cuidado e confiança, onde a experiência se encontra com a elegância.
           </p>
 
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6">
             <Link
               to="/marcacao"
               className="inline-flex min-w-[300px] md:min-w-[340px] items-center justify-center rounded-full border border-brand-gold/70 bg-[linear-gradient(135deg,rgba(210,175,84,0.98),rgba(168,132,44,0.96))] px-10 md:px-12 py-5 md:py-6 text-[11px] md:text-[12px] uppercase tracking-[0.34em] font-semibold text-black/80 shadow-[0_20px_60px_rgba(0,0,0,0.35)] transition-all duration-200 hover:-translate-y-1 hover:scale-[1.02] hover:border-[#ecd07f] hover:brightness-110 hover:shadow-[0_30px_90px_rgba(0,0,0,0.45),0_0_28px_rgba(198,162,74,0.32)] active:scale-[0.98] active:border-[#f2d98f] active:brightness-95 active:shadow-[0_12px_30px_rgba(0,0,0,0.32)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/60"
