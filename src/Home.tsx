@@ -7,7 +7,7 @@ import mbwayIcon from './assets/icons/mbway-seeklogo.png'
 export default function Home() {
   return (
     <div className="bg-brand-paper">
-      <section className="relative min-h-[100dvh] pt-32 flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[100dvh] pt-36 md:pt-32 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
             src="/IMG_6695.jpg"
