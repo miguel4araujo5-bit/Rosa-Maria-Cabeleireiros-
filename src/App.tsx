@@ -504,6 +504,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-brand-paper">
       <Navbar />
       <main>{children}</main>
+      <InstallPrompt />
 
       <footer className="bg-brand-ink text-white pt-20 md:pt-24 pb-14 md:pb-18">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
