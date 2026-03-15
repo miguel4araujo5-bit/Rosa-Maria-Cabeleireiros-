@@ -504,15 +504,15 @@ function AppShell({ children }: { children: React.ReactNode }) {
       <Navbar />
       <main>{children}</main>
 
-      <footer className="bg-brand-ink text-white pt-28 pb-20">
+      <footer className="bg-brand-ink text-white pt-20 md:pt-24 pb-14 md:pb-18">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 lg:gap-20 mb-16">
-            <div className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-14 lg:gap-18 mb-12 md:mb-14">
+            <div className="space-y-6">
               <Link to="/" className="inline-flex flex-col group items-start">
                 <Logo />
               </Link>
 
-              <p className="max-w-[18ch] text-stone-400 font-medium text-[clamp(18px,4.8vw,28px)] leading-[1.55] tracking-[0.01em]">
+              <p className="max-w-[18ch] text-stone-400 font-medium text-[clamp(17px,4.5vw,28px)] leading-[1.45] tracking-[0.01em]">
                 Há mais de 40 anos a conquistar a confiança das nossas clientes.
               </p>
 
@@ -521,23 +521,23 @@ function AppShell({ children }: { children: React.ReactNode }) {
                   href="https://www.instagram.com/cabeleireirorosamaria?igsh=YWh2dTh3aHd6aXNu"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-stone-300 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-gold/40 hover:bg-brand-gold hover:text-black"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-stone-300 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-gold/40 hover:bg-brand-gold hover:text-black"
                 >
-                  <Instagram size={20} />
+                  <Instagram size={18} />
                 </a>
 
                 <a
                   href="https://www.facebook.com/rosamaria.cabeleireiro/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-stone-300 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-gold/40 hover:bg-brand-gold hover:text-black"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-stone-300 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-gold/40 hover:bg-brand-gold hover:text-black"
                 >
-                  <Facebook size={20} />
+                  <Facebook size={18} />
                 </a>
               </div>
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="h-px w-10 bg-brand-gold/50"></div>
                 <h4 className="text-[11px] uppercase tracking-[0.45em] text-brand-gold font-bold">
@@ -545,7 +545,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                 </h4>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <a
                   href="tel:+351229013475"
                   className="flex items-start gap-4 text-stone-200 font-medium text-lg hover:text-brand-gold transition-colors"
@@ -554,7 +554,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                   +351 229 013 475
                 </a>
 
-                <p className="leading-8 text-stone-400 text-[16px]">
+                <p className="leading-7 text-stone-400 text-[15px] md:text-[16px]">
                   Rua de Cinco de Outubro 5498<br />
                   4465-080 São Mamede de Infesta<br />
                   Portugal
@@ -564,7 +564,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                   <iframe
                     src="https://www.google.com/maps?q=Rosa+Maria+Cabeleireiros+São+Mamede+de+Infesta&output=embed"
                     width="100%"
-                    height="190"
+                    height="176"
                     style={{ border: 0 }}
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
@@ -577,36 +577,36 @@ function AppShell({ children }: { children: React.ReactNode }) {
                     href="https://waze.com/ul?q=Rua%20de%20Cinco%20de%20Outubro%205498%20São%20Mamede%20de%20Infesta"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 rounded-2xl border border-white/12 bg-white/95 text-brand-ink px-5 py-3.5 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-gold hover:text-black hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-[#b68a12] active:text-black"
+                    className="flex items-center justify-center gap-3 rounded-2xl border border-white/12 bg-white/95 text-brand-ink px-5 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-gold hover:text-black hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-[#b68a12] active:text-black"
                   >
                     <img src={wazeIcon} className="w-5 h-5 object-contain" alt="Waze" />
-                    <span className="font-medium tracking-[0.08em]">Waze</span>
+                    <span className="text-[15px] font-medium tracking-[0.06em]">Waze</span>
                   </a>
 
                   <a
                     href="https://maps.app.goo.gl/V1zjmbgj3yFsqsbS8"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 rounded-2xl border border-white/12 bg-white/95 text-brand-ink px-5 py-3.5 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-gold hover:text-black hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-[#b68a12] active:text-black"
+                    className="flex items-center justify-center gap-3 rounded-2xl border border-white/12 bg-white/95 text-brand-ink px-5 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-gold hover:text-black hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-[#b68a12] active:text-black"
                   >
                     <img src={googleMapsIcon} className="w-5 h-5 object-contain" alt="Google Maps" />
-                    <span className="font-medium tracking-[0.08em]">Google Maps</span>
+                    <span className="text-[15px] font-medium tracking-[0.06em]">Google Maps</span>
                   </a>
 
                   <a
                     href="https://maps.apple/p/baWYLSXHXT5ELI"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 rounded-2xl border border-white/12 bg-white/95 text-brand-ink px-5 py-3.5 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-gold hover:text-black hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-[#b68a12] active:text-black"
+                    className="flex items-center justify-center gap-3 rounded-2xl border border-white/12 bg-white/95 text-brand-ink px-5 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-gold hover:text-black hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-[#b68a12] active:text-black"
                   >
                     <img src={appleIcon} className="w-5 h-5 object-contain" alt="Apple Maps" />
-                    <span className="font-medium tracking-[0.08em]">Apple Maps</span>
+                    <span className="text-[15px] font-medium tracking-[0.06em]">Apple Maps</span>
                   </a>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="h-px w-10 bg-brand-gold/50"></div>
                 <h4 className="text-[11px] uppercase tracking-[0.45em] text-brand-gold font-bold">
@@ -614,7 +614,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                 </h4>
               </div>
 
-              <div className="rounded-[24px] border border-white/8 bg-white/[0.03] p-6 space-y-5 backdrop-blur-sm">
+              <div className="rounded-[24px] border border-white/8 bg-white/[0.03] p-5 md:p-6 space-y-4 backdrop-blur-sm">
                 <div className="flex items-center justify-between gap-4 border-b border-white/8 pb-4 text-[16px] font-medium">
                   <span className="text-stone-200">Terça — Sábado</span>
                   <span className="text-brand-gold tracking-[0.08em]">09:00 — 19:00</span>
@@ -626,19 +626,19 @@ function AppShell({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
 
-              <div className="rounded-[24px] border border-white/8 bg-gradient-to-br from-white/[0.05] to-transparent p-6">
+              <div className="rounded-[24px] border border-white/8 bg-gradient-to-br from-white/[0.05] to-transparent p-5 md:p-6">
                 <p className="text-[11px] uppercase tracking-[0.35em] text-brand-gold font-bold mb-3">
                   Atendimento
                 </p>
-                <p className="text-stone-400 leading-7 text-[15px]">
+                <p className="text-stone-400 leading-7 text-[14px] md:text-[15px]">
                   Reserve a sua visita online ou contacte o salão diretamente para informações adicionais.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-white/6 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex flex-col md:flex-row items-center gap-3 md:gap-5 text-[11px] uppercase tracking-[0.22em] text-stone-600 font-bold text-center md:text-left">
+          <div className="pt-6 border-t border-white/6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex flex-col md:flex-row items-center gap-2 md:gap-5 text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-stone-600 font-bold text-center md:text-left">
               <span>© 2026 Rosa Maria Cabeleireiros. Todos os direitos reservados.</span>
 
               <Link
