@@ -64,7 +64,7 @@ export default {
         },
         body: JSON.stringify({
           from: 'MA-Code <noreply@YOUR_DOMAIN_HERE>',
-          to: ['miguel4araujo5@gmail.com'],
+          to: ['www.miguel.araujo@gmail.com'],
           reply_to: email,
           subject: 'Pedido de orçamento - MA-Code',
           text: `Nome: ${name}\n\nEmail: ${email}\n\nMensagem:\n${message}`,
