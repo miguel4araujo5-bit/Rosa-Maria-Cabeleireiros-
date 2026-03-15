@@ -17,18 +17,26 @@ export default function MACode() {
     setErrorMessage('')
 
     try {
-      const response = await fetch('/api/ma-code-contact', {
+      const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify({
+          access_key: '18547eb2-4deb-4420-b33d-64813f8918e5',
+          subject: 'Pedido de orçamento - MA-Code',
+          from_name: 'MA-Code Website',
+          name: form.name,
+          email: form.email,
+          message: form.message
+        })
       })
 
       const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Erro ao enviar pedido')
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Erro ao enviar pedido')
       }
 
       setSuccessMessage('Pedido enviado com sucesso. Entraremos em contacto em breve.')
