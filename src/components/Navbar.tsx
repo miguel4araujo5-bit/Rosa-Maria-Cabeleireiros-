@@ -15,17 +15,15 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#e7dccb]/80 bg-[#f7f2ea]/86 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-12">
         <div className="flex justify-between h-24 md:h-28 items-center">
-
           <Link
             to="/"
             onClick={() => setIsOpen(false)}
             className="flex items-center py-2"
           >
-            <Logo />
+            <Logo variant="navbar" />
           </Link>
 
           <div className="hidden md:flex items-center gap-16">
-
             <Link
               to="/"
               className="text-sm uppercase tracking-[0.25em] font-bold text-stone-700 hover:text-brand-ink transition-colors"
@@ -67,7 +65,6 @@ export default function Navbar() {
                 Admin
               </Link>
             )}
-
           </div>
 
           <button
@@ -77,14 +74,12 @@ export default function Navbar() {
           >
             {isOpen ? <X size={30} strokeWidth={1.8} /> : <Menu size={30} strokeWidth={1.8} />}
           </button>
-
         </div>
       </div>
 
       {isOpen && (
         <div className="md:hidden overflow-hidden border-b border-[#e7dccb]/80 bg-[#f7f2ea]/95 backdrop-blur-xl">
           <div className="px-8 py-14 space-y-9 text-center">
-
             <Link
               to="/"
               onClick={() => setIsOpen(false)}
@@ -116,7 +111,6 @@ export default function Navbar() {
             >
               Admin
             </Link>
-
           </div>
         </div>
       )}
