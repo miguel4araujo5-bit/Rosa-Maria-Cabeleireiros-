@@ -12,7 +12,7 @@ export default function Navbar() {
   const isAdmin = location.pathname.startsWith('/admin')
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f6f1e8]/95 backdrop-blur-md border-b border-[#e8dfcf] shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f8f4ee]/92 backdrop-blur-md border-b border-[#e9dfd1] shadow-[0_4px_18px_rgba(0,0,0,0.04)]">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="flex justify-between h-28 items-center">
 
@@ -72,7 +72,7 @@ export default function Navbar() {
 
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden text-brand-ink p-2 border-2 border-[#e8dfcf]"
+            className="md:hidden text-brand-ink p-2 border-2 border-[#e9dfd1] bg-white/20"
           >
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
@@ -81,7 +81,7 @@ export default function Navbar() {
       </div>
 
       {isOpen && (
-        <div className="md:hidden bg-[#f6f1e8] border-b border-[#e8dfcf] overflow-hidden">
+        <div className="md:hidden bg-[#f8f4ee] border-b border-[#e9dfd1] overflow-hidden">
           <div className="px-8 py-16 space-y-10 text-center">
 
             <Link
