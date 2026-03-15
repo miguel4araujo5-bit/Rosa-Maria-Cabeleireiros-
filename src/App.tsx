@@ -1,3 +1,4 @@
+import InstallPrompt from './components/InstallPrompt'
 import Home from './Home'
 import Services from './Services'
 import Admin from './Admin'
