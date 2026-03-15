@@ -1,0 +1,6 @@
+name = "ma-code-contact"
+main = "index.ts"
+compatibility_date = "2026-03-15"
+
+[observability]
+enabled = true
