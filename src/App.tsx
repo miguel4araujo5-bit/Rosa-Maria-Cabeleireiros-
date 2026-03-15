@@ -577,7 +577,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                     href="https://waze.com/ul?q=Rua%20de%20Cinco%20de%20Outubro%205498%20São%20Mamede%20de%20Infesta"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 rounded-2xl border border-white/12 bg-white/95 text-brand-ink px-5 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-gold hover:text-black hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-[#b68a12] active:text-black"
+                    className="flex items-center justify-center gap-3 rounded-2xl border border-[#e7dccb]/80 bg-[#f7f2ea]/92 text-brand-ink px-5 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#efe6d8] hover:text-black hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-[#e8ddcd] active:text-black"
                   >
                     <img src={wazeIcon} className="w-5 h-5 object-contain" alt="Waze" />
                     <span className="text-[15px] font-medium tracking-[0.06em]">Waze</span>
@@ -587,7 +587,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                     href="https://maps.app.goo.gl/V1zjmbgj3yFsqsbS8"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 rounded-2xl border border-white/12 bg-white/95 text-brand-ink px-5 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-gold hover:text-black hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-[#b68a12] active:text-black"
+                    className="flex items-center justify-center gap-3 rounded-2xl border border-[#e7dccb]/80 bg-[#f7f2ea]/92 text-brand-ink px-5 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#efe6d8] hover:text-black hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-[#e8ddcd] active:text-black"
                   >
                     <img src={googleMapsIcon} className="w-5 h-5 object-contain" alt="Google Maps" />
                     <span className="text-[15px] font-medium tracking-[0.06em]">Google Maps</span>
@@ -597,7 +597,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                     href="https://maps.apple/p/baWYLSXHXT5ELI"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 rounded-2xl border border-white/12 bg-white/95 text-brand-ink px-5 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-gold hover:text-black hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-[#b68a12] active:text-black"
+                    className="flex items-center justify-center gap-3 rounded-2xl border border-[#e7dccb]/80 bg-[#f7f2ea]/92 text-brand-ink px-5 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#efe6d8] hover:text-black hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-[#e8ddcd] active:text-black"
                   >
                     <img src={appleIcon} className="w-5 h-5 object-contain" alt="Apple Maps" />
                     <span className="text-[15px] font-medium tracking-[0.06em]">Apple Maps</span>
