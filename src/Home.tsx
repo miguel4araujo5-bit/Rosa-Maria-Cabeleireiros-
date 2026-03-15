@@ -45,7 +45,7 @@ export default function Home() {
 
             <Link
               to="/servicos"
-              className="inline-flex min-w-[220px] items-center justify-center rounded-full border border-white/20 bg-white/5 px-9 md:px-10 py-4 md:py-5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-semibold text-white/80 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-1 hover:scale-[1.02] hover:border-brand-gold/60 hover:bg-white/10 hover:text-white hover:shadow-[0_22px_55px_rgba(0,0,0,0.32),0_0_22px_rgba(198,162,74,0.16)] active:scale-[0.98] active:border-brand-gold/75 active:bg-brand-gold/20 active:text-white active:shadow-[0_12px_28px_rgba(0,0,0,0.24)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/40"
+              className="inline-flex min-w-[220px] items-center justify-center rounded-full border border-white/30 bg-white/8 px-9 md:px-10 py-4 md:py-5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-semibold text-white/90 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-1 hover:scale-[1.02] hover:border-brand-gold/60 hover:bg-white/12 hover:text-white hover:shadow-[0_22px_55px_rgba(0,0,0,0.32),0_0_22px_rgba(198,162,74,0.16)] active:scale-[0.98] active:border-brand-gold/75 active:bg-brand-gold/20 active:text-white active:shadow-[0_12px_28px_rgba(0,0,0,0.24)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/40"
             >
               Os nossos serviços
             </Link>
