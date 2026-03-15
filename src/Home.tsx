@@ -15,23 +15,24 @@ export default function Home() {
             className="absolute inset-0 w-full h-full object-cover object-center md:object-top opacity-90 scale-[1.02]"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-black/85"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/78 via-black/62 to-black/88"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.22),transparent_52%)]"></div>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(198,162,74,0.16),transparent_38%)]"></div>
         </div>
 
         <div className="relative z-10 text-center px-6 pb-24 md:pb-0 max-w-4xl mx-auto translate-y-4 md:translate-y-16 animate-fade-in">
-          <h1 className="text-[clamp(20px,5vw,40px)] md:text-[40px] font-serif text-white/90 italic tracking-[0.02em] leading-tight">
+          <h1 className="text-[clamp(20px,5vw,40px)] md:text-[40px] font-serif text-white/92 italic tracking-[0.02em] leading-tight">
             Confiança de gerações desde 1982
           </h1>
 
           <div className="mt-4 mb-8 md:mt-8 md:mb-14 relative transition-transform duration-700 hover:scale-[1.015]">
-            <div className="absolute inset-0 blur-3xl opacity-25 bg-brand-gold scale-75"></div>
+            <div className="absolute inset-0 blur-3xl opacity-20 bg-brand-gold scale-75"></div>
             <div className="relative">
               <Logo />
             </div>
           </div>
 
-          <p className="max-w-2xl mx-auto text-white/65 text-[15px] md:text-[15px] leading-6 md:leading-7 font-medium mb-6 md:mb-12">
+          <p className="max-w-2xl mx-auto text-white/78 text-[15px] md:text-[15px] leading-6 md:leading-7 font-medium mb-6 md:mb-12">
             Um espaço de beleza, cuidado e confiança, onde a experiência se encontra com a elegância.
           </p>
 
@@ -45,7 +46,7 @@ export default function Home() {
 
             <Link
               to="/servicos"
-              className="inline-flex min-w-[220px] items-center justify-center rounded-full border border-white/30 bg-white/8 px-8 md:px-10 py-4 md:py-5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-semibold text-white/90 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-1 hover:scale-[1.02] hover:border-brand-gold/60 hover:bg-white/12 hover:text-white hover:shadow-[0_22px_55px_rgba(0,0,0,0.32),0_0_22px_rgba(198,162,74,0.16)] active:scale-[0.98] active:border-brand-gold/75 active:bg-brand-gold/20 active:text-white active:shadow-[0_12px_28px_rgba(0,0,0,0.24)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/40"
+              className="inline-flex min-w-[220px] items-center justify-center rounded-full border border-white/30 bg-white/8 px-8 md:px-10 py-4 md:py-5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-semibold text-white/92 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-1 hover:scale-[1.02] hover:border-brand-gold/60 hover:bg-white/12 hover:text-white hover:shadow-[0_22px_55px_rgba(0,0,0,0.32),0_0_22px_rgba(198,162,74,0.16)] active:scale-[0.98] active:border-brand-gold/75 active:bg-brand-gold/20 active:text-white active:shadow-[0_12px_28px_rgba(0,0,0,0.24)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold/40"
             >
               Os nossos serviços
             </Link>
