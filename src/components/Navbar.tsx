@@ -12,14 +12,14 @@ export default function Navbar() {
   const isAdmin = location.pathname.startsWith('/admin')
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f8f4ee]/92 backdrop-blur-md border-b border-[#e9dfd1] shadow-[0_4px_18px_rgba(0,0,0,0.04)]">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="flex justify-between h-28 items-center">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#e7dccb]/80 bg-[#f7f2ea]/86 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-12">
+        <div className="flex justify-between h-24 md:h-28 items-center">
 
           <Link
             to="/"
             onClick={() => setIsOpen(false)}
-            className="flex items-center py-3"
+            className="flex items-center py-2"
           >
             <Logo />
           </Link>
@@ -72,17 +72,18 @@ export default function Navbar() {
 
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden text-brand-ink p-2 border-2 border-[#e9dfd1] bg-white/20"
+            className="md:hidden flex items-center justify-center h-14 w-14 rounded-none border border-[#eadfce] bg-white/18 text-brand-ink shadow-[0_4px_14px_rgba(0,0,0,0.03)] transition-colors hover:bg-white/28"
+            aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
           >
-            {isOpen ? <X size={28} /> : <Menu size={28} />}
+            {isOpen ? <X size={30} strokeWidth={1.8} /> : <Menu size={30} strokeWidth={1.8} />}
           </button>
 
         </div>
       </div>
 
       {isOpen && (
-        <div className="md:hidden bg-[#f8f4ee] border-b border-[#e9dfd1] overflow-hidden">
-          <div className="px-8 py-16 space-y-10 text-center">
+        <div className="md:hidden overflow-hidden border-b border-[#e7dccb]/80 bg-[#f7f2ea]/95 backdrop-blur-xl">
+          <div className="px-8 py-14 space-y-9 text-center">
 
             <Link
               to="/"
