@@ -9,15 +9,10 @@ function isAndroidDevice() {
   return /Android/i.test(window.navigator.userAgent)
 }
 
-function isIosDevice() {
-  return /iPhone|iPad|iPod/i.test(window.navigator.userAgent)
-}
-
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<DeferredPromptEvent | null>(null)
   const [isInstalled, setIsInstalled] = useState(false)
-  const [isVisible, setIsVisible] = useState(false)
-  const [supportsNativePrompt, setSupportsNativePrompt] = useState(false)
+  const [isDismissed, setIsDismissed] = useState(false)
 
   useEffect(() => {
     const standalone =
@@ -29,22 +24,17 @@ export default function InstallPrompt() {
       return
     }
 
-    if (isAndroidDevice() || isIosDevice()) {
-      setIsVisible(true)
-    }
-
     const onBeforeInstallPrompt = (event: Event) => {
+      if (!isAndroidDevice()) return
       event.preventDefault()
       setDeferredPrompt(event as DeferredPromptEvent)
-      setSupportsNativePrompt(true)
-      setIsVisible(true)
+      setIsDismissed(false)
     }
 
     const onAppInstalled = () => {
       setIsInstalled(true)
-      setIsVisible(false)
       setDeferredPrompt(null)
-      setSupportsNativePrompt(false)
+      setIsDismissed(true)
     }
 
     window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
@@ -59,77 +49,42 @@ export default function InstallPrompt() {
   const handleInstall = async () => {
     if (!deferredPrompt) return
     await deferredPrompt.prompt()
-    const choice = await deferredPrompt.userChoice
-    if (choice.outcome === 'accepted') {
-      setIsVisible(false)
-    }
+    await deferredPrompt.userChoice
     setDeferredPrompt(null)
-    setSupportsNativePrompt(false)
   }
 
-  const handleClose = () => {
-    setIsVisible(false)
+  const handleLater = () => {
+    setIsDismissed(true)
   }
 
-  if (isInstalled || !isVisible) return null
-
-  const android = isAndroidDevice()
-  const ios = isIosDevice()
-
-  const description = android
-    ? supportsNativePrompt
-      ? 'Adicione Rosa Maria ao ecrã principal para acesso mais rápido.'
-      : 'No Android, abra o menu do Chrome e toque em “Instalar app” ou “Adicionar ao ecrã principal”.'
-    : ios
-      ? 'No iPhone, toque em Partilhar e depois em “Adicionar ao ecrã principal”.'
-      : 'Adicione Rosa Maria ao ecrã principal para acesso mais rápido.'
+  if (isInstalled || isDismissed || !deferredPrompt || !isAndroidDevice()) return null
 
   return (
     <div className="fixed bottom-5 left-4 right-4 z-[70] md:left-auto md:right-6 md:w-[360px]">
       <div className="rounded-2xl border border-[#e8dfcf] bg-[#f6f1e8]/95 backdrop-blur-md shadow-[0_15px_50px_rgba(0,0,0,0.12)] p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.24em] font-bold text-[#b8860b]">
-              Instale a Aplicação
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-[#2b2b2b]">
-              {description}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleClose}
-            className="shrink-0 text-[#8a7f72] hover:text-[#2b2b2b] text-lg leading-none"
-          >
-            ×
-          </button>
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.24em] font-bold text-[#b8860b]">
+            Instale a Aplicação
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-[#2b2b2b]">
+            Deseja instalar a aplicação?
+          </p>
         </div>
 
         <div className="mt-4 flex gap-3">
-          {android && supportsNativePrompt ? (
-            <button
-              type="button"
-              onClick={handleInstall}
-              className="flex-1 rounded-xl bg-[#b8860b] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:opacity-90 active:scale-[0.98]"
-            >
-              Instalar
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleClose}
-              className="flex-1 rounded-xl bg-[#b8860b] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:opacity-90 active:scale-[0.98]"
-            >
-              Percebi
-            </button>
-          )}
-
           <button
             type="button"
-            onClick={handleClose}
-            className="rounded-xl border border-[#d8c9b0] bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#6e6254] transition hover:bg-[#fbf7f0] active:scale-[0.98]"
+            onClick={handleInstall}
+            className="flex-1 rounded-xl bg-[#b8860b] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:opacity-90 active:scale-[0.98]"
           >
-            Depois
+            Sim
+          </button>
+          <button
+            type="button"
+            onClick={handleLater}
+            className="flex-1 rounded-xl border border-[#d8c9b0] bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#6e6254] transition hover:bg-[#fbf7f0] active:scale-[0.98]"
+          >
+            Mais tarde
           </button>
         </div>
       </div>
