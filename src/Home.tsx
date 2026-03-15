@@ -20,7 +20,7 @@ export default function Home() {
         </div>
 
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto translate-y-12 md:translate-y-16 animate-fade-in">
-          <h1 className="text-[30px] md:text-[40px] font-serif text-white/90 italic tracking-[0.04em] leading-tight">
+          <h1 className="mx-auto max-w-[12ch] text-[clamp(28px,5.6vw,40px)] md:text-[40px] font-serif text-white/90 italic tracking-[0.04em] leading-tight text-balance">
             Confiança de gerações desde 1982
           </h1>
 
