@@ -23,11 +23,11 @@ const Logo: React.FC<LogoProps> = ({ variant = 'default' }) => {
         style={
           isNavbar
             ? {
-                backgroundImage: 'linear-gradient(180deg, #e4c15d 0%, #c99712 48%, #9b6f00 100%)',
+                backgroundImage: 'linear-gradient(180deg, #ebcb6f 0%, #cf9f1c 48%, #9b6f00 100%)',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',
                 color: 'transparent',
-                WebkitTextStroke: '0.2px rgba(146,106,0,0.18)',
+                WebkitTextStroke: '0.25px rgba(146,106,0,0.22)',
               }
             : undefined
         }
@@ -38,8 +38,8 @@ const Logo: React.FC<LogoProps> = ({ variant = 'default' }) => {
       <span
         className={`logo-cabeleireiros uppercase ${
           isNavbar
-            ? 'mt-1 text-[13px] md:text-[14px] tracking-[0.42em] text-[#c8a13a]'
-            : 'mt-2 text-xs md:text-sm tracking-[0.45em] text-brand-gold'
+            ? 'mt-1.5 text-[14px] md:text-[15px] tracking-[0.38em] text-[#d2af52]'
+            : 'mt-2 text-xs md:text-sm tracking-[0.45em] text-[#d8b458]'
         }`}
       >
         Cabeleireiros
