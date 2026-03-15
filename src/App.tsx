@@ -512,9 +512,8 @@ function AppShell({ children }: { children: React.ReactNode }) {
                 <Logo />
               </Link>
 
-              <p className="max-w-md text-stone-400 font-medium text-[17px] leading-8">
-                Rosa Maria Cabeleireiros
-                ''40 anos a conquistar a confiança das nossas clientes.''
+              <p className="max-w-[18ch] text-stone-400 font-medium text-[clamp(18px,4.8vw,28px)] leading-[1.55] tracking-[0.01em]">
+                Há mais de 40 anos a conquistar a confiança das nossas clientes.
               </p>
 
               <div className="flex items-center gap-4">
