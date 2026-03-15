@@ -3,6 +3,7 @@ import Services from './Services'
 import Admin from './Admin'
 import Navbar from './components/Navbar'
 import FloatingNav from './components/FloatingNav'
+import InstallPrompt from './components/InstallPrompt'
 import React, { useEffect, useMemo, useState } from 'react'
 import { SERVICES, SERVICE_CATEGORIES } from './servicesData'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
@@ -503,6 +504,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-brand-paper">
       <Navbar />
       <main>{children}</main>
+      <InstallPrompt />
 
       <footer className="bg-brand-ink text-white pt-20 md:pt-24 pb-14 md:pb-18">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
