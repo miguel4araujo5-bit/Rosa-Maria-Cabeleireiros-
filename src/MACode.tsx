@@ -46,7 +46,9 @@ export default function MACode() {
 
   return (
     <div className="min-h-screen bg-brand-paper pt-40 pb-32 px-6">
+
       <div className="max-w-5xl mx-auto text-center mb-24">
+
         <h1 className="text-6xl font-serif mb-6">
           MA-Code
         </h1>
@@ -56,9 +58,11 @@ export default function MACode() {
           uma presença digital profissional e eficiente.
           <span className="font-bold"> (A partir de 19€/mês)</span>
         </p>
+
       </div>
 
       <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-12 mb-32">
+
         <div className="p-8 border border-stone-200 text-center">
           <h3 className="text-xl font-serif mb-4">
             Websites Profissionais
@@ -88,14 +92,17 @@ export default function MACode() {
             Plataformas personalizadas para automatizar o seu negócio.
           </p>
         </div>
+
       </div>
 
       <div className="max-w-3xl mx-auto">
+
         <h2 className="text-4xl font-serif text-center mb-12">
           Pedir Orçamento
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-8">
+
           <div>
             <label className="input-label">
               Nome
@@ -104,7 +111,7 @@ export default function MACode() {
             <input
               className="input-field"
               value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              onChange={(e)=>setForm({...form,name:e.target.value})}
               required
             />
           </div>
@@ -118,7 +125,7 @@ export default function MACode() {
               type="email"
               className="input-field"
               value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              onChange={(e)=>setForm({...form,email:e.target.value})}
               required
             />
           </div>
@@ -131,7 +138,7 @@ export default function MACode() {
             <textarea
               className="input-field h-32 resize-none"
               value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
+              onChange={(e)=>setForm({...form,message:e.target.value})}
               required
             />
           </div>
@@ -155,8 +162,11 @@ export default function MACode() {
           >
             {isSending ? 'A enviar...' : 'Pedir orçamento'}
           </button>
+
         </form>
+
       </div>
+
     </div>
   )
 }
