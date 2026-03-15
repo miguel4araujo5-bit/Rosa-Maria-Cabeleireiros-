@@ -1,5 +1,5 @@
-const CACHE_NAME = 'rosa-maria-v1'
-const APP_SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/favicon.svg']
+const CACHE_NAME = 'rosa-maria-v2'
+const APP_SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/favicon.png']
 
 self.addEventListener('install', event => {
   event.waitUntil(
