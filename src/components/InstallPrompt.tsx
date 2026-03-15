@@ -5,15 +5,38 @@ type DeferredPromptEvent = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
+function isAndroidDevice() {
+  return /Android/i.test(window.navigator.userAgent)
+}
+
+function isIosDevice() {
+  return /iPhone|iPad|iPod/i.test(window.navigator.userAgent)
+}
+
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<DeferredPromptEvent | null>(null)
   const [isInstalled, setIsInstalled] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const [supportsNativePrompt, setSupportsNativePrompt] = useState(false)
 
   useEffect(() => {
+    const standalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+
+    if (standalone) {
+      setIsInstalled(true)
+      return
+    }
+
+    if (isAndroidDevice() || isIosDevice()) {
+      setIsVisible(true)
+    }
+
     const onBeforeInstallPrompt = (event: Event) => {
       event.preventDefault()
       setDeferredPrompt(event as DeferredPromptEvent)
+      setSupportsNativePrompt(true)
       setIsVisible(true)
     }
 
@@ -21,6 +44,7 @@ export default function InstallPrompt() {
       setIsInstalled(true)
       setIsVisible(false)
       setDeferredPrompt(null)
+      setSupportsNativePrompt(false)
     }
 
     window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
@@ -40,6 +64,7 @@ export default function InstallPrompt() {
       setIsVisible(false)
     }
     setDeferredPrompt(null)
+    setSupportsNativePrompt(false)
   }
 
   const handleClose = () => {
@@ -48,16 +73,27 @@ export default function InstallPrompt() {
 
   if (isInstalled || !isVisible) return null
 
+  const android = isAndroidDevice()
+  const ios = isIosDevice()
+
+  const description = android
+    ? supportsNativePrompt
+      ? 'Adicione Rosa Maria ao ecrã principal para acesso mais rápido.'
+      : 'No Android, abra o menu do Chrome e toque em “Instalar app” ou “Adicionar ao ecrã principal”.'
+    : ios
+      ? 'No iPhone, toque em Partilhar e depois em “Adicionar ao ecrã principal”.'
+      : 'Adicione Rosa Maria ao ecrã principal para acesso mais rápido.'
+
   return (
     <div className="fixed bottom-5 left-4 right-4 z-[70] md:left-auto md:right-6 md:w-[360px]">
       <div className="rounded-2xl border border-[#e8dfcf] bg-[#f6f1e8]/95 backdrop-blur-md shadow-[0_15px_50px_rgba(0,0,0,0.12)] p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[11px] uppercase tracking-[0.24em] font-bold text-[#b8860b]">
-              Instalar app
+              Instale a Aplicação
             </p>
             <p className="mt-2 text-sm leading-relaxed text-[#2b2b2b]">
-              Adicione Rosa Maria ao ecrã principal para acesso mais rápido.
+              {description}
             </p>
           </div>
           <button
@@ -70,13 +106,24 @@ export default function InstallPrompt() {
         </div>
 
         <div className="mt-4 flex gap-3">
-          <button
-            type="button"
-            onClick={handleInstall}
-            className="flex-1 rounded-xl bg-[#b8860b] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:opacity-90 active:scale-[0.98]"
-          >
-            Instalar
-          </button>
+          {android && supportsNativePrompt ? (
+            <button
+              type="button"
+              onClick={handleInstall}
+              className="flex-1 rounded-xl bg-[#b8860b] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:opacity-90 active:scale-[0.98]"
+            >
+              Instalar
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleClose}
+              className="flex-1 rounded-xl bg-[#b8860b] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:opacity-90 active:scale-[0.98]"
+            >
+              Percebi
+            </button>
+          )}
+
           <button
             type="button"
             onClick={handleClose}
