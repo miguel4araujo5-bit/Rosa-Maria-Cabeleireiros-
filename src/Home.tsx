@@ -62,9 +62,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-6 pt-12 md:pt-16 pb-20 md:pb-24 bg-brand-paper">
+      <section className="px-6 pt-8 md:pt-10 pb-16 md:pb-20 bg-brand-paper">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-10 md:mb-12">
+          <div className="text-center max-w-3xl mx-auto mb-8 md:mb-10">
             <span className="section-subtitle tracking-[0.38em]">
               Em destaque
             </span>
@@ -156,7 +156,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-12 md:mt-14 text-center">
+          <div className="mt-10 md:mt-12 text-center">
             <Link
               to="/servicos"
               className="inline-flex items-center rounded-full border border-brand-gold/60 px-7 py-4 text-[11px] uppercase tracking-[0.3em] font-semibold text-brand-ink transition-all duration-200 hover:bg-brand-gold hover:text-black"
@@ -167,7 +167,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-6 pt-2 md:pt-4 pb-16 md:pb-20 bg-brand-paper">
+      <section className="px-6 pt-0 md:pt-2 pb-12 md:pb-16 bg-brand-paper">
         <div className="max-w-4xl mx-auto">
           <div className="rounded-[30px] border border-stone-200/80 bg-white px-6 py-8 md:px-10 md:py-10 shadow-[0_14px_40px_rgba(0,0,0,0.04)]">
             <div className="flex items-center justify-center gap-4 md:gap-5 text-stone-500">
