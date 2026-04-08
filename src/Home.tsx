@@ -26,7 +26,7 @@ export default function Home() {
           </h1>
 
           <p className="mt-3 text-[10px] md:text-[11px] uppercase tracking-[0.34em] font-semibold text-brand-gold/90">
-          São Mamede de Infesta · Matosinhos
+            São Mamede de Infesta · Matosinhos
           </p>
 
           <div className="mt-4 mb-8 md:mt-8 md:mb-14 relative transition-transform duration-700 hover:scale-[1.015]">
@@ -96,6 +96,111 @@ export default function Home() {
               alt="MB WAY"
               className="h-8 md:h-9 w-auto object-contain opacity-85 transition-all duration-300 hover:opacity-100 hover:scale-[1.03]"
             />
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 py-20 md:py-28 bg-brand-paper">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-14 md:mb-18">
+            <span className="section-subtitle tracking-[0.38em]">
+              Em destaque
+            </span>
+            <h2 className="section-title">
+              Serviços em destaque
+            </h2>
+            <p className="mt-5 text-stone-500 text-[15px] md:text-[16px] leading-7 font-medium">
+              Uma seleção de serviços pensados para valorizar a sua imagem com elegância, cuidado e atenção ao detalhe.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+            <div className="group rounded-[30px] border border-stone-200/70 bg-white px-7 py-8 md:px-8 md:py-10 shadow-[0_14px_40px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(0,0,0,0.08)]">
+              <div className="flex items-center justify-between gap-4 mb-8">
+                <span className="text-[11px] uppercase tracking-[0.32em] text-brand-gold font-bold">
+                  01
+                </span>
+                <div className="h-px flex-1 bg-gradient-to-r from-brand-gold/40 to-transparent"></div>
+              </div>
+
+              <h3 className="text-[28px] md:text-[30px] font-serif text-brand-ink leading-tight">
+                Coloração
+              </h3>
+
+              <p className="mt-5 text-stone-500 text-[15px] leading-7 font-medium">
+                Tons pensados com equilíbrio, cuidado e elegância para valorizar a sua imagem.
+              </p>
+
+              <div className="mt-8">
+                <Link
+                  to="/coloracao"
+                  className="inline-flex items-center rounded-full border border-brand-ink/15 px-5 py-3 text-[11px] uppercase tracking-[0.28em] font-semibold text-brand-ink transition-all duration-200 hover:border-brand-gold hover:text-brand-gold"
+                >
+                  Descobrir
+                </Link>
+              </div>
+            </div>
+
+            <div className="group rounded-[30px] border border-stone-200/70 bg-white px-7 py-8 md:px-8 md:py-10 shadow-[0_14px_40px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(0,0,0,0.08)]">
+              <div className="flex items-center justify-between gap-4 mb-8">
+                <span className="text-[11px] uppercase tracking-[0.32em] text-brand-gold font-bold">
+                  02
+                </span>
+                <div className="h-px flex-1 bg-gradient-to-r from-brand-gold/40 to-transparent"></div>
+              </div>
+
+              <h3 className="text-[28px] md:text-[30px] font-serif text-brand-ink leading-tight">
+                Cortes e Brushing
+              </h3>
+
+              <p className="mt-5 text-stone-500 text-[15px] leading-7 font-medium">
+                Cortes e finalizações que combinam sofisticação, leveza e atenção ao detalhe.
+              </p>
+
+              <div className="mt-8">
+                <Link
+                  to="/cortes-brushing"
+                  className="inline-flex items-center rounded-full border border-brand-ink/15 px-5 py-3 text-[11px] uppercase tracking-[0.28em] font-semibold text-brand-ink transition-all duration-200 hover:border-brand-gold hover:text-brand-gold"
+                >
+                  Descobrir
+                </Link>
+              </div>
+            </div>
+
+            <div className="group rounded-[30px] border border-stone-200/70 bg-white px-7 py-8 md:px-8 md:py-10 shadow-[0_14px_40px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(0,0,0,0.08)]">
+              <div className="flex items-center justify-between gap-4 mb-8">
+                <span className="text-[11px] uppercase tracking-[0.32em] text-brand-gold font-bold">
+                  03
+                </span>
+                <div className="h-px flex-1 bg-gradient-to-r from-brand-gold/40 to-transparent"></div>
+              </div>
+
+              <h3 className="text-[28px] md:text-[30px] font-serif text-brand-ink leading-tight">
+                Madeixas e Tratamentos
+              </h3>
+
+              <p className="mt-5 text-stone-500 text-[15px] leading-7 font-medium">
+                Serviços técnicos e cuidados capilares pensados para dar brilho, textura e personalidade.
+              </p>
+
+              <div className="mt-8">
+                <Link
+                  to="/madeixas-tratamentos"
+                  className="inline-flex items-center rounded-full border border-brand-ink/15 px-5 py-3 text-[11px] uppercase tracking-[0.28em] font-semibold text-brand-ink transition-all duration-200 hover:border-brand-gold hover:text-brand-gold"
+                >
+                  Descobrir
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 md:mt-14 text-center">
+            <Link
+              to="/servicos"
+              className="inline-flex items-center rounded-full border border-brand-gold/60 px-7 py-4 text-[11px] uppercase tracking-[0.3em] font-semibold text-brand-ink transition-all duration-200 hover:bg-brand-gold hover:text-black"
+            >
+              Ver preçário completo
+            </Link>
           </div>
         </div>
       </section>
