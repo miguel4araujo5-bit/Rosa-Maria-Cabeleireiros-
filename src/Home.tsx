@@ -110,7 +110,7 @@ export default function Home() {
               Serviços em destaque
             </h2>
             <p className="mt-5 text-stone-500 text-[15px] md:text-[16px] leading-7 font-medium">
-              Uma seleção de serviços pensados para valorizar a sua imagem com elegância, cuidado e atenção ao detalhe.
+              Descubra os nossos serviços de cabeleireiro pensados para realçar a sua beleza com elegância, técnica e cuidado profissional. Da coloração aos cortes, brushing, madeixas e tratamentos capilares, cada serviço é adaptado ao seu estilo e às necessidades do seu cabelo.
             </p>
           </div>
 
@@ -128,7 +128,7 @@ export default function Home() {
               </h3>
 
               <p className="mt-5 text-stone-500 text-[15px] leading-7 font-medium">
-                Tons pensados com equilíbrio, cuidado e elegância para valorizar a sua imagem.
+                Serviço de coloração profissional pensado para dar brilho, profundidade e personalidade ao seu cabelo, com um resultado elegante, harmonioso e adaptado a si.
               </p>
 
               <div className="mt-8">
@@ -154,7 +154,7 @@ export default function Home() {
               </h3>
 
               <p className="mt-5 text-stone-500 text-[15px] leading-7 font-medium">
-                Cortes e finalizações que combinam sofisticação, leveza e atenção ao detalhe.
+                Cortes de cabelo femininos e brushing com acabamento cuidado, pensados para valorizar o seu rosto, o seu estilo e a sua imagem no dia a dia.
               </p>
 
               <div className="mt-8">
@@ -180,7 +180,7 @@ export default function Home() {
               </h3>
 
               <p className="mt-5 text-stone-500 text-[15px] leading-7 font-medium">
-                Serviços técnicos e cuidados capilares pensados para dar brilho, textura e personalidade.
+                Madeixas, hidratação e tratamentos capilares que devolvem luz, suavidade e vida ao cabelo, com um cuidado técnico ajustado a cada cliente.
               </p>
 
               <div className="mt-8">
