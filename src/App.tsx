@@ -700,21 +700,31 @@ function AppShell({ children }: { children: React.ReactNode }) {
               </div>
             </div>
           </div>
-
-        <div className="pt-6 border-t border-white/6">
+<div className="pt-6 border-t border-white/6">
   <div className="flex flex-col items-center gap-3 text-center">
     <span className="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-stone-600 font-bold">
       © 2026 Rosa Maria Cabeleireiros. Todos os direitos reservados.
     </span>
 
-    <a
-      href="https://ma-code.pt"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-stone-500 font-bold hover:text-brand-gold transition-colors"
-    >
-      Desenvolvido por: MA-Code · ma-code.pt
-    </a>
+    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-stone-500 font-bold">
+      <Link
+        to="/ma-code"
+        className="hover:text-brand-gold transition-colors"
+      >
+        Desenvolvido por MA-Code
+      </Link>
+
+      <span className="hidden sm:inline text-stone-700">·</span>
+
+      <a
+        href="https://ma-code.pt"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:text-brand-gold transition-colors"
+      >
+        ma-code.pt
+      </a>
+    </div>
   </div>
 </div>
         </div>
