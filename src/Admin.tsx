@@ -864,6 +864,7 @@ export default function Admin() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative">
             <button
+              type="button"
               onClick={() => setShowRescheduleModal(false)}
               className="absolute top-4 right-4 text-stone-500 hover:text-stone-800"
             >
@@ -938,6 +939,7 @@ export default function Admin() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative max-h-[90vh] overflow-y-auto">
             <button
+              type="button"
               onClick={() => setShowEditModal(false)}
               className="absolute top-4 right-4 text-stone-500 hover:text-stone-800"
             >
