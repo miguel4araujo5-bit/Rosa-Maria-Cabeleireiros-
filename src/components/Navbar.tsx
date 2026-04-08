@@ -104,13 +104,28 @@ export default function Navbar() {
               Agendar Agora
             </Link>
 
-            <Link
-              to={ADMIN_PATH}
-              onClick={() => setIsOpen(false)}
-              className="block text-xs uppercase tracking-[0.3em] text-stone-400 font-bold"
-            >
-              Admin
-            </Link>
+            {isAdmin ? (
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await api.adminLogout()
+                  } catch {}
+                  window.location.href = '/'
+                }}
+                className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-red-600 font-bold hover:text-red-800 transition-colors"
+              >
+                <LogOut size={16} /> Sair
+              </button>
+            ) : (
+              <Link
+                to={ADMIN_PATH}
+                onClick={() => setIsOpen(false)}
+                className="block text-xs uppercase tracking-[0.3em] text-stone-400 font-bold"
+              >
+                Admin
+              </Link>
+            )}
           </div>
         </div>
       )}
