@@ -7,10 +7,30 @@ export interface Appointment {
   id: string
   name: string
   whatsapp: string
-  services: string  // JSON string com array de serviços
-  date: string      // YYYY-MM-DD
-  time: string      // HH:MM
+  services: string
+  date: string
+  time: string
   observation?: string
   status: AppointmentStatus
   created_at?: string
+}
+
+export interface AvailabilitySlot {
+  date: string
+  time: string
+  status: AppointmentStatus
+}
+
+export interface CreateAppointmentPayload {
+  name: string
+  whatsapp: string
+  services: string
+  date: string
+  time: string
+  observation?: string
+  status?: AppointmentStatus
+}
+
+export interface AdminLoginResponse {
+  token: string
 }
