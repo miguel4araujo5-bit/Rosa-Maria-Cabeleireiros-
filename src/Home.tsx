@@ -62,44 +62,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-6 pt-4 md:pt-5 pb-2 mt-0 bg-brand-paper">
-        <div className="max-w-5xl mx-auto flex flex-col items-center gap-2">
-          <div className="flex items-center justify-center gap-4 md:gap-5 text-stone-500">
-            <div className="hidden sm:block w-12 md:w-16 h-px bg-gradient-to-r from-transparent to-stone-200"></div>
-
-            <p className="text-[9px] md:text-[10px] uppercase tracking-[0.32em] font-bold text-center whitespace-nowrap">
-              Também aceitamos pagamento por:
-            </p>
-
-            <div className="hidden sm:block w-12 md:w-16 h-px bg-gradient-to-l from-transparent to-stone-200"></div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-            <img
-              src={visaIcon}
-              alt="Visa"
-              className="h-8 md:h-9 w-auto object-contain opacity-85 transition-all duration-300 hover:opacity-100 hover:scale-[1.03]"
-            />
-
-            <div className="hidden sm:block h-5 w-px bg-stone-200"></div>
-
-            <img
-              src={applePayIcon}
-              alt="Apple Pay"
-              className="h-8 md:h-9 w-auto object-contain opacity-85 transition-all duration-300 hover:opacity-100 hover:scale-[1.03]"
-            />
-
-            <div className="hidden sm:block h-5 w-px bg-stone-200"></div>
-
-            <img
-              src={mbwayIcon}
-              alt="MB WAY"
-              className="h-8 md:h-9 w-auto object-contain opacity-85 transition-all duration-300 hover:opacity-100 hover:scale-[1.03]"
-            />
-          </div>
-        </div>
-      </section>
-
       <section className="px-6 pt-12 md:pt-16 pb-20 md:pb-24 bg-brand-paper">
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-10 md:mb-12">
@@ -201,6 +163,48 @@ export default function Home() {
             >
               Ver preçário completo
             </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 pt-2 md:pt-4 pb-16 md:pb-20 bg-brand-paper">
+        <div className="max-w-4xl mx-auto">
+          <div className="rounded-[30px] border border-stone-200/80 bg-white px-6 py-8 md:px-10 md:py-10 shadow-[0_14px_40px_rgba(0,0,0,0.04)]">
+            <div className="flex items-center justify-center gap-4 md:gap-5 text-stone-500">
+              <div className="hidden sm:block w-12 md:w-16 h-px bg-gradient-to-r from-transparent to-stone-200"></div>
+
+              <p className="text-[9px] md:text-[10px] uppercase tracking-[0.32em] font-bold text-center whitespace-nowrap">
+                Também aceitamos pagamento por:
+              </p>
+
+              <div className="hidden sm:block w-12 md:w-16 h-px bg-gradient-to-l from-transparent to-stone-200"></div>
+            </div>
+
+            <div className="mt-6 md:mt-8 flex flex-wrap items-center justify-center gap-4 md:gap-6">
+              <div className="flex items-center justify-center rounded-2xl border border-stone-200 bg-brand-paper/70 px-5 py-4 md:px-6 md:py-4 min-w-[110px] md:min-w-[120px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_26px_rgba(0,0,0,0.05)]">
+                <img
+                  src={visaIcon}
+                  alt="Visa"
+                  className="h-8 md:h-9 w-auto object-contain opacity-90"
+                />
+              </div>
+
+              <div className="flex items-center justify-center rounded-2xl border border-stone-200 bg-brand-paper/70 px-5 py-4 md:px-6 md:py-4 min-w-[110px] md:min-w-[120px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_26px_rgba(0,0,0,0.05)]">
+                <img
+                  src={applePayIcon}
+                  alt="Apple Pay"
+                  className="h-8 md:h-9 w-auto object-contain opacity-90"
+                />
+              </div>
+
+              <div className="flex items-center justify-center rounded-2xl border border-stone-200 bg-brand-paper/70 px-5 py-4 md:px-6 md:py-4 min-w-[110px] md:min-w-[120px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_26px_rgba(0,0,0,0.05)]">
+                <img
+                  src={mbwayIcon}
+                  alt="MB WAY"
+                  className="h-8 md:h-9 w-auto object-contain opacity-90"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
