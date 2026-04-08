@@ -639,6 +639,68 @@ function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
+          <div className="border-t border-white/6 pt-12 md:pt-14 pb-12 md:pb-14">
+            <div className="max-w-5xl mx-auto text-center">
+              <div className="flex items-center justify-center gap-4 mb-5">
+                <div className="hidden sm:block h-px w-16 bg-gradient-to-r from-transparent to-brand-gold/40"></div>
+                <p className="text-[11px] uppercase tracking-[0.35em] text-brand-gold font-bold">
+                  Avaliações
+                </p>
+                <div className="hidden sm:block h-px w-16 bg-gradient-to-l from-transparent to-brand-gold/40"></div>
+              </div>
+
+              <p className="max-w-2xl mx-auto text-stone-400 text-[15px] md:text-[16px] leading-7 font-medium">
+                A experiência no salão reflete-se também na forma como as nossas clientes nos avaliam.
+              </p>
+
+              <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+                <a
+                  href="https://maps.app.goo.gl/V1zjmbgj3yFsqsbS8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group rounded-[28px] border border-white/8 bg-white/[0.03] px-8 py-8 md:px-10 md:py-10 text-left transition-all duration-300 hover:-translate-y-1 hover:border-brand-gold/40 hover:bg-white/[0.045] hover:shadow-[0_20px_50px_rgba(0,0,0,0.18)]"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-stone-300 text-[12px] uppercase tracking-[0.28em] font-bold">
+                        Google
+                      </p>
+                      <p className="mt-4 text-[48px] md:text-[56px] leading-none font-serif italic text-white">
+                        4,9
+                      </p>
+                    </div>
+
+                    <img
+                      src={googleMapsIcon}
+                      alt="Google"
+                      className="w-7 h-7 object-contain opacity-90 transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                </a>
+
+                <a
+                  href="https://www.facebook.com/rosamaria.cabeleireiro/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group rounded-[28px] border border-white/8 bg-white/[0.03] px-8 py-8 md:px-10 md:py-10 text-left transition-all duration-300 hover:-translate-y-1 hover:border-brand-gold/40 hover:bg-white/[0.045] hover:shadow-[0_20px_50px_rgba(0,0,0,0.18)]"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-stone-300 text-[12px] uppercase tracking-[0.28em] font-bold">
+                        Facebook
+                      </p>
+                      <p className="mt-4 text-[48px] md:text-[56px] leading-none font-serif italic text-white">
+                        5,0
+                      </p>
+                    </div>
+
+                    <Facebook size={28} className="text-stone-300 transition-transform duration-300 group-hover:scale-105" />
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+
           <div className="pt-6 border-t border-white/6 flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex flex-col md:flex-row items-center gap-2 md:gap-5 text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-stone-600 font-bold text-center md:text-left">
               <span>© 2026 Rosa Maria Cabeleireiros. Todos os direitos reservados.</span>
@@ -647,7 +709,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                 to="/ma-code"
                 className="text-stone-500 hover:text-brand-gold transition-colors"
               >
-                Criado por: MA-Code
+                Desenvolvido por: MA-Code
               </Link>
             </div>
           </div>
