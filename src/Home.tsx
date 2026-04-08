@@ -11,7 +11,7 @@ export default function Home() {
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
             src="/IMG_6695.jpg"
-            alt="Rosa Maria Cabeleireiros"
+            alt="Rosa Maria Cabeleireiros em São Mamede de Infesta"
             className="absolute inset-0 w-full h-full object-cover object-center md:object-top opacity-90 scale-[1.02]"
             referrerPolicy="no-referrer"
           />
@@ -25,6 +25,10 @@ export default function Home() {
             Confiança de gerações desde 1982
           </h1>
 
+          <p className="mt-3 text-[10px] md:text-[11px] uppercase tracking-[0.34em] font-semibold text-brand-gold/90">
+          São Mamede de Infesta · Matosinhos
+          </p>
+
           <div className="mt-4 mb-8 md:mt-8 md:mb-14 relative transition-transform duration-700 hover:scale-[1.015]">
             <div className="absolute inset-0 blur-3xl opacity-20 bg-brand-gold scale-75"></div>
             <div className="relative">
@@ -33,7 +37,7 @@ export default function Home() {
           </div>
 
           <p className="max-w-2xl mx-auto text-white/78 text-[15px] md:text-[15px] leading-6 md:leading-7 font-medium mb-6 md:mb-12">
-            Um espaço de beleza, cuidado e confiança, onde a experiência se encontra com a elegância.
+            Um espaço de beleza, cuidado e confiança em São Mamede de Infesta, onde a experiência se encontra com a elegância.
           </p>
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6">
