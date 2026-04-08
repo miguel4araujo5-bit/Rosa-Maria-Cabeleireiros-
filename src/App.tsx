@@ -15,6 +15,9 @@ import googleMapsIcon from './assets/icons/googlemaps.svg'
 import wazeIcon from './assets/icons/waze.svg'
 import appleIcon from './assets/icons/apple.svg'
 import MACode from './MACode'
+import Coloracao from './Coloracao'
+import CortesBrushing from './CortesBrushing'
+import MadeixasTratamentos from './MadeixasTratamentos'
 
 type AvailabilitySlot = {
   date: string
@@ -700,33 +703,34 @@ function AppShell({ children }: { children: React.ReactNode }) {
               </div>
             </div>
           </div>
-<div className="pt-6 border-t border-white/6">
-  <div className="flex flex-col items-center gap-3 text-center">
-    <span className="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-stone-600 font-bold">
-      © 2026 Rosa Maria Cabeleireiros. Todos os direitos reservados.
-    </span>
 
-    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-stone-500 font-bold">
-      <Link
-        to="/ma-code"
-        className="hover:text-brand-gold transition-colors"
-      >
-        Desenvolvido por MA-Code
-      </Link>
+          <div className="pt-6 border-t border-white/6">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <span className="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-stone-600 font-bold">
+                © 2026 Rosa Maria Cabeleireiros. Todos os direitos reservados.
+              </span>
 
-      <span className="hidden sm:inline text-stone-700">·</span>
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-stone-500 font-bold">
+                <Link
+                  to="/ma-code"
+                  className="hover:text-brand-gold transition-colors"
+                >
+                  Desenvolvido por MA-Code
+                </Link>
 
-      <a
-        href="https://ma-code.pt"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="hover:text-brand-gold transition-colors"
-      >
-        ma-code.pt
-      </a>
-    </div>
-  </div>
-</div>
+                <span className="hidden sm:inline text-stone-700">·</span>
+
+                <a
+                  href="https://ma-code.pt"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-brand-gold transition-colors"
+                >
+                  ma-code.pt
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </footer>
 
@@ -744,6 +748,9 @@ export default function App() {
           <Route path="/servicos" element={<Services />} />
           <Route path="/marcacao" element={<Booking />} />
           <Route path="/agendar" element={<Booking />} />
+          <Route path="/coloracao" element={<Coloracao />} />
+          <Route path="/cortes-brushing" element={<CortesBrushing />} />
+          <Route path="/madeixas-tratamentos" element={<MadeixasTratamentos />} />
           <Route path="/admin/*" element={<Admin />} />
           <Route path="/ma-code" element={<MACode />} />
         </Routes>
