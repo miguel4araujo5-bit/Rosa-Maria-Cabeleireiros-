@@ -515,7 +515,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
 
               <p className="max-w-[18ch] text-stone-400 font-medium text-[clamp(17px,4.5vw,28px)] leading-[1.45] tracking-[0.01em]">
-                Há mais de 40 anos a conquistar a confiança das nossas clientes.
+                Há mais de 40 anos a cuidar da beleza e da confiança das nossas clientes em São Mamede de Infesta.
               </p>
 
               <div className="flex items-center gap-4">
@@ -558,7 +558,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
                 <p className="leading-7 text-stone-400 text-[15px] md:text-[16px]">
                   Rua de Cinco de Outubro 5498<br />
-                  4465-080 São Mamede de Infesta<br />
+                  4465-080 São Mamede de Infesta, Matosinhos<br />
                   Portugal
                 </p>
 
@@ -633,7 +633,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                   Atendimento
                 </p>
                 <p className="text-stone-400 leading-7 text-[14px] md:text-[15px]">
-                  Reserve a sua visita online ou contacte o salão diretamente para informações adicionais.
+                  Reserve a sua visita online ao nosso cabeleireiro em São Mamede de Infesta ou contacte o salão diretamente para informações adicionais.
                 </p>
               </div>
             </div>
