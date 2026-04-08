@@ -167,40 +167,48 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-6 pt-2 md:pt-4 pb-16 md:pb-20 bg-brand-paper">
-        <div className="max-w-5xl mx-auto flex flex-col items-center gap-2">
-          <div className="flex items-center justify-center gap-4 md:gap-5 text-stone-500">
-            <div className="hidden sm:block w-12 md:w-16 h-px bg-gradient-to-r from-transparent to-stone-200"></div>
+      <section className="px-6 pt-4 md:pt-6 pb-16 md:pb-20 bg-brand-paper">
+        <div className="max-w-4xl mx-auto">
+          <div className="rounded-[30px] border border-stone-200/80 bg-white px-6 py-8 md:px-10 md:py-10 shadow-[0_14px_40px_rgba(0,0,0,0.04)]">
+            <div className="text-center max-w-2xl mx-auto">
+              <span className="section-subtitle tracking-[0.32em]">
+                Pagamentos
+              </span>
 
-            <p className="text-[9px] md:text-[10px] uppercase tracking-[0.32em] font-bold text-center whitespace-nowrap">
-              Também aceitamos pagamento por:
-            </p>
+              <h3 className="mt-3 text-[28px] md:text-[34px] font-serif text-brand-ink leading-tight">
+                Métodos de pagamento aceites
+              </h3>
 
-            <div className="hidden sm:block w-12 md:w-16 h-px bg-gradient-to-l from-transparent to-stone-200"></div>
-          </div>
+              <p className="mt-4 text-stone-500 text-[15px] md:text-[16px] leading-7 font-medium">
+                Para maior comodidade na sua visita, aceitamos vários métodos de pagamento de forma simples, prática e segura.
+              </p>
+            </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-            <img
-              src={visaIcon}
-              alt="Visa"
-              className="h-8 md:h-9 w-auto object-contain opacity-85 transition-all duration-300 hover:opacity-100 hover:scale-[1.03]"
-            />
+            <div className="mt-8 md:mt-10 flex flex-wrap items-center justify-center gap-5 md:gap-7">
+              <div className="flex items-center justify-center rounded-2xl border border-stone-200 bg-brand-paper/70 px-5 py-4 md:px-6 md:py-4 min-w-[110px] md:min-w-[120px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_26px_rgba(0,0,0,0.05)]">
+                <img
+                  src={visaIcon}
+                  alt="Visa"
+                  className="h-8 md:h-9 w-auto object-contain opacity-90"
+                />
+              </div>
 
-            <div className="hidden sm:block h-5 w-px bg-stone-200"></div>
+              <div className="flex items-center justify-center rounded-2xl border border-stone-200 bg-brand-paper/70 px-5 py-4 md:px-6 md:py-4 min-w-[110px] md:min-w-[120px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_26px_rgba(0,0,0,0.05)]">
+                <img
+                  src={applePayIcon}
+                  alt="Apple Pay"
+                  className="h-8 md:h-9 w-auto object-contain opacity-90"
+                />
+              </div>
 
-            <img
-              src={applePayIcon}
-              alt="Apple Pay"
-              className="h-8 md:h-9 w-auto object-contain opacity-85 transition-all duration-300 hover:opacity-100 hover:scale-[1.03]"
-            />
-
-            <div className="hidden sm:block h-5 w-px bg-stone-200"></div>
-
-            <img
-              src={mbwayIcon}
-              alt="MB WAY"
-              className="h-8 md:h-9 w-auto object-contain opacity-85 transition-all duration-300 hover:opacity-100 hover:scale-[1.03]"
-            />
+              <div className="flex items-center justify-center rounded-2xl border border-stone-200 bg-brand-paper/70 px-5 py-4 md:px-6 md:py-4 min-w-[110px] md:min-w-[120px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_26px_rgba(0,0,0,0.05)]">
+                <img
+                  src={mbwayIcon}
+                  alt="MB WAY"
+                  className="h-8 md:h-9 w-auto object-contain opacity-90"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
