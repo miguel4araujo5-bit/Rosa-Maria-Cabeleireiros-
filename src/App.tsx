@@ -701,18 +701,22 @@ function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          <div className="pt-6 border-t border-white/6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex flex-col md:flex-row items-center gap-2 md:gap-5 text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-stone-600 font-bold text-center md:text-left">
-              <span>© 2026 Rosa Maria Cabeleireiros. Todos os direitos reservados.</span>
+        <div className="pt-6 border-t border-white/6">
+  <div className="flex flex-col items-center gap-3 text-center">
+    <span className="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-stone-600 font-bold">
+      © 2026 Rosa Maria Cabeleireiros. Todos os direitos reservados.
+    </span>
 
-              <Link
-                to="/ma-code"
-                className="text-stone-500 hover:text-brand-gold transition-colors"
-              >
-                Desenvolvido por: MA-Code
-              </Link>
-            </div>
-          </div>
+    <a
+      href="https://ma-code.pt"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-stone-500 font-bold hover:text-brand-gold transition-colors"
+    >
+      Desenvolvido por: MA-Code · ma-code.pt
+    </a>
+  </div>
+</div>
         </div>
       </footer>
 
