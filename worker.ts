@@ -259,6 +259,39 @@ export default {
           const body = await readJson(request)
           if (!id || !body) return json({ error: 'Invalid request' }, 400)
 
+          const current = await env.DB.prepare(
+            `SELECT * FROM appointments WHERE id = ?`
+          )
+            .bind(id)
+            .first<{
+              id: string
+              name: string
+              whatsapp: string
+              services: string
+              date: string
+              time: string
+              observation: string
+              status: string
+              created_at: string
+            }>()
+
+          if (!current) {
+            return json({ error: 'Appointment not found' }, 404)
+          }
+
+          const nextDate = body.date !== undefined ? String(body.date) : current.date
+          const nextTime = body.time !== undefined ? String(body.time) : current.time
+
+          const conflict = await env.DB.prepare(
+            `SELECT id FROM appointments WHERE date = ? AND time = ? AND id != ?`
+          )
+            .bind(nextDate, nextTime, id)
+            .first()
+
+          if (conflict) {
+            return json({ error: 'Horário já ocupado' }, 400)
+          }
+
           const fields: string[] = []
           const values: any[] = []
 
