@@ -100,9 +100,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-6 py-20 md:py-28 bg-brand-paper">
+      <section className="px-6 pt-12 md:pt-16 pb-20 md:pb-24 bg-brand-paper">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-14 md:mb-18">
+          <div className="text-center max-w-3xl mx-auto mb-10 md:mb-12">
             <span className="section-subtitle tracking-[0.38em]">
               Em destaque
             </span>
