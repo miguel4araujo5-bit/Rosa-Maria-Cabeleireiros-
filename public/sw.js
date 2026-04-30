@@ -1,32 +1,30 @@
-const CACHE_NAME = 'rosa-maria-v3'
-const APP_SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/favicon.png']
+const CACHE_NAME = 'rosa-maria-v4'
+const APP_SHELL = ['/', '/manifest.webmanifest', '/favicon.png']
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL))
+    caches.open(CACHE_NAME)
+      .then(cache => Promise.allSettled(APP_SHELL.map(url => cache.add(url))))
+      .then(() => self.skipWaiting())
   )
-  self.skipWaiting()
 })
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      )
-    )
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
+      .then(() => self.clients.claim())
   )
-  self.clients.claim()
 })
 
 self.addEventListener('fetch', event => {
   const { request } = event
 
-  if (request.method !== 'GET') {
-    return
-  }
+  if (request.method !== 'GET') return
+
+  const url = new URL(request.url)
+
+  if (url.pathname.startsWith('/api/')) return
 
   if (request.mode === 'navigate') {
     event.respondWith(
@@ -54,12 +52,14 @@ self.addEventListener('push', event => {
   const title = data.title || 'Nova marcação recebida'
   const options = {
     body: data.body || 'Abra a agenda para confirmar o novo pedido.',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
+    icon: '/favicon.png',
+    badge: '/favicon.png',
     data: {
       url: data.url || '/admin',
     },
     requireInteraction: true,
+    tag: 'rosa-maria-marcacao',
+    renotify: true,
   }
 
   event.waitUntil(self.registration.showNotification(title, options))
