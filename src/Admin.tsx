@@ -1,8 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { SERVICES } from './servicesData'
 import { useNavigate } from 'react-router-dom'
-import { Calendar, ChevronRight, LogOut, RefreshCw, Trash2, X, MessageCircle } from 'lucide-react'
+import { Bell, Calendar, ChevronRight, LogOut, RefreshCw, Trash2, X, MessageCircle } from 'lucide-react'
 import { api } from './services/api'
+import {
+  enablePushNotifications,
+  readPushNotificationState,
+  type PushNotificationState,
+} from './utils/pushNotifications'
 import type { Appointment } from './types'
 
 const TIMES = [
