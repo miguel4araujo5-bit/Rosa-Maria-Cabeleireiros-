@@ -58,6 +58,48 @@ function stringToBase64Url(value: string) {
   return bytesToBase64Url(new TextEncoder().encode(value))
 }
 
+function ecdsaSignatureToJose(signature: Uint8Array) {
+  if (signature.length === 64) return signature
+
+  if (signature[0] !== 0x30) {
+    throw new Error('Invalid ECDSA signature')
+  }
+
+  let offset = 2
+
+  if (signature[1] & 0x80) {
+    offset = 2 + (signature[1] & 0x7f)
+  }
+
+  if (signature[offset] !== 0x02) {
+    throw new Error('Invalid ECDSA signature')
+  }
+
+  const rLength = signature[offset + 1]
+  const rStart = offset + 2
+  const r = signature.slice(rStart, rStart + rLength)
+
+  const sOffset = rStart + rLength
+
+  if (signature[sOffset] !== 0x02) {
+    throw new Error('Invalid ECDSA signature')
+  }
+
+  const sLength = signature[sOffset + 1]
+  const sStart = sOffset + 2
+  const s = signature.slice(sStart, sStart + sLength)
+
+  const out = new Uint8Array(64)
+
+  const rTrimmed = r.length > 32 ? r.slice(r.length - 32) : r
+  const sTrimmed = s.length > 32 ? s.slice(s.length - 32) : s
+
+  out.set(rTrimmed, 32 - rTrimmed.length)
+  out.set(sTrimmed, 64 - sTrimmed.length)
+
+  return out
+}
+
 async function cleanupExpiredSessions(db: D1Database) {
   const now = new Date().toISOString()
   await db.prepare(`DELETE FROM admin_sessions WHERE expires_at <= ?`).bind(now).run()
@@ -220,7 +262,9 @@ async function createVapidJwt(db: D1Database, endpoint: string, requestUrl: stri
     new TextEncoder().encode(unsigned)
   )
 
-  return `${unsigned}.${bytesToBase64Url(new Uint8Array(signature))}`
+  const joseSignature = ecdsaSignatureToJose(new Uint8Array(signature))
+
+  return `${unsigned}.${bytesToBase64Url(joseSignature)}`
 }
 
 async function sendAdminBookingPush(db: D1Database, requestUrl: string) {
@@ -292,7 +336,7 @@ async function deletePushSubscription(request: Request, db: D1Database) {
 }
 
 export default {
-  async fetch(request: Request, env: Env, ctx?: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     try {
       const url = new URL(request.url)
       const pathname = url.pathname
@@ -369,9 +413,7 @@ export default {
           }
 
           if (notifyAdmin !== false) {
-            const pushTask = sendAdminBookingPush(env.DB, request.url).catch(() => null)
-            if (ctx) ctx.waitUntil(pushTask)
-            else await pushTask
+            ctx.waitUntil(sendAdminBookingPush(env.DB, request.url).catch(() => null))
           }
 
           return json({ success: true, id })
