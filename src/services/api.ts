@@ -159,4 +159,44 @@ export const api = {
       throw new Error(`Erro ${res.status}`)
     }
   },
+
+  async getPushPublicKey(): Promise<string> {
+    const res = await fetch('/api/admin/push-public-key', {
+      headers: authHeaders(),
+    })
+
+    const data = await parseResponse<{ publicKey: string }>(res)
+
+    if (!data.publicKey) {
+      throw new Error('Chave de notificações indisponível.')
+    }
+
+    return data.publicKey
+  },
+
+  async savePushSubscription(subscription: PushSubscription): Promise<void> {
+    const res = await fetch('/api/admin/push-subscriptions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+      },
+      body: JSON.stringify(subscription),
+    })
+
+    await parseResponse<{ success: boolean }>(res)
+  },
+
+  async deletePushSubscription(endpoint: string): Promise<void> {
+    const res = await fetch('/api/admin/push-subscriptions', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+      },
+      body: JSON.stringify({ endpoint }),
+    })
+
+    await parseResponse<{ success: boolean }>(res)
+  },
 }
