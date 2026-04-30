@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rosa-maria-v2'
+const CACHE_NAME = 'rosa-maria-v3'
 const APP_SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/favicon.png']
 
 self.addEventListener('install', event => {
