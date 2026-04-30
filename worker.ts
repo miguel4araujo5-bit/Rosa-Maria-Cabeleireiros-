@@ -48,6 +48,16 @@ function timingSafeEqual(a: string, b: string) {
   return diff === 0
 }
 
+function bytesToBase64Url(bytes: Uint8Array) {
+  let binary = ''
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i])
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+}
+
+function stringToBase64Url(value: string) {
+  return bytesToBase64Url(new TextEncoder().encode(value))
+}
+
 async function cleanupExpiredSessions(db: D1Database) {
   const now = new Date().toISOString()
   await db.prepare(`DELETE FROM admin_sessions WHERE expires_at <= ?`).bind(now).run()
@@ -113,6 +123,18 @@ async function initSchema(db: D1Database) {
       expires_at TEXT NOT NULL
     )`,
     `CREATE INDEX IF NOT EXISTS idx_admin_sessions_expires ON admin_sessions(expires_at)`,
+    `CREATE TABLE IF NOT EXISTS push_settings (
+      name TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    )`,
+    `CREATE TABLE IF NOT EXISTS push_subscriptions (
+      endpoint TEXT PRIMARY KEY,
+      p256dh TEXT,
+      auth TEXT,
+      user_agent TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )`,
   ]
 
   for (const sql of stmts) {
@@ -127,8 +149,150 @@ function ensureSchema(db: D1Database) {
   return schemaReady
 }
 
+async function getVapidKeys(db: D1Database) {
+  const { results } = await db.prepare(
+    `SELECT name, value FROM push_settings WHERE name IN ('vapid_public_key', 'vapid_private_jwk')`
+  ).all<{ name: string; value: string }>()
+
+  const map = new Map<string, string>()
+  for (const row of results ?? []) map.set(row.name, row.value)
+
+  const publicKey = map.get('vapid_public_key')
+  const privateJwkRaw = map.get('vapid_private_jwk')
+
+  if (publicKey && privateJwkRaw) {
+    return {
+      publicKey,
+      privateJwk: JSON.parse(privateJwkRaw) as JsonWebKey,
+    }
+  }
+
+  const keyPair = await crypto.subtle.generateKey(
+    { name: 'ECDSA', namedCurve: 'P-256' },
+    true,
+    ['sign', 'verify']
+  ) as CryptoKeyPair
+
+  const publicRaw = new Uint8Array(await crypto.subtle.exportKey('raw', keyPair.publicKey))
+  const privateJwk = await crypto.subtle.exportKey('jwk', keyPair.privateKey)
+  const nextPublicKey = bytesToBase64Url(publicRaw)
+
+  await db.prepare(`INSERT OR REPLACE INTO push_settings (name, value) VALUES (?, ?)`)
+    .bind('vapid_public_key', nextPublicKey)
+    .run()
+
+  await db.prepare(`INSERT OR REPLACE INTO push_settings (name, value) VALUES (?, ?)`)
+    .bind('vapid_private_jwk', JSON.stringify(privateJwk))
+    .run()
+
+  return {
+    publicKey: nextPublicKey,
+    privateJwk,
+  }
+}
+
+async function createVapidJwt(db: D1Database, endpoint: string, requestUrl: string) {
+  const keys = await getVapidKeys(db)
+
+  const privateKey = await crypto.subtle.importKey(
+    'jwk',
+    keys.privateJwk,
+    { name: 'ECDSA', namedCurve: 'P-256' },
+    false,
+    ['sign']
+  )
+
+  const header = {
+    typ: 'JWT',
+    alg: 'ES256',
+  }
+
+  const payload = {
+    aud: new URL(endpoint).origin,
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 12,
+    sub: new URL(requestUrl).origin,
+  }
+
+  const unsigned = `${stringToBase64Url(JSON.stringify(header))}.${stringToBase64Url(JSON.stringify(payload))}`
+  const signature = await crypto.subtle.sign(
+    { name: 'ECDSA', hash: 'SHA-256' },
+    privateKey,
+    new TextEncoder().encode(unsigned)
+  )
+
+  return `${unsigned}.${bytesToBase64Url(new Uint8Array(signature))}`
+}
+
+async function sendAdminBookingPush(db: D1Database, requestUrl: string) {
+  const keys = await getVapidKeys(db)
+
+  const { results } = await db.prepare(
+    `SELECT endpoint FROM push_subscriptions`
+  ).all<{ endpoint: string }>()
+
+  const subscriptions = results ?? []
+  if (subscriptions.length === 0) return
+
+  await Promise.all(subscriptions.map(async sub => {
+    try {
+      const token = await createVapidJwt(db, sub.endpoint, requestUrl)
+
+      const res = await fetch(sub.endpoint, {
+        method: 'POST',
+        headers: {
+          TTL: '86400',
+          Urgency: 'high',
+          Authorization: `vapid t=${token}, k=${keys.publicKey}`,
+        },
+      })
+
+      if (res.status === 404 || res.status === 410) {
+        await db.prepare(`DELETE FROM push_subscriptions WHERE endpoint = ?`).bind(sub.endpoint).run()
+      }
+    } catch {}
+  }))
+}
+
+async function savePushSubscription(request: Request, db: D1Database) {
+  const body = await readJson(request) as any
+  const endpoint = body?.endpoint ? String(body.endpoint) : ''
+  const p256dh = body?.keys?.p256dh ? String(body.keys.p256dh) : ''
+  const auth = body?.keys?.auth ? String(body.keys.auth) : ''
+
+  if (!endpoint || !endpoint.startsWith('https://')) {
+    return json({ error: 'Invalid push subscription' }, 400)
+  }
+
+  const now = new Date().toISOString()
+  const userAgent = request.headers.get('User-Agent') || ''
+
+  await db.prepare(
+    `INSERT INTO push_subscriptions (endpoint, p256dh, auth, user_agent, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)
+     ON CONFLICT(endpoint) DO UPDATE SET
+       p256dh = excluded.p256dh,
+       auth = excluded.auth,
+       user_agent = excluded.user_agent,
+       updated_at = excluded.updated_at`
+  )
+    .bind(endpoint, p256dh, auth, userAgent, now, now)
+    .run()
+
+  return json({ success: true })
+}
+
+async function deletePushSubscription(request: Request, db: D1Database) {
+  const body = await readJson(request) as any
+  const endpoint = body?.endpoint ? String(body.endpoint) : ''
+
+  if (!endpoint) return json({ success: true })
+
+  await db.prepare(`DELETE FROM push_subscriptions WHERE endpoint = ?`).bind(endpoint).run()
+  return json({ success: true })
+}
+
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx?: ExecutionContext): Promise<Response> {
     try {
       const url = new URL(request.url)
       const pathname = url.pathname
@@ -162,10 +326,10 @@ export default {
         }
 
         if (pathname === '/api/appointments' && request.method === 'POST') {
-          const body = await readJson(request)
+          const body = await readJson(request) as any
           if (!body) return json({ error: 'Invalid JSON' }, 400)
 
-          const { name, whatsapp, services, date, time, observation } = body
+          const { name, whatsapp, services, date, time, observation, notifyAdmin } = body
           if (!name || !whatsapp || !services || !date || !time) {
             return json({ error: 'Missing fields' }, 400)
           }
@@ -204,11 +368,17 @@ export default {
             throw err
           }
 
+          if (notifyAdmin !== false) {
+            const pushTask = sendAdminBookingPush(env.DB, request.url).catch(() => null)
+            if (ctx) ctx.waitUntil(pushTask)
+            else await pushTask
+          }
+
           return json({ success: true, id })
         }
 
         if (pathname === '/api/admin/login' && request.method === 'POST') {
-          const body = await readJson(request)
+          const body = await readJson(request) as any
           const password = body?.password ? String(body.password) : ''
           if (!password) return json({ error: 'Password required' }, 400)
           if (!env.ADMIN_PASSWORD) return json({ error: 'Missing ADMIN_PASSWORD secret' }, 500)
@@ -240,6 +410,28 @@ export default {
           return json({ success: true })
         }
 
+        if (pathname === '/api/admin/push-public-key' && request.method === 'GET') {
+          const auth = await requireAdmin(request, env)
+          if (!auth.ok) return auth.res
+
+          const keys = await getVapidKeys(env.DB)
+          return json({ publicKey: keys.publicKey })
+        }
+
+        if (pathname === '/api/admin/push-subscriptions' && request.method === 'POST') {
+          const auth = await requireAdmin(request, env)
+          if (!auth.ok) return auth.res
+
+          return savePushSubscription(request, env.DB)
+        }
+
+        if (pathname === '/api/admin/push-subscriptions' && request.method === 'DELETE') {
+          const auth = await requireAdmin(request, env)
+          if (!auth.ok) return auth.res
+
+          return deletePushSubscription(request, env.DB)
+        }
+
         if (pathname === '/api/admin/appointments' && request.method === 'GET') {
           const auth = await requireAdmin(request, env)
           if (!auth.ok) return auth.res
@@ -256,7 +448,7 @@ export default {
           if (!auth.ok) return auth.res
 
           const id = pathname.split('/').pop() || ''
-          const body = await readJson(request)
+          const body = await readJson(request) as any
           if (!id || !body) return json({ error: 'Invalid request' }, 400)
 
           const current = await env.DB.prepare(
