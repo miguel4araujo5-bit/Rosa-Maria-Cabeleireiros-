@@ -29,6 +29,7 @@ export interface CreateAppointmentPayload {
   time: string
   observation?: string
   status?: AppointmentStatus
+  notifyAdmin?: boolean
 }
 
 export interface AdminLoginResponse {
