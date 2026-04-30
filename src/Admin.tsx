@@ -139,7 +139,7 @@ async function postAppointmentAndReturnId(payload: any) {
   const res = await fetch('/api/appointments', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...payload, notifyAdmin: false }),
   })
   const data = await res.json().catch(() => null)
   if (!res.ok) {
@@ -205,6 +205,9 @@ export default function Admin() {
   const [editServices, setEditServices] = useState<string[]>([])
   const [editObservation, setEditObservation] = useState('')
 
+  const [pushState, setPushState] = useState<PushNotificationState>('inactive')
+  const [pushLoading, setPushLoading] = useState(false)
+
   const serviceById = useMemo(() => {
     const m = new Map<string, any>()
     SERVICES.forEach((s: any) => m.set(String(s.id), s))
@@ -238,9 +241,36 @@ export default function Admin() {
     }
   }
 
+  const refreshPushState = async () => {
+    try {
+      const state = await readPushNotificationState()
+      setPushState(state)
+    } catch {
+      setPushState('unsupported')
+    }
+  }
+
   useEffect(() => {
     fetchAppointments()
   }, [])
+
+  useEffect(() => {
+    if (isLoggedIn) refreshPushState()
+  }, [isLoggedIn])
+
+  const handleEnablePush = async () => {
+    setPushLoading(true)
+
+    try {
+      await enablePushNotifications()
+      await refreshPushState()
+      alert('Notificações ativas. Vai receber alertas quando entrarem novas marcações.')
+    } catch (err: any) {
+      alert(err?.message ? String(err.message) : 'Não foi possível ativar as notificações.')
+    } finally {
+      setPushLoading(false)
+    }
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -557,6 +587,45 @@ export default function Admin() {
         >
           <LogOut size={16} /> Sair
         </button>
+
+        <div className="flex flex-col items-center gap-3">
+          <button
+            type="button"
+            onClick={handleEnablePush}
+            disabled={pushLoading || pushState === 'active' || pushState === 'unsupported' || pushState === 'denied'}
+            className={cn(
+              'flex items-center gap-3 px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest transition-all disabled:cursor-not-allowed',
+              pushState === 'active'
+                ? 'bg-emerald-50 text-emerald-700'
+                : pushState === 'denied'
+                  ? 'bg-red-50 text-red-700'
+                  : pushState === 'unsupported'
+                    ? 'bg-stone-100 text-stone-400'
+                    : 'bg-brand-gold hover:bg-yellow-600 text-white'
+            )}
+          >
+            <Bell size={16} />
+            {pushLoading
+              ? 'A ativar...'
+              : pushState === 'active'
+                ? 'Notificações ativas'
+                : pushState === 'denied'
+                  ? 'Notificações bloqueadas'
+                  : pushState === 'unsupported'
+                    ? 'Abrir pela app'
+                    : 'Ativar notificações'}
+          </button>
+
+          <p className="max-w-md text-xs leading-5 text-stone-400">
+            {pushState === 'active'
+              ? 'O iPhone vai receber alertas quando entrar uma nova marcação.'
+              : pushState === 'denied'
+                ? 'As notificações estão bloqueadas nas definições do iPhone.'
+                : pushState === 'unsupported'
+                  ? 'No iPhone, adiciona o site ao Ecrã Principal e abre a app por esse ícone.'
+                  : 'No iPhone, abre a app instalada no Ecrã Principal e toca aqui para permitir notificações.'}
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
