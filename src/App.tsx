@@ -27,6 +27,8 @@ type AvailabilitySlot = {
 
 const ADMIN_PATH = '/admin'
 const MANAGER_WHATSAPP = '351932939817'
+const PUSH_TARGET_CACHE = 'rosa-maria-push-target'
+const PUSH_TARGET_KEY = '/latest'
 
 const TIMES = [
   '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
@@ -46,6 +48,55 @@ function useScrollToTop() {
       window.scrollTo(0, 0)
     }
   }, [pathname])
+}
+
+function PushNotificationNavigation() {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const openPushTarget = (value: unknown) => {
+      if (typeof value !== 'string') return
+      if (!value.startsWith('/admin')) return
+
+      navigate(value)
+    }
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'ROSA_MARIA_OPEN_PUSH_TARGET') {
+        openPushTarget(event.data.url)
+      }
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', handleMessage)
+    }
+
+    if ('caches' in window) {
+      caches.open(PUSH_TARGET_CACHE)
+        .then(cache => cache.match(PUSH_TARGET_KEY).then(async response => {
+          if (!response) return
+
+          await cache.delete(PUSH_TARGET_KEY)
+
+          const data = await response.json().catch(() => null)
+          const createdAt = Date.parse(data?.createdAt || '')
+          const isFresh = Number.isFinite(createdAt) && Date.now() - createdAt < 1000 * 60 * 5
+
+          if (isFresh) {
+            openPushTarget(data?.url)
+          }
+        }))
+        .catch(() => undefined)
+    }
+
+    return () => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', handleMessage)
+      }
+    }
+  }, [navigate])
+
+  return null
 }
 
 function todayISO() {
@@ -742,6 +793,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <Router>
+      <PushNotificationNavigation />
       <AppShell>
         <Routes>
           <Route path="/" element={<Home />} />
