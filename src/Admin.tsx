@@ -30,6 +30,13 @@ function toPTDateLabel(dateISO: string) {
   return fmt.format(d).replace('.', '')
 }
 
+function toWhatsappDateLabel(dateISO: string) {
+  if (!dateISO) return ''
+  const [year, month, day] = dateISO.split('-')
+  if (!year || !month || !day) return dateISO
+  return `${day}/${month}/${year}`
+}
+
 function monthTitle(d: Date) {
   const fmt = new Intl.DateTimeFormat('pt-PT', { month: 'long', year: 'numeric' })
   const s = fmt.format(d)
@@ -382,6 +389,50 @@ export default function Admin() {
       await fetchAppointments()
     } catch (err: any) {
       alert(err?.message ? String(err.message) : 'Erro ao atualizar.')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleConfirmAppointment = async (app: Appointment, time: string) => {
+    const id = String((app as any)?.id || '')
+    if (!id) {
+      alert('Marcação inválida.')
+      return
+    }
+
+    const date = String((app as any)?.date || selectedDate)
+    const name = String((app as any)?.name || '').trim()
+    const whatsapp = String((app as any)?.whatsapp || '').trim()
+    const message = `${name ? `Olá ${name}. ` : ''}A sua marcação foi confirmada, contamos consigo dia ${toWhatsappDateLabel(date)} às ${time} horas.`
+    const whatsappUrl = waLink(whatsapp, message)
+    const whatsappWindow = window.open('about:blank', '_blank')
+
+    setActionLoading(id)
+
+    try {
+      await api.updateAppointment(id, { status: 'confirmado' } as any)
+
+      setAppointments(previous =>
+        previous.map(item =>
+          String((item as any)?.id || '') === id
+            ? ({ ...item, status: 'confirmado' } as Appointment)
+            : item
+        )
+      )
+
+      if (whatsappWindow) {
+        whatsappWindow.location.href = whatsappUrl
+      } else {
+        window.location.href = whatsappUrl
+      }
+
+      await fetchAppointments()
+    } catch (err: any) {
+      if (whatsappWindow) {
+        whatsappWindow.close()
+      }
+      alert(err?.message ? String(err.message) : 'Erro ao confirmar a marcação.')
     } finally {
       setActionLoading(null)
     }
@@ -841,10 +892,11 @@ export default function Admin() {
                 const serviceIds = app ? safeParseServices((app as any).services) : []
                 const services = app ? serviceLabels(serviceIds) : []
                 const obs = app ? String((app as any).observation || '').trim() : ''
+                const appId = app ? String((app as any)?.id || '') : ''
 
                 const slotTotal = servicesTotalCents(serviceIds)
 
-                const msgConfirm = `Olá ${name}! A sua marcação no Rosa Maria Cabeleireiros ficou confirmada para ${toPTDateLabel(selectedDate)} às ${time}. Até breve.`
+                const msgConfirm = `${name ? `Olá ${name}. ` : ''}A sua marcação foi confirmada, contamos consigo dia ${toWhatsappDateLabel(selectedDate)} às ${time} horas.`
                 const msgReject = `Olá ${name}! Obrigado pelo seu pedido. Infelizmente não conseguimos confirmar ${toPTDateLabel(selectedDate)} às ${time}. Pode responder com outro horário/dia para tentarmos ajustar.`
                 const msgPending = `Olá ${name}! Recebemos o seu pedido para ${toPTDateLabel(selectedDate)} às ${time}. Iremos confirmar o mais rápido possível.`
 
@@ -950,16 +1002,22 @@ export default function Admin() {
                         <div className="grid grid-cols-3 gap-2">
                           <button
                             type="button"
-                            onClick={() => updateStatus(String((app as any)?.id || ''), 'confirmado')}
-                            disabled={actionLoading === String((app as any)?.id || '')}
-                            className="bg-emerald-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 disabled:opacity-50"
+                            onClick={() => handleConfirmAppointment(app as any, time)}
+                            disabled={confirmed || actionLoading === appId}
+                            className={cn(
+                              "py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all disabled:opacity-100",
+                              confirmed
+                                ? "bg-emerald-800 text-white shadow-inner ring-2 ring-emerald-200 scale-[0.98] cursor-default"
+                                : "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.98]",
+                              actionLoading === appId && !confirmed && "opacity-60 cursor-wait"
+                            )}
                           >
-                            Confirmar
+                            {actionLoading === appId ? 'A confirmar...' : confirmed ? 'Confirmada' : 'Confirmar'}
                           </button>
                           <button
                             type="button"
                             onClick={() => openReschedule(app as any)}
-                            disabled={actionLoading === String((app as any)?.id || '')}
+                            disabled={actionLoading === appId}
                             className="bg-blue-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 disabled:opacity-50"
                           >
                             Mudar hora/dia
@@ -967,7 +1025,7 @@ export default function Admin() {
                           <button
                             type="button"
                             onClick={() => openEdit(app as any)}
-                            disabled={actionLoading === String((app as any)?.id || '')}
+                            disabled={actionLoading === appId}
                             className="bg-stone-800 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-stone-900 disabled:opacity-50"
                           >
                             Editar
@@ -986,8 +1044,8 @@ export default function Admin() {
                           </a>
                           <button
                             type="button"
-                            onClick={() => deleteAppointment(String((app as any)?.id || ''))}
-                            disabled={actionLoading === String((app as any)?.id || '')}
+                            onClick={() => deleteAppointment(appId)}
+                            disabled={actionLoading === appId}
                             className="py-3 text-[10px] font-black uppercase tracking-widest rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:border-red-300 disabled:opacity-50 flex items-center justify-center gap-2"
                           >
                             <Trash2 size={16} /> Apagar
