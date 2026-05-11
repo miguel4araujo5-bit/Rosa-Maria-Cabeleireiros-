@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rosa-maria-v10'
+const CACHE_NAME = 'rosa-maria-v11'
 const APP_SHELL = ['/', '/manifest.webmanifest', '/favicon.png']
 const PUSH_TARGET_CACHE = 'rosa-maria-push-target'
 const PUSH_TARGET_KEY = '/latest'
@@ -123,6 +123,14 @@ self.addEventListener('notificationclick', event => {
                 type: 'ROSA_MARIA_OPEN_PUSH_TARGET',
                 url: targetPath,
               })
+
+              if ('navigate' in client) {
+                const navigatedClient = await client.navigate(targetUrl)
+
+                if (navigatedClient && 'focus' in navigatedClient) {
+                  return navigatedClient.focus()
+                }
+              }
 
               if ('focus' in client) {
                 return client.focus()
