@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rosa-maria-v4'
+const CACHE_NAME = 'rosa-maria-v5'
 const APP_SHELL = ['/', '/manifest.webmanifest', '/favicon.png']
 
 self.addEventListener('install', event => {
@@ -19,7 +19,6 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const { request } = event
-
   if (request.method !== 'GET') return
 
   const url = new URL(request.url)
@@ -27,15 +26,11 @@ self.addEventListener('fetch', event => {
   if (url.pathname.startsWith('/api/')) return
 
   if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request).catch(() => caches.match('/'))
-    )
+    event.respondWith(fetch(request).catch(() => caches.match('/')))
     return
   }
 
-  event.respondWith(
-    fetch(request).catch(() => caches.match(request))
-  )
+  event.respondWith(fetch(request).catch(() => caches.match(request)))
 })
 
 self.addEventListener('push', event => {
@@ -51,11 +46,11 @@ self.addEventListener('push', event => {
 
   const title = data.title || 'Nova marcação recebida'
   const options = {
-    body: data.body || 'Abra a agenda para confirmar o novo pedido.',
+    body: data.body || 'Toque para abrir diretamente a nova marcação.',
     icon: '/favicon.png',
     badge: '/favicon.png',
     data: {
-      url: data.url || '/admin',
+      url: data.url || '/admin?fromPush=1',
     },
     requireInteraction: true,
     tag: 'rosa-maria-marcacao',
@@ -68,14 +63,13 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
   event.notification.close()
 
-  const targetUrl = new URL(event.notification.data?.url || '/admin', self.location.origin).href
+  const targetUrl = new URL(event.notification.data?.url || '/admin?fromPush=1', self.location.origin).href
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
       for (const client of clientList) {
         if ('navigate' in client && 'focus' in client) {
-          client.navigate(targetUrl)
-          return client.focus()
+          return client.navigate(targetUrl).then(() => client.focus())
         }
       }
 
