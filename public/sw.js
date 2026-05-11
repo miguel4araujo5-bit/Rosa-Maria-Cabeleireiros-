@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rosa-maria-v7'
+const CACHE_NAME = 'rosa-maria-v8'
 const APP_SHELL = ['/', '/manifest.webmanifest', '/favicon.png']
 
 self.addEventListener('install', event => {
@@ -45,7 +45,10 @@ self.addEventListener('push', event => {
   }
 
   const title = data.title || 'Nova marcação recebida'
-  const targetUrl = '/admin?fromPush=1'
+  const targetUrl = data.url || '/admin?fromPush=1'
+  const notificationTag = data.appointmentId
+    ? `rosa-maria-marcacao-${data.appointmentId}`
+    : `rosa-maria-marcacao-${Date.now()}`
 
   event.waitUntil(
     self.registration.showNotification(title, {
@@ -54,9 +57,12 @@ self.addEventListener('push', event => {
       badge: '/favicon.png',
       data: {
         url: targetUrl,
+        appointmentId: data.appointmentId || null,
+        date: data.date || null,
+        time: data.time || null,
       },
       requireInteraction: true,
-      tag: `rosa-maria-marcacao-${Date.now()}`,
+      tag: notificationTag,
       renotify: true,
     })
   )
@@ -65,7 +71,9 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
   event.notification.close()
 
-  const targetUrl = new URL('/admin?fromPush=1', self.location.origin).href
+  const data = event.notification.data || {}
+  const targetPath = data.url || '/admin?fromPush=1'
+  const targetUrl = new URL(targetPath, self.location.origin).href
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async clientList => {
