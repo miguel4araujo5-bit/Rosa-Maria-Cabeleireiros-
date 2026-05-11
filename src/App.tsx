@@ -650,13 +650,13 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
                 <div className="grid grid-cols-1 gap-3">
                   <a
-                    href="https://waze.com/ul?q=Rua%20de%20Cinco%20de%20Outubro%205498%20São%20Mamede%20de%20Infesta"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 rounded-2xl border border-brand-gold bg-white text-brand-ink px-5 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-brand-ink hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-brand-gold active:border-brand-gold active:text-black"
+                  href="https://waze.com/ul/hez3f7fuk0"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-3 rounded-2xl border border-brand-gold bg-white text-brand-ink px-5 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-brand-ink hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-brand-gold active:border-brand-gold active:text-black"
                   >
-                    <img src={wazeIcon} className="w-5 h-5 object-contain" alt="Waze" />
-                    <span className="text-[15px] font-medium tracking-[0.06em]">Waze</span>
+                  <img src={wazeIcon} className="w-5 h-5 object-contain" alt="Waze" />
+                  <span className="text-[15px] font-medium tracking-[0.06em]">Waze</span>
                   </a>
 
                   <a
