@@ -270,15 +270,36 @@ async function createVapidJwt(db: D1Database, endpoint: string, requestUrl: stri
   return `${unsigned}.${bytesToBase64Url(joseSignature)}`
 }
 
-async function sendAdminBookingPush(db: D1Database, requestUrl: string, env?: Env) {
+async function sendAdminBookingPush(
+  db: D1Database,
+  requestUrl: string,
+  appointment: {
+    id: string
+    name: string
+    whatsapp: string
+    services: string
+    date: string
+    time: string
+  },
+  env?: Env
+) {
   const keys = await getVapidKeys(db)
 
   const { results } = await db.prepare(
-    `SELECT endpoint FROM push_subscriptions`
-  ).all<{ endpoint: string }>()
+    `SELECT endpoint, p256dh, auth FROM push_subscriptions`
+  ).all<{ endpoint: string; p256dh: string; auth: string }>()
 
   const subscriptions = results ?? []
   if (subscriptions.length === 0) return
+
+  const payload = JSON.stringify({
+    title: 'Nova marcação',
+    body: `${appointment.name} · ${appointment.date} às ${appointment.time}`,
+    url: `/admin?date=${encodeURIComponent(appointment.date)}&time=${encodeURIComponent(appointment.time)}&id=${encodeURIComponent(appointment.id)}`,
+    appointmentId: appointment.id,
+    date: appointment.date,
+    time: appointment.time,
+  })
 
   await Promise.all(subscriptions.map(async sub => {
     try {
@@ -291,7 +312,9 @@ async function sendAdminBookingPush(db: D1Database, requestUrl: string, env?: En
           Urgency: 'high',
           Authorization: `vapid t=${token}, k=${keys.publicKey}`,
           'Crypto-Key': `p256ecdsa=${keys.publicKey}`,
+          'Content-Type': 'application/json',
         },
+        body: payload,
       })
 
       if (res.status === 404 || res.status === 410) {
@@ -391,6 +414,11 @@ export default {
           if (existing) return json({ error: 'Horário já ocupado' }, 400)
 
           const id = crypto.randomUUID()
+          const appointmentName = String(name).trim()
+          const appointmentWhatsapp = String(whatsapp).trim()
+          const appointmentServices = String(services)
+          const appointmentDate = String(date)
+          const appointmentTime = String(time)
 
           try {
             await env.DB.prepare(
@@ -399,11 +427,11 @@ export default {
             )
               .bind(
                 id,
-                String(name).trim(),
-                String(whatsapp).trim(),
-                String(services),
-                String(date),
-                String(time),
+                appointmentName,
+                appointmentWhatsapp,
+                appointmentServices,
+                appointmentDate,
+                appointmentTime,
                 observation ? String(observation) : '',
                 'por_confirmar',
                 new Date().toISOString()
@@ -417,7 +445,14 @@ export default {
           }
 
           if (notifyAdmin !== false) {
-            ctx.waitUntil(sendAdminBookingPush(env.DB, request.url, env).catch(() => null))
+            ctx.waitUntil(sendAdminBookingPush(env.DB, request.url, {
+              id,
+              name: appointmentName,
+              whatsapp: appointmentWhatsapp,
+              services: appointmentServices,
+              date: appointmentDate,
+              time: appointmentTime,
+            }, env).catch(() => null))
           }
 
           return json({ success: true, id })
