@@ -49,9 +49,33 @@ function withTimeout<T>(promise: Promise<T>, milliseconds: number, message: stri
   ])
 }
 
+function waitForActiveWorker(registration: ServiceWorkerRegistration) {
+  if (registration.active) return Promise.resolve(registration)
+
+  const worker = registration.installing || registration.waiting
+
+  if (!worker) {
+    return navigator.serviceWorker.ready
+  }
+
+  return new Promise<ServiceWorkerRegistration>((resolve, reject) => {
+    const timeout = window.setTimeout(() => {
+      reject(new Error('O service worker ainda não ficou ativo. Fecha a app, abre novamente pelo ícone do Ecrã Principal e tenta outra vez.'))
+    }, 12000)
+
+    worker.addEventListener('statechange', () => {
+      if (worker.state === 'activated') {
+        window.clearTimeout(timeout)
+        resolve(registration)
+      }
+    })
+  })
+}
+
 async function getServiceWorkerRegistration() {
+  const expectedScope = `${window.location.origin}/`
   const existingRegistrations = await navigator.serviceWorker.getRegistrations()
-  let registration = existingRegistrations.find(reg => reg.scope === `${window.location.origin}/`)
+  let registration = existingRegistrations.find(reg => reg.scope === expectedScope)
 
   if (!registration) {
     registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
@@ -59,16 +83,8 @@ async function getServiceWorkerRegistration() {
 
   await registration.update().catch(() => null)
 
-  if (registration.waiting) {
-    return registration
-  }
-
-  if (registration.active) {
-    return registration
-  }
-
   return withTimeout(
-    navigator.serviceWorker.ready,
+    waitForActiveWorker(registration),
     12000,
     'O service worker ainda não ficou ativo. Fecha a app, abre novamente pelo ícone do Ecrã Principal e tenta outra vez.'
   )
