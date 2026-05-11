@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { SERVICES } from './servicesData'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Bell, Calendar, ChevronRight, LogOut, RefreshCw, Trash2, X, MessageCircle } from 'lucide-react'
 import { api } from './services/api'
 import {
@@ -181,6 +181,7 @@ function formatEUR(cents: number) {
 
 export default function Admin() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [password, setPassword] = useState('')
@@ -257,6 +258,43 @@ export default function Admin() {
   useEffect(() => {
     if (isLoggedIn) refreshPushState()
   }, [isLoggedIn])
+
+  useEffect(() => {
+    if (searchParams.get('fromPush') !== '1') return
+    if (!appointments.length) return
+
+    const latestPending = [...appointments]
+      .filter((a: any) => String(a.status) === 'por_confirmar')
+      .sort((a: any, b: any) => {
+        const aTime = new Date(String(a.created_at || '')).getTime()
+        const bTime = new Date(String(b.created_at || '')).getTime()
+        return bTime - aTime
+      })[0]
+
+    if (!latestPending) {
+      setSearchParams({})
+      return
+    }
+
+    const nextDate = String((latestPending as any).date || '')
+    const nextTimes = safeParseTimes((latestPending as any).time)
+    const nextTime = nextTimes[0] || String((latestPending as any).time || '')
+
+    if (nextDate) {
+      const d = new Date(`${nextDate}T00:00:00`)
+      if (!Number.isNaN(d.getTime())) {
+        setCurrentMonth(d)
+        setSelectedDate(nextDate)
+      }
+    }
+
+    window.setTimeout(() => {
+      const target = document.querySelector(`[data-appointment-time="${nextTime}"]`)
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 500)
+
+    setSearchParams({})
+  }, [appointments, searchParams, setSearchParams])
 
   const handleEnablePush = async () => {
     setPushLoading(true)
@@ -770,6 +808,7 @@ export default function Admin() {
                 return (
                   <div
                     key={time}
+                    data-appointment-time={time}
                     className={cn(
                       "p-6 rounded-2xl border-2 transition-all",
                       blocked && "bg-stone-50 border-stone-200 opacity-70",
