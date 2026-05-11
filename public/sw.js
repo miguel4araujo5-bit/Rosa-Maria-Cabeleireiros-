@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rosa-maria-v8'
+const CACHE_NAME = 'rosa-maria-v9'
 const APP_SHELL = ['/', '/manifest.webmanifest', '/favicon.png']
 
 self.addEventListener('install', event => {
@@ -33,37 +33,56 @@ self.addEventListener('fetch', event => {
   event.respondWith(fetch(request).catch(() => caches.match(request)))
 })
 
-self.addEventListener('push', event => {
-  let data = {}
+async function getPushTarget() {
+  try {
+    const subscription = await self.registration.pushManager.getSubscription()
+    const endpoint = subscription?.endpoint || ''
 
-  if (event.data) {
-    try {
-      data = event.data.json()
-    } catch {
-      data = { body: event.data.text() }
+    const res = await fetch('/api/admin/push-target', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ endpoint }),
+    })
+
+    if (!res.ok) {
+      throw new Error('Push target unavailable')
+    }
+
+    return await res.json()
+  } catch {
+    return {
+      title: 'Nova marcação recebida',
+      body: 'Toque para abrir o painel.',
+      url: '/admin?fromPush=1',
     }
   }
+}
 
-  const title = data.title || 'Nova marcação recebida'
-  const targetUrl = data.url || '/admin?fromPush=1'
-  const notificationTag = data.appointmentId
-    ? `rosa-maria-marcacao-${data.appointmentId}`
-    : `rosa-maria-marcacao-${Date.now()}`
-
+self.addEventListener('push', event => {
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body: data.body || 'Toque para abrir a marcação no painel.',
-      icon: '/favicon.png',
-      badge: '/favicon.png',
-      data: {
-        url: targetUrl,
-        appointmentId: data.appointmentId || null,
-        date: data.date || null,
-        time: data.time || null,
-      },
-      requireInteraction: true,
-      tag: notificationTag,
-      renotify: true,
+    getPushTarget().then(data => {
+      const title = data.title || 'Nova marcação recebida'
+      const targetUrl = data.url || '/admin?fromPush=1'
+      const notificationTag = data.appointmentId
+        ? `rosa-maria-marcacao-${data.appointmentId}`
+        : `rosa-maria-marcacao-${Date.now()}`
+
+      return self.registration.showNotification(title, {
+        body: data.body || 'Toque para abrir a marcação no painel.',
+        icon: '/favicon.png',
+        badge: '/favicon.png',
+        data: {
+          url: targetUrl,
+          appointmentId: data.appointmentId || null,
+          date: data.date || null,
+          time: data.time || null,
+        },
+        requireInteraction: true,
+        tag: notificationTag,
+        renotify: true,
+      })
     })
   )
 })
