@@ -6,7 +6,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 
 const PUSH_TARGET_CACHE = 'rosa-maria-push-target'
 const PUSH_TARGET_KEY = '/latest'
-const PUSH_TARGET_CONSUMED_KEY = 'rosa_maria_consumed_push_target'
+const PUSH_TARGET_PENDING_KEY = 'rosa_maria_pending_push_target'
 
 function isAdminTarget(value: unknown) {
   return typeof value === 'string' && value.startsWith('/admin')
@@ -17,28 +17,16 @@ function isFreshTarget(createdAt: unknown) {
   return Number.isFinite(timestamp) && Date.now() - timestamp < 1000 * 60 * 10
 }
 
-function wasConsumed(url: string, createdAt: string) {
-  return localStorage.getItem(PUSH_TARGET_CONSUMED_KEY) === `${url}|${createdAt}`
-}
-
-function markConsumed(url: string, createdAt: string) {
-  localStorage.setItem(PUSH_TARGET_CONSUMED_KEY, `${url}|${createdAt}`)
-}
-
-function openPushTarget(url: unknown, createdAt: unknown) {
+function savePendingPushTarget(url: unknown, createdAt: unknown) {
   if (!isAdminTarget(url)) return
   if (!isFreshTarget(createdAt)) return
 
-  const targetUrl = String(url)
-  const targetCreatedAt = String(createdAt || '')
+  localStorage.setItem(PUSH_TARGET_PENDING_KEY, JSON.stringify({
+    url: String(url),
+    createdAt: String(createdAt || new Date().toISOString()),
+  }))
 
-  if (wasConsumed(targetUrl, targetCreatedAt)) return
-
-  markConsumed(targetUrl, targetCreatedAt)
-
-  if (`${window.location.pathname}${window.location.search}` === targetUrl) return
-
-  window.location.replace(targetUrl)
+  window.dispatchEvent(new CustomEvent('rosa-maria-push-target'))
 }
 
 async function consumeCachedPushTarget() {
@@ -50,11 +38,9 @@ async function consumeCachedPushTarget() {
 
     if (!response) return
 
-    await cache.delete(PUSH_TARGET_KEY)
-
     const data = await response.json().catch(() => null)
 
-    openPushTarget(data?.url, data?.createdAt)
+    savePendingPushTarget(data?.url, data?.createdAt)
   } catch {}
 }
 
@@ -93,7 +79,7 @@ async function consumeServerPushTarget() {
 
     const data = await res.json().catch(() => null)
 
-    openPushTarget(data?.url, data?.createdAt)
+    savePendingPushTarget(data?.url, data?.createdAt)
   } catch {}
 }
 
@@ -105,7 +91,7 @@ async function checkPushTargets() {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('message', event => {
     if (event.data?.type === 'ROSA_MARIA_OPEN_PUSH_TARGET') {
-      openPushTarget(event.data.url, new Date().toISOString())
+      savePendingPushTarget(event.data.url, new Date().toISOString())
     }
   })
 
