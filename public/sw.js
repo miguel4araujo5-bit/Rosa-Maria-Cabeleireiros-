@@ -45,31 +45,40 @@ self.addEventListener('push', event => {
   }
 
   const title = data.title || 'Nova marcação recebida'
-  const options = {
-    body: data.body || 'Toque para abrir diretamente a nova marcação.',
-    icon: '/favicon.png',
-    badge: '/favicon.png',
-    data: {
-      url: data.url || '/admin?fromPush=1',
-    },
-    requireInteraction: true,
-    tag: 'rosa-maria-marcacao',
-    renotify: true,
-  }
+  const targetUrl = '/admin?fromPush=1'
 
-  event.waitUntil(self.registration.showNotification(title, options))
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: data.body || 'Toque para abrir a marcação no painel.',
+      icon: '/favicon.png',
+      badge: '/favicon.png',
+      data: {
+        url: targetUrl,
+      },
+      requireInteraction: true,
+      tag: `rosa-maria-marcacao-${Date.now()}`,
+      renotify: true,
+    })
+  )
 })
 
 self.addEventListener('notificationclick', event => {
   event.notification.close()
 
-  const targetUrl = new URL(event.notification.data?.url || '/admin?fromPush=1', self.location.origin).href
+  const targetUrl = new URL('/admin?fromPush=1', self.location.origin).href
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async clientList => {
       for (const client of clientList) {
-        if ('navigate' in client && 'focus' in client) {
-          return client.navigate(targetUrl).then(() => client.focus())
+        if (client.url.startsWith(self.location.origin)) {
+          try {
+            if ('navigate' in client) {
+              await client.navigate(targetUrl)
+            }
+            if ('focus' in client) {
+              return client.focus()
+            }
+          } catch {}
         }
       }
 
