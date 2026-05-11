@@ -8,11 +8,37 @@ const PUSH_TARGET_CACHE = 'rosa-maria-push-target'
 const PUSH_TARGET_KEY = '/latest'
 const PUSH_TARGET_CONSUMED_KEY = 'rosa_maria_consumed_push_target'
 
-function openPushTarget(value: unknown) {
-  if (typeof value !== 'string') return
-  if (!value.startsWith('/admin')) return
+function isAdminTarget(value: unknown) {
+  return typeof value === 'string' && value.startsWith('/admin')
+}
 
-  window.location.assign(value)
+function isFreshTarget(createdAt: unknown) {
+  const timestamp = Date.parse(String(createdAt || ''))
+  return Number.isFinite(timestamp) && Date.now() - timestamp < 1000 * 60 * 10
+}
+
+function wasConsumed(url: string, createdAt: string) {
+  return localStorage.getItem(PUSH_TARGET_CONSUMED_KEY) === `${url}|${createdAt}`
+}
+
+function markConsumed(url: string, createdAt: string) {
+  localStorage.setItem(PUSH_TARGET_CONSUMED_KEY, `${url}|${createdAt}`)
+}
+
+function openPushTarget(url: unknown, createdAt: unknown) {
+  if (!isAdminTarget(url)) return
+  if (!isFreshTarget(createdAt)) return
+
+  const targetUrl = String(url)
+  const targetCreatedAt = String(createdAt || '')
+
+  if (wasConsumed(targetUrl, targetCreatedAt)) return
+
+  markConsumed(targetUrl, targetCreatedAt)
+
+  if (`${window.location.pathname}${window.location.search}` === targetUrl) return
+
+  window.location.replace(targetUrl)
 }
 
 async function consumeCachedPushTarget() {
@@ -27,25 +53,59 @@ async function consumeCachedPushTarget() {
     await cache.delete(PUSH_TARGET_KEY)
 
     const data = await response.json().catch(() => null)
-    const url = typeof data?.url === 'string' ? data.url : ''
-    const createdAt = Date.parse(data?.createdAt || '')
-    const isFresh = Number.isFinite(createdAt) && Date.now() - createdAt < 1000 * 60 * 10
 
-    if (!url || !isFresh) return
-
-    const consumedKey = `${url}|${data?.createdAt || ''}`
-
-    if (localStorage.getItem(PUSH_TARGET_CONSUMED_KEY) === consumedKey) return
-
-    localStorage.setItem(PUSH_TARGET_CONSUMED_KEY, consumedKey)
-    openPushTarget(url)
+    openPushTarget(data?.url, data?.createdAt)
   } catch {}
+}
+
+function wait(milliseconds: number) {
+  return new Promise(resolve => window.setTimeout(resolve, milliseconds))
+}
+
+async function getCurrentPushEndpoint() {
+  if (!('serviceWorker' in navigator)) return ''
+  if (!('PushManager' in window)) return ''
+
+  try {
+    const registration = await navigator.serviceWorker.ready
+    const subscription = await registration.pushManager.getSubscription()
+    return subscription?.endpoint || ''
+  } catch {
+    return ''
+  }
+}
+
+async function consumeServerPushTarget() {
+  try {
+    const endpoint = await getCurrentPushEndpoint()
+
+    if (!endpoint) return
+
+    const res = await fetch('/api/admin/push-target', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ endpoint }),
+    })
+
+    if (!res.ok) return
+
+    const data = await res.json().catch(() => null)
+
+    openPushTarget(data?.url, data?.createdAt)
+  } catch {}
+}
+
+async function checkPushTargets() {
+  await consumeCachedPushTarget()
+  await consumeServerPushTarget()
 }
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('message', event => {
     if (event.data?.type === 'ROSA_MARIA_OPEN_PUSH_TARGET') {
-      openPushTarget(event.data.url)
+      openPushTarget(event.data.url, new Date().toISOString())
     }
   })
 
@@ -54,13 +114,28 @@ if ('serviceWorker' in navigator) {
       .then(registration => registration.update())
       .catch(() => undefined)
 
-    consumeCachedPushTarget()
-    window.setTimeout(() => consumeCachedPushTarget(), 500)
-    window.setTimeout(() => consumeCachedPushTarget(), 1500)
+    checkPushTargets()
+    wait(500).then(checkPushTargets)
+    wait(1500).then(checkPushTargets)
+    wait(3000).then(checkPushTargets)
+  })
+
+  window.addEventListener('focus', () => {
+    checkPushTargets()
+  })
+
+  window.addEventListener('pageshow', () => {
+    checkPushTargets()
+  })
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      checkPushTargets()
+    }
   })
 }
 
-consumeCachedPushTarget()
+checkPushTargets()
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
