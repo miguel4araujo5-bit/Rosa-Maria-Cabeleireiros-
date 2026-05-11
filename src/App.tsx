@@ -52,49 +52,69 @@ function useScrollToTop() {
 
 function PushNotificationNavigation() {
   const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
-    const openPushTarget = (value: unknown) => {
-      if (typeof value !== 'string') return
-      if (!value.startsWith('/admin')) return
+    const pendingKey = 'rosa_maria_pending_push_target'
+    const consumedKey = 'rosa_maria_consumed_push_target'
 
-      navigate(value)
-    }
+    const openPendingTarget = () => {
+      const raw = localStorage.getItem(pendingKey)
+      if (!raw) return
 
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'ROSA_MARIA_OPEN_PUSH_TARGET') {
-        openPushTarget(event.data.url)
+      const data = JSON.parse(raw)
+      const url = typeof data?.url === 'string' ? data.url : ''
+      const createdAt = String(data?.createdAt || '')
+      const timestamp = Date.parse(createdAt)
+      const isFresh = Number.isFinite(timestamp) && Date.now() - timestamp < 1000 * 60 * 10
+
+      if (!url.startsWith('/admin') || !isFresh) {
+        localStorage.removeItem(pendingKey)
+        return
       }
+
+      const consumedValue = `${url}|${createdAt}`
+
+      if (localStorage.getItem(consumedKey) === consumedValue) {
+        localStorage.removeItem(pendingKey)
+        return
+      }
+
+      if (`${location.pathname}${location.search}` === url) {
+        localStorage.setItem(consumedKey, consumedValue)
+        localStorage.removeItem(pendingKey)
+        return
+      }
+
+      navigate(url, { replace: true })
+
+      window.setTimeout(() => {
+        localStorage.setItem(consumedKey, consumedValue)
+        localStorage.removeItem(pendingKey)
+      }, 700)
     }
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('message', handleMessage)
-    }
+    openPendingTarget()
 
-    if ('caches' in window) {
-      caches.open(PUSH_TARGET_CACHE)
-        .then(cache => cache.match(PUSH_TARGET_KEY).then(async response => {
-          if (!response) return
+    const onPushTarget = () => openPendingTarget()
 
-          await cache.delete(PUSH_TARGET_KEY)
+    window.addEventListener('rosa-maria-push-target', onPushTarget)
+    window.addEventListener('focus', onPushTarget)
+    window.addEventListener('pageshow', onPushTarget)
 
-          const data = await response.json().catch(() => null)
-          const createdAt = Date.parse(data?.createdAt || '')
-          const isFresh = Number.isFinite(createdAt) && Date.now() - createdAt < 1000 * 60 * 5
-
-          if (isFresh) {
-            openPushTarget(data?.url)
-          }
-        }))
-        .catch(() => undefined)
-    }
+    const timers = [
+      window.setTimeout(openPendingTarget, 300),
+      window.setTimeout(openPendingTarget, 1000),
+      window.setTimeout(openPendingTarget, 2500),
+    ]
 
     return () => {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.removeEventListener('message', handleMessage)
-      }
+      window.removeEventListener('rosa-maria-push-target', onPushTarget)
+      window.removeEventListener('focus', onPushTarget)
+      window.removeEventListener('pageshow', onPushTarget)
+      timers.forEach(timer => window.clearTimeout(timer))
     }
-  }, [navigate])
+  }, [navigate, location.pathname, location.search])
 
   return null
 }
