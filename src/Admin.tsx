@@ -406,7 +406,6 @@ export default function Admin() {
     const whatsapp = String((app as any)?.whatsapp || '').trim()
     const message = `${name ? `Olá ${name}. ` : ''}A sua marcação foi confirmada, contamos consigo dia ${toWhatsappDateLabel(date)} às ${time} horas.`
     const whatsappUrl = waLink(whatsapp, message)
-    const whatsappWindow = window.open('about:blank', '_blank')
 
     setActionLoading(id)
 
@@ -421,17 +420,10 @@ export default function Admin() {
         )
       )
 
-      if (whatsappWindow) {
-        whatsappWindow.location.href = whatsappUrl
-      } else {
-        window.location.href = whatsappUrl
-      }
-
       await fetchAppointments()
+
+      window.location.href = whatsappUrl
     } catch (err: any) {
-      if (whatsappWindow) {
-        whatsappWindow.close()
-      }
       alert(err?.message ? String(err.message) : 'Erro ao confirmar a marcação.')
     } finally {
       setActionLoading(null)
