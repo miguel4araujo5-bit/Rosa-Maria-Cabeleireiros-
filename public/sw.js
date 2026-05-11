@@ -1,5 +1,7 @@
-const CACHE_NAME = 'rosa-maria-v9'
+const CACHE_NAME = 'rosa-maria-v10'
 const APP_SHELL = ['/', '/manifest.webmanifest', '/favicon.png']
+const PUSH_TARGET_CACHE = 'rosa-maria-push-target'
+const PUSH_TARGET_KEY = '/latest'
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -60,6 +62,23 @@ async function getPushTarget() {
   }
 }
 
+async function savePushTarget(targetPath) {
+  try {
+    const cache = await caches.open(PUSH_TARGET_CACHE)
+    await cache.put(
+      PUSH_TARGET_KEY,
+      new Response(JSON.stringify({
+        url: targetPath,
+        createdAt: new Date().toISOString(),
+      }), {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    )
+  } catch {}
+}
+
 self.addEventListener('push', event => {
   event.waitUntil(
     getPushTarget().then(data => {
@@ -95,21 +114,25 @@ self.addEventListener('notificationclick', event => {
   const targetUrl = new URL(targetPath, self.location.origin).href
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async clientList => {
-      for (const client of clientList) {
-        if (client.url.startsWith(self.location.origin)) {
-          try {
-            if ('navigate' in client) {
-              await client.navigate(targetUrl)
-            }
-            if ('focus' in client) {
-              return client.focus()
-            }
-          } catch {}
-        }
-      }
+    savePushTarget(targetPath).then(() => {
+      return clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async clientList => {
+        for (const client of clientList) {
+          if (client.url.startsWith(self.location.origin)) {
+            try {
+              client.postMessage({
+                type: 'ROSA_MARIA_OPEN_PUSH_TARGET',
+                url: targetPath,
+              })
 
-      return clients.openWindow(targetUrl)
+              if ('focus' in client) {
+                return client.focus()
+              }
+            } catch {}
+          }
+        }
+
+        return clients.openWindow(targetUrl)
+      })
     })
   )
 })
