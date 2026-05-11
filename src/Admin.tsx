@@ -261,7 +261,39 @@ export default function Admin() {
   }, [isLoggedIn])
 
   useEffect(() => {
-    if (searchParams.get('fromPush') !== '1') return
+    if (!isLoggedIn) return
+
+    const targetDate = searchParams.get('date') || ''
+    const targetTime = searchParams.get('time') || ''
+    const targetId = searchParams.get('id') || ''
+    const fromPush = searchParams.get('fromPush') === '1'
+
+    if (targetDate || targetTime || targetId) {
+      const targetAppointment = targetId
+        ? appointments.find((a: any) => String(a?.id || '') === targetId)
+        : null
+
+      const nextDate = targetDate || String((targetAppointment as any)?.date || '')
+      const nextTimes = targetTime ? [targetTime] : safeParseTimes((targetAppointment as any)?.time)
+      const nextTime = nextTimes[0] || ''
+
+      if (nextDate) {
+        const d = new Date(`${nextDate}T00:00:00`)
+        if (!Number.isNaN(d.getTime())) {
+          setCurrentMonth(d)
+          setSelectedDate(nextDate)
+        }
+      }
+
+      if (nextTime) {
+        setPushTargetTime(nextTime)
+      }
+
+      setSearchParams({})
+      return
+    }
+
+    if (!fromPush) return
     if (!appointments.length) return
 
     const latestPending = [...appointments]
@@ -291,7 +323,7 @@ export default function Admin() {
     }
 
     setSearchParams({})
-  }, [appointments, searchParams, setSearchParams])
+  }, [appointments, isLoggedIn, searchParams, setSearchParams])
 
   useEffect(() => {
     if (!pushTargetTime) return
@@ -302,7 +334,7 @@ export default function Admin() {
         target.scrollIntoView({ behavior: 'smooth', block: 'center' })
         setPushTargetTime(null)
       }
-    }, 350)
+    }, 500)
 
     return () => window.clearTimeout(timer)
   }, [pushTargetTime, selectedDate, appointments])
