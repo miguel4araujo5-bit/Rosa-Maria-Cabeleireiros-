@@ -189,6 +189,7 @@ export default function Admin() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [currentMonth, setCurrentMonth] = useState(() => new Date())
   const [selectedDate, setSelectedDate] = useState(() => todayISO())
+  const [pushTargetTime, setPushTargetTime] = useState<string | null>(null)
 
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
@@ -285,16 +286,26 @@ export default function Admin() {
       if (!Number.isNaN(d.getTime())) {
         setCurrentMonth(d)
         setSelectedDate(nextDate)
+        setPushTargetTime(nextTime)
       }
     }
 
-    window.setTimeout(() => {
-      const target = document.querySelector(`[data-appointment-time="${nextTime}"]`)
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }, 500)
-
     setSearchParams({})
   }, [appointments, searchParams, setSearchParams])
+
+  useEffect(() => {
+    if (!pushTargetTime) return
+
+    const timer = window.setTimeout(() => {
+      const target = document.querySelector(`[data-appointment-time="${pushTargetTime}"]`)
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        setPushTargetTime(null)
+      }
+    }, 350)
+
+    return () => window.clearTimeout(timer)
+  }, [pushTargetTime, selectedDate, appointments])
 
   const handleEnablePush = async () => {
     setPushLoading(true)
