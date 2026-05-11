@@ -2,6 +2,7 @@ export interface Env {
   DB: D1Database
   ADMIN_PASSWORD: string
   ASSETS: Fetcher
+  VAPID_SUBJECT?: string
 }
 
 const CORS_HEADERS: Record<string, string> = {
@@ -233,7 +234,7 @@ async function getVapidKeys(db: D1Database) {
   }
 }
 
-async function createVapidJwt(db: D1Database, endpoint: string, requestUrl: string) {
+async function createVapidJwt(db: D1Database, endpoint: string, requestUrl: string, env?: Env) {
   const keys = await getVapidKeys(db)
 
   const privateKey = await crypto.subtle.importKey(
@@ -244,6 +245,8 @@ async function createVapidJwt(db: D1Database, endpoint: string, requestUrl: stri
     ['sign']
   )
 
+  const origin = new URL(requestUrl).origin
+
   const header = {
     typ: 'JWT',
     alg: 'ES256',
@@ -252,7 +255,7 @@ async function createVapidJwt(db: D1Database, endpoint: string, requestUrl: stri
   const payload = {
     aud: new URL(endpoint).origin,
     exp: Math.floor(Date.now() / 1000) + 60 * 60 * 12,
-    sub: new URL(requestUrl).origin,
+    sub: env?.VAPID_SUBJECT || origin,
   }
 
   const unsigned = `${stringToBase64Url(JSON.stringify(header))}.${stringToBase64Url(JSON.stringify(payload))}`
@@ -267,7 +270,7 @@ async function createVapidJwt(db: D1Database, endpoint: string, requestUrl: stri
   return `${unsigned}.${bytesToBase64Url(joseSignature)}`
 }
 
-async function sendAdminBookingPush(db: D1Database, requestUrl: string) {
+async function sendAdminBookingPush(db: D1Database, requestUrl: string, env?: Env) {
   const keys = await getVapidKeys(db)
 
   const { results } = await db.prepare(
@@ -279,7 +282,7 @@ async function sendAdminBookingPush(db: D1Database, requestUrl: string) {
 
   await Promise.all(subscriptions.map(async sub => {
     try {
-      const token = await createVapidJwt(db, sub.endpoint, requestUrl)
+      const token = await createVapidJwt(db, sub.endpoint, requestUrl, env)
 
       const res = await fetch(sub.endpoint, {
         method: 'POST',
@@ -287,6 +290,7 @@ async function sendAdminBookingPush(db: D1Database, requestUrl: string) {
           TTL: '86400',
           Urgency: 'high',
           Authorization: `vapid t=${token}, k=${keys.publicKey}`,
+          'Crypto-Key': `p256ecdsa=${keys.publicKey}`,
         },
       })
 
@@ -413,7 +417,7 @@ export default {
           }
 
           if (notifyAdmin !== false) {
-            ctx.waitUntil(sendAdminBookingPush(env.DB, request.url).catch(() => null))
+            ctx.waitUntil(sendAdminBookingPush(env.DB, request.url, env).catch(() => null))
           }
 
           return json({ success: true, id })
