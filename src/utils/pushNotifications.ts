@@ -50,12 +50,17 @@ function withTimeout<T>(promise: Promise<T>, milliseconds: number, message: stri
 }
 
 async function getServiceWorkerRegistration() {
-  let registration = await navigator.serviceWorker.getRegistration()
+  const existingRegistrations = await navigator.serviceWorker.getRegistrations()
+  let registration = existingRegistrations.find(reg => reg.scope === `${window.location.origin}/`)
 
   if (!registration) {
     registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
-  } else {
-    await registration.update().catch(() => null)
+  }
+
+  await registration.update().catch(() => null)
+
+  if (registration.waiting) {
+    return registration
   }
 
   if (registration.active) {
@@ -99,6 +104,7 @@ export async function readPushNotificationState(): Promise<PushNotificationState
     const subscription = await registration.pushManager.getSubscription()
 
     if (subscription && Notification.permission === 'granted') {
+      await api.savePushSubscription(subscription)
       return 'active'
     }
 
@@ -135,6 +141,7 @@ export async function enablePushNotifications() {
   let subscription = await registration.pushManager.getSubscription()
 
   if (subscription && !sameKey(subscription.options?.applicationServerKey, applicationServerKey)) {
+    await api.deletePushSubscription(subscription).catch(() => null)
     await subscription.unsubscribe()
     subscription = null
   }
