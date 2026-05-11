@@ -270,36 +270,102 @@ async function createVapidJwt(db: D1Database, endpoint: string, requestUrl: stri
   return `${unsigned}.${bytesToBase64Url(joseSignature)}`
 }
 
+async function saveLatestAdminPushTarget(
+  db: D1Database,
+  appointment: {
+    id: string
+    name: string
+    date: string
+    time: string
+  }
+) {
+  const payload = {
+    title: 'Nova marcação recebida',
+    body: `${appointment.name} · ${appointment.date} às ${appointment.time}`,
+    url: `/admin?date=${encodeURIComponent(appointment.date)}&time=${encodeURIComponent(appointment.time)}&id=${encodeURIComponent(appointment.id)}&fromPush=1`,
+    appointmentId: appointment.id,
+    date: appointment.date,
+    time: appointment.time,
+    createdAt: new Date().toISOString(),
+  }
+
+  await db.prepare(`INSERT OR REPLACE INTO push_settings (name, value) VALUES (?, ?)`)
+    .bind('latest_admin_push_target', JSON.stringify(payload))
+    .run()
+}
+
+async function getLatestAdminPushTarget(request: Request, db: D1Database) {
+  const body = await readJson(request) as any
+  const endpoint = body?.endpoint ? String(body.endpoint) : ''
+
+  if (!endpoint) {
+    return json({
+      title: 'Nova marcação recebida',
+      body: 'Toque para abrir o painel.',
+      url: '/admin?fromPush=1',
+    })
+  }
+
+  const subscription = await db.prepare(
+    `SELECT endpoint FROM push_subscriptions WHERE endpoint = ?`
+  )
+    .bind(endpoint)
+    .first<{ endpoint: string }>()
+
+  if (!subscription?.endpoint) {
+    return json({
+      title: 'Nova marcação recebida',
+      body: 'Toque para abrir o painel.',
+      url: '/admin?fromPush=1',
+    })
+  }
+
+  const setting = await db.prepare(
+    `SELECT value FROM push_settings WHERE name = ?`
+  )
+    .bind('latest_admin_push_target')
+    .first<{ value: string }>()
+
+  if (!setting?.value) {
+    return json({
+      title: 'Nova marcação recebida',
+      body: 'Toque para abrir o painel.',
+      url: '/admin?fromPush=1',
+    })
+  }
+
+  try {
+    return json(JSON.parse(setting.value))
+  } catch {
+    return json({
+      title: 'Nova marcação recebida',
+      body: 'Toque para abrir o painel.',
+      url: '/admin?fromPush=1',
+    })
+  }
+}
+
 async function sendAdminBookingPush(
   db: D1Database,
   requestUrl: string,
   appointment: {
     id: string
     name: string
-    whatsapp: string
-    services: string
     date: string
     time: string
   },
   env?: Env
 ) {
+  await saveLatestAdminPushTarget(db, appointment)
+
   const keys = await getVapidKeys(db)
 
   const { results } = await db.prepare(
-    `SELECT endpoint, p256dh, auth FROM push_subscriptions`
-  ).all<{ endpoint: string; p256dh: string; auth: string }>()
+    `SELECT endpoint FROM push_subscriptions`
+  ).all<{ endpoint: string }>()
 
   const subscriptions = results ?? []
   if (subscriptions.length === 0) return
-
-  const payload = JSON.stringify({
-    title: 'Nova marcação',
-    body: `${appointment.name} · ${appointment.date} às ${appointment.time}`,
-    url: `/admin?date=${encodeURIComponent(appointment.date)}&time=${encodeURIComponent(appointment.time)}&id=${encodeURIComponent(appointment.id)}`,
-    appointmentId: appointment.id,
-    date: appointment.date,
-    time: appointment.time,
-  })
 
   await Promise.all(subscriptions.map(async sub => {
     try {
@@ -312,9 +378,7 @@ async function sendAdminBookingPush(
           Urgency: 'high',
           Authorization: `vapid t=${token}, k=${keys.publicKey}`,
           'Crypto-Key': `p256ecdsa=${keys.publicKey}`,
-          'Content-Type': 'application/json',
         },
-        body: payload,
       })
 
       if (res.status === 404 || res.status === 410) {
@@ -396,6 +460,10 @@ export default {
           return json(results ?? [])
         }
 
+        if (pathname === '/api/admin/push-target' && request.method === 'POST') {
+          return getLatestAdminPushTarget(request, env.DB)
+        }
+
         if (pathname === '/api/appointments' && request.method === 'POST') {
           const body = await readJson(request) as any
           if (!body) return json({ error: 'Invalid JSON' }, 400)
@@ -448,8 +516,6 @@ export default {
             ctx.waitUntil(sendAdminBookingPush(env.DB, request.url, {
               id,
               name: appointmentName,
-              whatsapp: appointmentWhatsapp,
-              services: appointmentServices,
               date: appointmentDate,
               time: appointmentTime,
             }, env).catch(() => null))
