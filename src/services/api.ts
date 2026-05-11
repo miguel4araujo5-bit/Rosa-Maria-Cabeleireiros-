@@ -7,10 +7,6 @@ import type {
 
 const ADMIN_TOKEN_KEY = 'rm_admin_token'
 
-/* ===========================
-   Token Helpers
-=========================== */
-
 function getAdminToken(): string | null {
   return localStorage.getItem(ADMIN_TOKEN_KEY)
 }
@@ -22,10 +18,6 @@ function setAdminToken(token: string) {
 function clearAdminToken() {
   localStorage.removeItem(ADMIN_TOKEN_KEY)
 }
-
-/* ===========================
-   Response Handler
-=========================== */
 
 async function parseResponse<T>(res: Response): Promise<T> {
   if (res.status === 401) {
@@ -51,15 +43,13 @@ function authHeaders(): HeadersInit {
   return { Authorization: `Bearer ${token}` }
 }
 
-/* ===========================
-   API
-=========================== */
+function subscriptionEndpoint(value: string | PushSubscription | { endpoint?: string } | null | undefined) {
+  if (!value) return ''
+  if (typeof value === 'string') return value
+  return String(value.endpoint || '')
+}
 
 export const api = {
-  /* ---------------------------
-     PUBLIC
-  --------------------------- */
-
   async getAvailability(): Promise<AvailabilitySlot[]> {
     const res = await fetch('/api/availability')
     return parseResponse<AvailabilitySlot[]>(res)
@@ -81,10 +71,6 @@ export const api = {
 
     await parseResponse<{ success: boolean }>(res)
   },
-
-  /* ---------------------------
-     ADMIN AUTH
-  --------------------------- */
 
   async adminLogin(password: string): Promise<void> {
     const res = await fetch('/api/admin/login', {
@@ -116,10 +102,6 @@ export const api = {
 
     clearAdminToken()
   },
-
-  /* ---------------------------
-     ADMIN DATA
-  --------------------------- */
 
   async getAdminAppointments(): Promise<Appointment[]> {
     const res = await fetch('/api/admin/appointments', {
@@ -187,7 +169,9 @@ export const api = {
     await parseResponse<{ success: boolean }>(res)
   },
 
-  async deletePushSubscription(endpoint: string): Promise<void> {
+  async deletePushSubscription(subscription: string | PushSubscription | { endpoint?: string }): Promise<void> {
+    const endpoint = subscriptionEndpoint(subscription)
+
     const res = await fetch('/api/admin/push-subscriptions', {
       method: 'DELETE',
       headers: {
