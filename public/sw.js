@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rosa-maria-v11'
+const CACHE_NAME = 'rosa-maria-v12'
 const APP_SHELL = ['/', '/manifest.webmanifest', '/favicon.png']
 const PUSH_TARGET_CACHE = 'rosa-maria-push-target'
 const PUSH_TARGET_KEY = '/latest'
@@ -81,12 +81,14 @@ async function savePushTarget(targetPath) {
 
 self.addEventListener('push', event => {
   event.waitUntil(
-    getPushTarget().then(data => {
+    getPushTarget().then(async data => {
       const title = data.title || 'Nova marcação recebida'
       const targetUrl = data.url || '/admin?fromPush=1'
       const notificationTag = data.appointmentId
         ? `rosa-maria-marcacao-${data.appointmentId}`
         : `rosa-maria-marcacao-${Date.now()}`
+
+      await savePushTarget(targetUrl)
 
       return self.registration.showNotification(title, {
         body: data.body || 'Toque para abrir a marcação no painel.',
