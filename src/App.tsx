@@ -51,70 +51,162 @@ function useScrollToTop() {
 }
 
 function PushNotificationNavigation() {
-  const navigate = useNavigate()
   const location = useLocation()
 
   useEffect(() => {
     const pendingKey = 'rosa_maria_pending_push_target'
     const consumedKey = 'rosa_maria_consumed_push_target'
 
-    const openPendingTarget = () => {
-      const raw = localStorage.getItem(pendingKey)
-      if (!raw) return
+    const normalizeTargetUrl = (value: string) => {
+      try {
+        const target = new URL(value, window.location.origin)
 
-      const data = JSON.parse(raw)
-      const url = typeof data?.url === 'string' ? data.url : ''
-      const createdAt = String(data?.createdAt || '')
-      const timestamp = Date.parse(createdAt)
-      const isFresh = Number.isFinite(timestamp) && Date.now() - timestamp < 1000 * 60 * 10
+        if (target.origin !== window.location.origin) {
+          return ''
+        }
 
-      if (!url.startsWith('/admin') || !isFresh) {
-        localStorage.removeItem(pendingKey)
-        return
+        if (!target.pathname.startsWith(ADMIN_PATH)) {
+          return ''
+        }
+
+        return `${target.pathname}${target.search}${target.hash}`
+      } catch {
+        return ''
       }
+    }
 
-      const consumedValue = `${url}|${createdAt}`
+    const savePendingTarget = (url: string, createdAt?: string) => {
+      const normalizedUrl = normalizeTargetUrl(url)
+      if (!normalizedUrl) return
+
+      localStorage.setItem(
+        pendingKey,
+        JSON.stringify({
+          url: normalizedUrl,
+          createdAt: createdAt || new Date().toISOString(),
+        })
+      )
+    }
+
+    const readPendingTarget = () => {
+      try {
+        const raw = localStorage.getItem(pendingKey)
+        if (!raw) return null
+
+        const data = JSON.parse(raw)
+        const url = normalizeTargetUrl(typeof data?.url === 'string' ? data.url : '')
+        const createdAt = String(data?.createdAt || '')
+        const timestamp = Date.parse(createdAt)
+        const isFresh = Number.isFinite(timestamp) && Date.now() - timestamp < 1000 * 60 * 10
+
+        if (!url || !isFresh) {
+          localStorage.removeItem(pendingKey)
+          return null
+        }
+
+        return { url, createdAt }
+      } catch {
+        localStorage.removeItem(pendingKey)
+        return null
+      }
+    }
+
+    const consumeTarget = (url: string, createdAt: string) => {
+      localStorage.setItem(consumedKey, `${url}|${createdAt}`)
+      localStorage.removeItem(pendingKey)
+    }
+
+    const openPendingTarget = () => {
+      const target = readPendingTarget()
+      if (!target) return
+
+      const consumedValue = `${target.url}|${target.createdAt}`
 
       if (localStorage.getItem(consumedKey) === consumedValue) {
         localStorage.removeItem(pendingKey)
         return
       }
 
-      if (`${location.pathname}${location.search}` === url) {
-        localStorage.setItem(consumedKey, consumedValue)
-        localStorage.removeItem(pendingKey)
+      const currentUrl = `${location.pathname}${location.search}${location.hash}`
+
+      if (currentUrl === target.url) {
+        consumeTarget(target.url, target.createdAt)
         return
       }
 
-      navigate(url, { replace: true })
+      consumeTarget(target.url, target.createdAt)
+      window.location.assign(target.url)
+    }
 
-      window.setTimeout(() => {
-        localStorage.setItem(consumedKey, consumedValue)
-        localStorage.removeItem(pendingKey)
-      }, 700)
+    const readCachedTarget = async () => {
+      try {
+        if (!('caches' in window)) return
+
+        const cache = await caches.open(PUSH_TARGET_CACHE)
+        const response = await cache.match(PUSH_TARGET_KEY)
+
+        if (!response) return
+
+        const data = await response.json()
+        const url = typeof data?.url === 'string' ? data.url : ''
+        const createdAt = String(data?.createdAt || '')
+
+        if (!url) return
+
+        savePendingTarget(url, createdAt)
+        openPendingTarget()
+      } catch {}
+    }
+
+    const onServiceWorkerMessage = (event: MessageEvent) => {
+      const data = event.data || {}
+
+      if (data.type !== 'ROSA_MARIA_OPEN_PUSH_TARGET') {
+        return
+      }
+
+      const url = typeof data.url === 'string' ? data.url : ''
+
+      if (!url) return
+
+      savePendingTarget(url)
+      openPendingTarget()
+    }
+
+    const onPushTarget = () => {
+      openPendingTarget()
+      readCachedTarget()
     }
 
     openPendingTarget()
-
-    const onPushTarget = () => openPendingTarget()
+    readCachedTarget()
 
     window.addEventListener('rosa-maria-push-target', onPushTarget)
     window.addEventListener('focus', onPushTarget)
     window.addEventListener('pageshow', onPushTarget)
 
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', onServiceWorkerMessage)
+    }
+
     const timers = [
-      window.setTimeout(openPendingTarget, 300),
-      window.setTimeout(openPendingTarget, 1000),
-      window.setTimeout(openPendingTarget, 2500),
+      window.setTimeout(onPushTarget, 300),
+      window.setTimeout(onPushTarget, 1000),
+      window.setTimeout(onPushTarget, 2500),
     ]
 
     return () => {
       window.removeEventListener('rosa-maria-push-target', onPushTarget)
       window.removeEventListener('focus', onPushTarget)
       window.removeEventListener('pageshow', onPushTarget)
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', onServiceWorkerMessage)
+      }
+
       timers.forEach(timer => window.clearTimeout(timer))
     }
-  }, [navigate, location.pathname, location.search])
+  }, [location.pathname, location.search, location.hash])
 
   return null
 }
@@ -583,8 +675,8 @@ function AppShell({ children }: { children: React.ReactNode }) {
       <footer className="bg-brand-ink text-white pt-14 md:pt-24 pb-12 md:pb-18">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-14 lg:gap-18 mb-12 md:mb-14">
-            <div className="space-y-6">
-              <Link to="/" className="inline-flex flex-col group items-start">
+            <div className="space-y-6 flex flex-col items-center text-center md:items-start md:text-left">
+              <Link to="/" className="inline-flex flex-col group items-center md:items-start">
                 <Logo />
               </Link>
 
@@ -614,7 +706,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="space-y-6">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center md:justify-start gap-4">
                 <div className="h-px w-10 bg-brand-gold/50"></div>
                 <h4 className="text-[11px] uppercase tracking-[0.45em] text-brand-gold font-bold">
                   Contacto
@@ -624,13 +716,13 @@ function AppShell({ children }: { children: React.ReactNode }) {
               <div className="space-y-5">
                 <a
                   href="tel:+351229013475"
-                  className="flex items-start gap-4 text-stone-200 font-medium text-lg hover:text-brand-gold transition-colors"
+                  className="flex items-start justify-center md:justify-start gap-4 text-stone-200 font-medium text-lg hover:text-brand-gold transition-colors"
                 >
                   <Phone size={22} className="text-brand-gold shrink-0 mt-0.5" />
                   +351 229 013 475
                 </a>
 
-                <p className="leading-7 text-stone-400 text-[15px] md:text-[16px]">
+                <p className="leading-7 text-stone-400 text-[15px] md:text-[16px] text-center md:text-left">
                   Rua de Cinco de Outubro 5498<br />
                   4465-080 São Mamede de Infesta, Matosinhos<br />
                   Portugal
@@ -683,7 +775,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="space-y-6">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center md:justify-start gap-4">
                 <div className="h-px w-10 bg-brand-gold/50"></div>
                 <h4 className="text-[11px] uppercase tracking-[0.45em] text-brand-gold font-bold">
                   Horário
