@@ -277,18 +277,18 @@ function Booking() {
   }
 
   const sendWhatsAppToManager = () => {
-  const labels = serviceLabels(formData.selectedServices)
-  const observationText = formData.observation?.trim()
+    const labels = serviceLabels(formData.selectedServices)
+    const observationText = formData.observation?.trim()
 
-  const message = [
-    `Olá! O meu nome é ${formData.name}.`,
-    `Gostaria de fazer uma marcação para ${labels.join(', ')}, no dia ${toPTDateLabel(formData.date)} às ${formData.time}.`,
-    'Será possível confirmar, por favor?',
-    observationText ? `Observação: ${observationText}` : ''
-  ].filter(Boolean).join('\n')
+    const message = [
+      `Olá! O meu nome é ${formData.name}.`,
+      `Gostaria de fazer uma marcação para ${labels.join(', ')}, no dia ${toPTDateLabel(formData.date)} às ${formData.time}.`,
+      'Será possível confirmar, por favor?',
+      observationText ? `Observação: ${observationText}` : ''
+    ].filter(Boolean).join('\n')
 
-  window.open(`https://wa.me/${MANAGER_WHATSAPP}?text=${encodeURIComponent(message)}`, '_blank', 'noreferrer')
-}
+    window.open(`https://wa.me/${MANAGER_WHATSAPP}?text=${encodeURIComponent(message)}`, '_blank', 'noreferrer')
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -580,7 +580,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
       <main>{children}</main>
       <InstallPrompt />
 
-      <footer className="bg-brand-ink text-white pt-20 md:pt-24 pb-14 md:pb-18">
+      <footer className="bg-brand-ink text-white pt-14 md:pt-24 pb-12 md:pb-18">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-14 lg:gap-18 mb-12 md:mb-14">
             <div className="space-y-6">
@@ -588,7 +588,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                 <Logo />
               </Link>
 
-              <p className="max-w-[18ch] text-stone-400 font-medium text-[clamp(17px,4.5vw,28px)] leading-[1.45] tracking-[0.01em]">
+              <p className="max-w-[30ch] md:max-w-[18ch] text-stone-400 font-medium text-[15px] md:text-[clamp(17px,4.5vw,28px)] leading-[1.65] md:leading-[1.45] tracking-[0.01em]">
                 Há mais de 40 anos a cuidar da beleza e da confiança das nossas clientes em São Mamede de Infesta.
               </p>
 
@@ -648,16 +648,16 @@ function AppShell({ children }: { children: React.ReactNode }) {
                   />
                 </div>
 
-               <div className="grid grid-cols-1 gap-3">
-                <a
-                 href="https://waze.com/ul?q=Rosa%20Maria%20Cabeleireiros%2C%20Rua%205%20de%20Outubro%205498%2C%204465-080%20S%C3%A3o%20Mamede%20de%20Infesta%2C%20Matosinhos%2C%20Portugal&navigate=yes"
-                 target="_blank"
-                  rel="noopener noreferrer"
-                className="flex items-center justify-center gap-3 rounded-2xl border border-brand-gold bg-white text-brand-ink px-5 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-brand-ink hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-brand-gold active:border-brand-gold active:text-black"
-                >
-                <img src={wazeIcon} className="w-5 h-5 object-contain" alt="Waze" />
-                <span className="text-[15px] font-medium tracking-[0.06em]">Waze</span>
-                </a>
+                <div className="grid grid-cols-1 gap-3">
+                  <a
+                    href="https://waze.com/ul?q=Rosa%20Maria%20Cabeleireiros%2C%20Rua%205%20de%20Outubro%205498%2C%204465-080%20S%C3%A3o%20Mamede%20de%20Infesta%2C%20Matosinhos%2C%20Portugal&navigate=yes"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-3 rounded-2xl border border-brand-gold bg-white text-brand-ink px-5 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-brand-ink hover:shadow-[0_14px_32px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.985] active:bg-brand-gold active:border-brand-gold active:text-black"
+                  >
+                    <img src={wazeIcon} className="w-5 h-5 object-contain" alt="Waze" />
+                    <span className="text-[15px] font-medium tracking-[0.06em]">Waze</span>
+                  </a>
 
                   <a
                     href="https://maps.app.goo.gl/V1zjmbgj3yFsqsbS8"
