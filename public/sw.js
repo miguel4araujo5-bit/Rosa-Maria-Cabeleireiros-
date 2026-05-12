@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rosa-maria-v12'
+const CACHE_NAME = 'rosa-maria-v13'
 const APP_SHELL = ['/', '/manifest.webmanifest', '/favicon.png']
 const PUSH_TARGET_CACHE = 'rosa-maria-push-target'
 const PUSH_TARGET_KEY = '/latest'
@@ -14,7 +14,11 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
+      .then(keys => Promise.all(
+        keys
+          .filter(key => key !== CACHE_NAME && key !== PUSH_TARGET_CACHE)
+          .map(key => caches.delete(key))
+      ))
       .then(() => self.clients.claim())
   )
 })
