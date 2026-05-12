@@ -6,17 +6,84 @@ import type {
 } from '../types'
 
 const ADMIN_TOKEN_KEY = 'rm_admin_token'
+const ADMIN_TOKEN_MAX_AGE = 60 * 60 * 24 * 90
+
+function readLocalToken(): string | null {
+  try {
+    return localStorage.getItem(ADMIN_TOKEN_KEY)
+  } catch {
+    return null
+  }
+}
+
+function writeLocalToken(token: string) {
+  try {
+    localStorage.setItem(ADMIN_TOKEN_KEY, token)
+  } catch {}
+}
+
+function removeLocalToken() {
+  try {
+    localStorage.removeItem(ADMIN_TOKEN_KEY)
+  } catch {}
+}
+
+function getCookieToken(): string | null {
+  try {
+    const cookies = document.cookie.split(';').map(item => item.trim())
+    const found = cookies.find(item => item.startsWith(`${ADMIN_TOKEN_KEY}=`))
+    if (!found) return null
+    const value = found.slice(ADMIN_TOKEN_KEY.length + 1)
+    return decodeURIComponent(value || '')
+  } catch {
+    return null
+  }
+}
+
+function setCookieToken(token: string) {
+  try {
+    const secure = window.location.protocol === 'https:' ? '; Secure' : ''
+    const encoded = encodeURIComponent(token)
+    document.cookie = `${ADMIN_TOKEN_KEY}=${encoded}; Max-Age=${ADMIN_TOKEN_MAX_AGE}; Path=/; SameSite=Lax${secure}`
+
+    if (window.location.hostname === 'rosa-maria.pt' || window.location.hostname.endsWith('.rosa-maria.pt')) {
+      document.cookie = `${ADMIN_TOKEN_KEY}=${encoded}; Max-Age=${ADMIN_TOKEN_MAX_AGE}; Path=/; Domain=.rosa-maria.pt; SameSite=Lax${secure}`
+    }
+  } catch {}
+}
+
+function clearCookieToken() {
+  try {
+    const secure = window.location.protocol === 'https:' ? '; Secure' : ''
+    document.cookie = `${ADMIN_TOKEN_KEY}=; Max-Age=0; Path=/; SameSite=Lax${secure}`
+
+    if (window.location.hostname === 'rosa-maria.pt' || window.location.hostname.endsWith('.rosa-maria.pt')) {
+      document.cookie = `${ADMIN_TOKEN_KEY}=; Max-Age=0; Path=/; Domain=.rosa-maria.pt; SameSite=Lax${secure}`
+    }
+  } catch {}
+}
 
 function getAdminToken(): string | null {
-  return localStorage.getItem(ADMIN_TOKEN_KEY)
+  const localToken = readLocalToken()
+  if (localToken) return localToken
+
+  const cookieToken = getCookieToken()
+  if (cookieToken) {
+    writeLocalToken(cookieToken)
+    return cookieToken
+  }
+
+  return null
 }
 
 function setAdminToken(token: string) {
-  localStorage.setItem(ADMIN_TOKEN_KEY, token)
+  writeLocalToken(token)
+  setCookieToken(token)
 }
 
 function clearAdminToken() {
-  localStorage.removeItem(ADMIN_TOKEN_KEY)
+  removeLocalToken()
+  clearCookieToken()
 }
 
 async function parseResponse<T>(res: Response): Promise<T> {
