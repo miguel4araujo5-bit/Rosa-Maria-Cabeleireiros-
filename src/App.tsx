@@ -35,6 +35,33 @@ const TIMES = [
   '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00',
 ] as const
 
+const INSTAGRAM_GALLERY = [
+  {
+    src: '/instagram/salao-01-loiro-liso.jpg',
+    alt: 'Cabelo loiro liso realizado no salão Rosa Maria Cabeleireiros',
+  },
+  {
+    src: '/instagram/salao-02-madeixas-onduladas.jpg',
+    alt: 'Madeixas onduladas realizadas no salão Rosa Maria Cabeleireiros',
+  },
+  {
+    src: '/instagram/salao-03-loiro-curto.jpg',
+    alt: 'Cabelo loiro curto com movimento realizado no salão Rosa Maria Cabeleireiros',
+  },
+  {
+    src: '/instagram/salao-04-castanho-dourado.jpg',
+    alt: 'Cabelo castanho dourado realizado no salão Rosa Maria Cabeleireiros',
+  },
+  {
+    src: '/instagram/salao-05-penteado.jpg',
+    alt: 'Penteado realizado no salão Rosa Maria Cabeleireiros',
+  },
+  {
+    src: '/instagram/salao-06-interior.jpg',
+    alt: 'Interior do salão Rosa Maria Cabeleireiros em São Mamede de Infesta',
+  },
+] as const
+
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ')
 }
@@ -678,6 +705,41 @@ function Booking() {
   )
 }
 
+function InstagramGallery() {
+  return (
+    <div className="w-full max-w-[330px] md:max-w-[360px]">
+      <div className="flex items-center justify-center md:justify-start gap-3">
+        <div className="h-px w-8 bg-brand-gold/45"></div>
+        <p className="text-[10px] uppercase tracking-[0.32em] text-brand-gold font-bold">
+          Momentos no salão
+        </p>
+      </div>
+
+      <div className="-mx-1 mt-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex gap-3 px-1 snap-x snap-mandatory">
+          {INSTAGRAM_GALLERY.map((image) => (
+            <a
+              key={image.src}
+              href="https://www.instagram.com/cabeleireirorosamaria?igsh=YWh2dTh3aHd6aXNu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative h-28 w-24 md:h-32 md:w-28 shrink-0 snap-start overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_14px_32px_rgba(0,0,0,0.24)] transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-gold/45"
+            >
+              <img
+                src={image.src}
+                alt={image.alt}
+                loading="lazy"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent"></div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function AppShell({ children }: { children: React.ReactNode }) {
   useScrollToTop()
 
@@ -696,8 +758,10 @@ function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
 
               <p className="max-w-[30ch] md:max-w-[18ch] text-stone-400 font-medium text-[15px] md:text-[clamp(17px,4.5vw,28px)] leading-[1.65] md:leading-[1.45] tracking-[0.01em]">
-                Há mais de 40 anos a cuidar da beleza e da confiança das nossas clientes em São Mamede de Infesta.
+              Há mais de 40 anos a cuidar da beleza e da confiança das nossas clientes em São Mamede de Infesta.
               </p>
+
+              <InstagramGallery />
 
               <div className="flex items-center gap-4">
                 <a
