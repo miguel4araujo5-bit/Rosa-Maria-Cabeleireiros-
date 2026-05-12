@@ -642,6 +642,31 @@ export default function Admin() {
     ).length
   }
 
+    const firstBookingTimeOnDay = (dateStr: string) => {
+    const times = appointments
+      .filter(a =>
+        String((a as any).date) === dateStr &&
+        (String((a as any).status) === 'por_confirmar' || String((a as any).status) === 'confirmado')
+      )
+      .flatMap(a => safeParseTimes((a as any).time))
+      .filter(time => TIMES.includes(time as any))
+      .sort((a, b) => TIMES.indexOf(a as any) - TIMES.indexOf(b as any))
+
+    return times[0] || ''
+  }
+
+  const selectCalendarDate = (dateStr: string) => {
+    setSelectedDate(dateStr)
+
+    const firstTime = firstBookingTimeOnDay(dateStr)
+
+    if (firstTime) {
+      setPushTargetTime(firstTime)
+    } else {
+      setPushTargetTime(null)
+    }
+  }
+  
   const dayApps = useMemo(() => {
     return appointments.filter(a => String((a as any).date) === selectedDate)
   }, [appointments, selectedDate])
@@ -795,7 +820,7 @@ export default function Admin() {
                   <button
                     key={idx}
                     type="button"
-                    onClick={() => setSelectedDate(dateStr)}
+                    onClick={() => selectCalendarDate(dateStr)}
                     className={cn(
                       "aspect-square flex flex-col items-center justify-center rounded-2xl border-2 transition-all relative",
                       !isCurrent && "opacity-20 border-transparent",
