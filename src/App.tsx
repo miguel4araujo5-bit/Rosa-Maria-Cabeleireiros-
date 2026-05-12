@@ -734,7 +734,7 @@ function InstagramGallery() {
         <div className="flex items-center justify-center md:justify-start gap-3">
           <div className="h-px w-8 bg-brand-gold/45"></div>
           <p className="text-[10px] uppercase tracking-[0.32em] text-brand-gold font-bold">
-            Momentos no salão
+            Beleza em detalhe
           </p>
         </div>
 
