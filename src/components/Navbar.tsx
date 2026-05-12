@@ -14,11 +14,11 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#e7dccb]/80 bg-[#f7f2ea]/86 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-12">
-        <div className="flex justify-between h-24 md:h-28 items-center">
+        <div className="flex justify-between h-20 md:h-28 items-center">
           <Link
             to="/"
             onClick={() => setIsOpen(false)}
-            className="flex items-center py-2"
+            className="flex items-center py-1 origin-left scale-[0.86] md:scale-100 transition-transform"
           >
             <Logo variant="navbar" />
           </Link>
@@ -69,21 +69,21 @@ export default function Navbar() {
 
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden flex items-center justify-center h-14 w-14 rounded-none border border-[#eadfce] bg-white/18 text-brand-ink shadow-[0_4px_14px_rgba(0,0,0,0.03)] transition-colors hover:bg-white/28"
+            className="md:hidden flex items-center justify-center h-12 w-12 rounded-none border border-[#eadfce] bg-white/18 text-brand-ink shadow-[0_4px_14px_rgba(0,0,0,0.03)] transition-colors hover:bg-white/28"
             aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
           >
-            {isOpen ? <X size={30} strokeWidth={1.8} /> : <Menu size={30} strokeWidth={1.8} />}
+            {isOpen ? <X size={27} strokeWidth={1.8} /> : <Menu size={27} strokeWidth={1.8} />}
           </button>
         </div>
       </div>
 
       {isOpen && (
         <div className="md:hidden overflow-hidden border-b border-[#e7dccb]/80 bg-[#f7f2ea]/95 backdrop-blur-xl">
-          <div className="px-8 py-14 space-y-9 text-center">
+          <div className="px-8 py-10 space-y-7 text-center">
             <Link
               to="/"
               onClick={() => setIsOpen(false)}
-              className="block text-lg uppercase tracking-[0.3em] text-stone-700 font-bold"
+              className="block text-base uppercase tracking-[0.3em] text-stone-700 font-bold"
             >
               Início
             </Link>
@@ -91,7 +91,7 @@ export default function Navbar() {
             <Link
               to="/servicos"
               onClick={() => setIsOpen(false)}
-              className="block text-lg uppercase tracking-[0.3em] text-stone-700 font-bold"
+              className="block text-base uppercase tracking-[0.3em] text-stone-700 font-bold"
             >
               Serviços
             </Link>
@@ -99,7 +99,7 @@ export default function Navbar() {
             <Link
               to="/marcacao"
               onClick={() => setIsOpen(false)}
-              className="block text-lg uppercase tracking-[0.3em] text-brand-ink font-black"
+              className="block text-base uppercase tracking-[0.3em] text-brand-ink font-black"
             >
               Agendar Agora
             </Link>
