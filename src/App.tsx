@@ -706,37 +706,98 @@ function Booking() {
 }
 
 function InstagramGallery() {
-  return (
-    <div className="w-full max-w-[330px] md:max-w-[360px]">
-      <div className="flex items-center justify-center md:justify-start gap-3">
-        <div className="h-px w-8 bg-brand-gold/45"></div>
-        <p className="text-[10px] uppercase tracking-[0.32em] text-brand-gold font-bold">
-          Momentos no salão
-        </p>
-      </div>
+  const [selectedImage, setSelectedImage] = useState<(typeof INSTAGRAM_GALLERY)[number] | null>(null)
 
-      <div className="-mx-1 mt-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div className="flex gap-3 px-1 snap-x snap-mandatory">
-          {INSTAGRAM_GALLERY.map((image) => (
-            <a
-              key={image.src}
-              href="https://www.instagram.com/cabeleireirorosamaria?igsh=YWh2dTh3aHd6aXNu"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative h-28 w-24 md:h-32 md:w-28 shrink-0 snap-start overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_14px_32px_rgba(0,0,0,0.24)] transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-gold/45"
-            >
-              <img
-                src={image.src}
-                alt={image.alt}
-                loading="lazy"
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent"></div>
-            </a>
-          ))}
+  useEffect(() => {
+    if (!selectedImage) return
+
+    const originalOverflow = document.body.style.overflow
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedImage(null)
+      }
+    }
+
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = originalOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [selectedImage])
+
+  return (
+    <>
+      <div className="w-full max-w-[330px] md:max-w-[360px]">
+        <div className="flex items-center justify-center md:justify-start gap-3">
+          <div className="h-px w-8 bg-brand-gold/45"></div>
+          <p className="text-[10px] uppercase tracking-[0.32em] text-brand-gold font-bold">
+            Momentos no salão
+          </p>
+        </div>
+
+        <div className="-mx-1 mt-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-3 px-1 snap-x snap-mandatory">
+            {INSTAGRAM_GALLERY.map((image) => (
+              <button
+                key={image.src}
+                type="button"
+                onClick={() => setSelectedImage(image)}
+                className="group relative h-28 w-24 md:h-32 md:w-28 shrink-0 snap-start overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_14px_32px_rgba(0,0,0,0.24)] transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-gold/45"
+              >
+                <img
+                  src={image.src}
+                  alt={image.alt}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent"></div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 px-5 py-8 backdrop-blur-md"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div
+            className="relative w-full max-w-[420px] rounded-[32px] border border-brand-gold/35 bg-brand-ink p-3 shadow-[0_30px_90px_rgba(0,0,0,0.55)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setSelectedImage(null)}
+              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white backdrop-blur-md transition-all duration-300 hover:bg-brand-gold hover:text-black"
+              aria-label="Fechar imagem"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="overflow-hidden rounded-[24px] bg-black">
+              <img
+                src={selectedImage.src}
+                alt={selectedImage.alt}
+                className="max-h-[68vh] w-full object-contain"
+              />
+            </div>
+
+            <div className="px-3 pb-2 pt-5 text-center">
+              <p className="font-serif text-2xl italic text-white">
+                Rosa Maria Cabeleireiros
+              </p>
+              <p className="mt-2 text-[10px] uppercase tracking-[0.34em] text-brand-gold font-bold">
+                São Mamede de Infesta
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
