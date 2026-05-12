@@ -5,7 +5,7 @@ import whatsappIcon from '../assets/icons/whatsapp.svg'
 export default function FloatingNav() {
   const location = useLocation()
 
-  if (location.pathname === '/admin') {
+  if (location.pathname.startsWith('/admin')) {
     return null
   }
 
@@ -21,20 +21,20 @@ export default function FloatingNav() {
   }
 
   return (
-    <div className="fixed bottom-3 right-3 md:bottom-6 md:right-6 z-50 flex flex-col gap-3">
+    <div className="fixed bottom-5 right-5 md:bottom-6 md:right-6 z-50 flex flex-col gap-3">
       <button
         onClick={openWhatsApp}
         aria-label="Contactar pelo WhatsApp"
-        className="flex items-center gap-2 md:gap-3 rounded-full bg-[#25D366] px-4 py-3 md:px-6 md:py-4 text-sm md:text-sm font-semibold text-white shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-all duration-200 hover:scale-105 active:scale-[0.98]"
+        className="flex h-14 w-14 md:h-auto md:w-auto items-center justify-center md:gap-3 rounded-full bg-[#25D366] p-0 md:px-6 md:py-4 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-all duration-200 hover:scale-105 active:scale-[0.98]"
       >
         <img
           src={whatsappIcon}
           alt=""
-          className="h-5 w-5 md:h-6 md:w-6"
+          className="h-7 w-7 md:h-6 md:w-6"
           aria-hidden="true"
         />
 
-        <span className="leading-none">WhatsApp</span>
+        <span className="hidden md:inline leading-none">WhatsApp</span>
       </button>
     </div>
   )
