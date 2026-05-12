@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
+
 import Logo from './Logo'
+
 import visaIcon from './assets/icons/visa.svg'
+
 import applePayIcon from './assets/icons/applepay.svg'
 import mbwayIcon from './assets/icons/mbway-seeklogo.png'
 
@@ -56,10 +59,6 @@ export default function Home() {
             </Link>
           </div>
         </div>
-
-        <div className="absolute bottom-14 left-1/2 -translate-x-1/2 hidden md:block">
-          <div className="w-px h-24 bg-gradient-to-b from-brand-gold to-transparent opacity-80"></div>
-        </div>
       </section>
 
       <section className="px-6 pt-8 md:pt-10 pb-16 md:pb-20 bg-brand-paper">
@@ -68,9 +67,11 @@ export default function Home() {
             <span className="section-subtitle tracking-[0.38em]">
               Em destaque
             </span>
+
             <h2 className="section-title">
               Cuidado, beleza e elegância
             </h2>
+
             <p className="mt-5 text-stone-500 text-[15px] md:text-[16px] leading-7 font-medium">
               Uma seleção de serviços pensados para valorizar a sua imagem com elegância, técnica e atenção ao detalhe.
             </p>
