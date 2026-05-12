@@ -7,21 +7,9 @@ import ErrorBoundary from './components/ErrorBoundary'
 const PUSH_TARGET_CACHE = 'rosa-maria-push-target'
 const PUSH_TARGET_KEY = '/latest'
 const PUSH_TARGET_PENDING_KEY = 'rosa_maria_pending_push_target'
-const PUSH_TARGET_CONSUMED_KEY = 'rosa_maria_consumed_push_target'
 
-function normalizePushTarget(value: unknown) {
-  try {
-    if (typeof value !== 'string') return ''
-
-    const target = new URL(value, window.location.origin)
-
-    if (target.origin !== window.location.origin) return ''
-    if (!target.pathname.startsWith('/admin')) return ''
-
-    return `${target.pathname}${target.search}${target.hash}`
-  } catch {
-    return ''
-  }
+function isAdminTarget(value: unknown) {
+  return typeof value === 'string' && value.startsWith('/admin')
 }
 
 function isFreshTarget(createdAt: unknown) {
@@ -29,34 +17,13 @@ function isFreshTarget(createdAt: unknown) {
   return Number.isFinite(timestamp) && Date.now() - timestamp < 1000 * 60 * 10
 }
 
-function wasTargetConsumed(url: string) {
-  const consumed = localStorage.getItem(PUSH_TARGET_CONSUMED_KEY) || ''
-  return consumed.startsWith(`${url}|`)
-}
-
 function savePendingPushTarget(url: unknown, createdAt: unknown) {
-  const targetUrl = normalizePushTarget(url)
-  if (!targetUrl) return
-
-  const targetCreatedAt = String(createdAt || new Date().toISOString())
-  if (!isFreshTarget(targetCreatedAt)) return
-
-  const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`
-
-  if (currentUrl === targetUrl) {
-    localStorage.setItem(PUSH_TARGET_CONSUMED_KEY, `${targetUrl}|${targetCreatedAt}`)
-    localStorage.removeItem(PUSH_TARGET_PENDING_KEY)
-    return
-  }
-
-  if (wasTargetConsumed(targetUrl)) {
-    localStorage.removeItem(PUSH_TARGET_PENDING_KEY)
-    return
-  }
+  if (!isAdminTarget(url)) return
+  if (!isFreshTarget(createdAt)) return
 
   localStorage.setItem(PUSH_TARGET_PENDING_KEY, JSON.stringify({
-    url: targetUrl,
-    createdAt: targetCreatedAt,
+    url: String(url),
+    createdAt: String(createdAt || new Date().toISOString()),
   }))
 
   window.dispatchEvent(new CustomEvent('rosa-maria-push-target'))
