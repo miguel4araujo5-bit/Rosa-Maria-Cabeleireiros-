@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rosa-maria-v13'
+const CACHE_NAME = 'rosa-maria-v14'
 const APP_SHELL = ['/', '/manifest.webmanifest', '/favicon.png']
 const PUSH_TARGET_CACHE = 'rosa-maria-push-target'
 const PUSH_TARGET_KEY = '/latest'
@@ -39,6 +39,24 @@ self.addEventListener('fetch', event => {
   event.respondWith(fetch(request).catch(() => caches.match(request)))
 })
 
+function normalizePushTarget(value) {
+  try {
+    const target = new URL(value || '/admin?fromPush=1', self.location.origin)
+
+    if (target.origin !== self.location.origin) {
+      return '/admin?fromPush=1'
+    }
+
+    if (!target.pathname.startsWith('/admin')) {
+      return '/admin?fromPush=1'
+    }
+
+    return `${target.pathname}${target.search}${target.hash}`
+  } catch {
+    return '/admin?fromPush=1'
+  }
+}
+
 async function getPushTarget() {
   try {
     const subscription = await self.registration.pushManager.getSubscription()
@@ -66,14 +84,14 @@ async function getPushTarget() {
   }
 }
 
-async function savePushTarget(targetPath) {
+async function savePushTarget(targetPath, createdAt) {
   try {
     const cache = await caches.open(PUSH_TARGET_CACHE)
     await cache.put(
       PUSH_TARGET_KEY,
       new Response(JSON.stringify({
-        url: targetPath,
-        createdAt: new Date().toISOString(),
+        url: normalizePushTarget(targetPath),
+        createdAt: createdAt || new Date().toISOString(),
       }), {
         headers: {
           'Content-Type': 'application/json',
@@ -87,12 +105,13 @@ self.addEventListener('push', event => {
   event.waitUntil(
     getPushTarget().then(async data => {
       const title = data.title || 'Nova marcação recebida'
-      const targetUrl = data.url || '/admin?fromPush=1'
+      const targetUrl = normalizePushTarget(data.url || '/admin?fromPush=1')
+      const createdAt = new Date().toISOString()
       const notificationTag = data.appointmentId
         ? `rosa-maria-marcacao-${data.appointmentId}`
         : `rosa-maria-marcacao-${Date.now()}`
 
-      await savePushTarget(targetUrl)
+      await savePushTarget(targetUrl, createdAt)
 
       return self.registration.showNotification(title, {
         body: data.body || 'Toque para abrir a marcação no painel.',
@@ -100,6 +119,7 @@ self.addEventListener('push', event => {
         badge: '/favicon.png',
         data: {
           url: targetUrl,
+          createdAt,
           appointmentId: data.appointmentId || null,
           date: data.date || null,
           time: data.time || null,
@@ -116,32 +136,26 @@ self.addEventListener('notificationclick', event => {
   event.notification.close()
 
   const data = event.notification.data || {}
-  const targetPath = data.url || '/admin?fromPush=1'
+  const targetPath = normalizePushTarget(data.url || '/admin?fromPush=1')
+  const createdAt = data.createdAt || new Date().toISOString()
   const targetUrl = new URL(targetPath, self.location.origin).href
 
   event.waitUntil(
-    savePushTarget(targetPath).then(() => {
-      return clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async clientList => {
+    savePushTarget(targetPath, createdAt).then(() => {
+      return clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
         for (const client of clientList) {
           if (client.url.startsWith(self.location.origin)) {
             try {
               client.postMessage({
                 type: 'ROSA_MARIA_OPEN_PUSH_TARGET',
                 url: targetPath,
+                createdAt,
               })
-
-              if ('navigate' in client) {
-                const navigatedClient = await client.navigate(targetUrl)
-
-                if (navigatedClient && 'focus' in navigatedClient) {
-                  return navigatedClient.focus()
-                }
-              }
-
-              if ('focus' in client) {
-                return client.focus()
-              }
             } catch {}
+
+            if ('focus' in client) {
+              return client.focus()
+            }
           }
         }
 
