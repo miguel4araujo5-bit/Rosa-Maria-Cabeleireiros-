@@ -538,7 +538,7 @@ export default {
 
           const token = crypto.randomUUID()
           const now = new Date()
-          const expires = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 14)
+          const expires = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 90)
 
           await env.DB.prepare(
             `INSERT INTO admin_sessions (token, created_at, expires_at) VALUES (?, ?, ?)`
