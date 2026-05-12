@@ -52,6 +52,7 @@ function useScrollToTop() {
 
 function PushNotificationNavigation() {
   const location = useLocation()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const pendingKey = 'rosa_maria_pending_push_target'
@@ -73,6 +74,15 @@ function PushNotificationNavigation() {
       } catch {
         return ''
       }
+    }
+
+    const clearCachedTarget = async () => {
+      try {
+        if (!('caches' in window)) return
+
+        const cache = await caches.open(PUSH_TARGET_CACHE)
+        await cache.delete(PUSH_TARGET_KEY)
+      } catch {}
     }
 
     const savePendingTarget = (url: string, createdAt?: string) => {
@@ -101,12 +111,14 @@ function PushNotificationNavigation() {
 
         if (!url || !isFresh) {
           localStorage.removeItem(pendingKey)
+          clearCachedTarget()
           return null
         }
 
         return { url, createdAt }
       } catch {
         localStorage.removeItem(pendingKey)
+        clearCachedTarget()
         return null
       }
     }
@@ -114,6 +126,7 @@ function PushNotificationNavigation() {
     const consumeTarget = (url: string, createdAt: string) => {
       localStorage.setItem(consumedKey, `${url}|${createdAt}`)
       localStorage.removeItem(pendingKey)
+      clearCachedTarget()
     }
 
     const openPendingTarget = () => {
@@ -124,18 +137,17 @@ function PushNotificationNavigation() {
 
       if (localStorage.getItem(consumedKey) === consumedValue) {
         localStorage.removeItem(pendingKey)
+        clearCachedTarget()
         return
       }
 
       const currentUrl = `${location.pathname}${location.search}${location.hash}`
 
-      if (currentUrl === target.url) {
-        consumeTarget(target.url, target.createdAt)
-        return
-      }
-
       consumeTarget(target.url, target.createdAt)
-      window.location.assign(target.url)
+
+      if (currentUrl !== target.url) {
+        navigate(target.url, { replace: true })
+      }
     }
 
     const readCachedTarget = async () => {
@@ -149,7 +161,9 @@ function PushNotificationNavigation() {
 
         const data = await response.json()
         const url = typeof data?.url === 'string' ? data.url : ''
-        const createdAt = String(data?.createdAt || '')
+        const createdAt = String(data?.createdAt || new Date().toISOString())
+
+        await cache.delete(PUSH_TARGET_KEY)
 
         if (!url) return
 
@@ -166,10 +180,11 @@ function PushNotificationNavigation() {
       }
 
       const url = typeof data.url === 'string' ? data.url : ''
+      const createdAt = typeof data.createdAt === 'string' ? data.createdAt : undefined
 
       if (!url) return
 
-      savePendingTarget(url)
+      savePendingTarget(url, createdAt)
       openPendingTarget()
     }
 
@@ -206,7 +221,7 @@ function PushNotificationNavigation() {
 
       timers.forEach(timer => window.clearTimeout(timer))
     }
-  }, [location.pathname, location.search, location.hash])
+  }, [location.pathname, location.search, location.hash, navigate])
 
   return null
 }
