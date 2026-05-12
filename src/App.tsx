@@ -277,18 +277,18 @@ function Booking() {
   }
 
   const sendWhatsAppToManager = () => {
-    const labels = serviceLabels(formData.selectedServices)
-    const message =
-      `Olá! Novo pedido de marcação:\n` +
-      `Nome: ${formData.name}\n` +
-      `WhatsApp: ${formData.whatsapp}\n` +
-      `Serviços: ${labels.join(', ')}\n` +
-      `Data: ${toPTDateLabel(formData.date)} às ${formData.time}\n` +
-      (formData.observation ? `Obs: ${formData.observation}\n` : '') +
-      `Estado: por confirmar`
+  const labels = serviceLabels(formData.selectedServices)
+  const observationText = formData.observation?.trim()
 
-    window.open(`https://wa.me/${MANAGER_WHATSAPP}?text=${encodeURIComponent(message)}`, '_blank', 'noreferrer')
-  }
+  const message = [
+    `Olá! O meu nome é ${formData.name}.`,
+    `Gostaria de fazer uma marcação para ${labels.join(', ')}, no dia ${toPTDateLabel(formData.date)} às ${formData.time}.`,
+    'Será possível confirmar, por favor?',
+    observationText ? `Observação: ${observationText}` : ''
+  ].filter(Boolean).join('\n')
+
+  window.open(`https://wa.me/${MANAGER_WHATSAPP}?text=${encodeURIComponent(message)}`, '_blank', 'noreferrer')
+}
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
