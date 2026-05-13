@@ -1,5 +1,5 @@
-const CACHE_NAME = 'rosa-maria-v16'
-const APP_SHELL = ['/manifest.webmanifest?v=6', '/favicon-32.png?v=6', '/icon-192.png?v=6', '/icon-512.png?v=6']
+const CACHE_NAME = 'rosa-maria-v17'
+const APP_SHELL = []
 const PUSH_TARGET_CACHE = 'rosa-maria-push-target'
 const PUSH_TARGET_KEY = '/latest'
 
