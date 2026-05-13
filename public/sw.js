@@ -1,5 +1,5 @@
-const CACHE_NAME = 'rosa-maria-v14'
-const APP_SHELL = ['/', '/manifest.webmanifest', '/favicon.png']
+const CACHE_NAME = 'rosa-maria-v15'
+const APP_SHELL = ['/manifest.webmanifest?v=5', '/favicon-32.png?v=5', '/icon-192.png?v=5', '/icon-512.png?v=5']
 const PUSH_TARGET_CACHE = 'rosa-maria-push-target'
 const PUSH_TARGET_KEY = '/latest'
 
@@ -115,8 +115,8 @@ self.addEventListener('push', event => {
 
       return self.registration.showNotification(title, {
         body: data.body || 'Toque para abrir a marcação no painel.',
-        icon: '/favicon.png',
-        badge: '/favicon.png',
+        icon: '/icon-192.png?v=5',
+        badge: '/favicon-32.png?v=5',
         data: {
           url: targetUrl,
           createdAt,
