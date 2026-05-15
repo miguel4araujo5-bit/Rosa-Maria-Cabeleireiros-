@@ -124,10 +124,13 @@ self.addEventListener('push', event => {
           date: data.date || null,
           time: data.time || null,
         },
-        requireInteraction: true,
-        tag: notificationTag,
-        renotify: true,
-      })
+          requireInteraction: true,
+          tag: notificationTag,
+          renotify: true,
+          silent: false,
+          vibrate: [200, 100, 200],
+          timestamp: Date.now(),
+        })
     })
   )
 })
