@@ -40,7 +40,7 @@ export default function Home() {
           </div>
 
           <p className="max-w-[31ch] md:max-w-2xl mx-auto text-white/78 text-[14px] md:text-[15px] leading-6 md:leading-7 font-medium mb-6 md:mb-12">
-            Um espaço de beleza, cuidado e confiança em São Mamede de Infesta, onde a experiência se encontra com a elegância.
+            Situado em São Mamede de Infesta, no concelho de Matosinhos e perto da Maia e de Leça do Balio, o Rosa Maria Cabeleireiros recebe clientes que procuram cortes, coloração, madeixas e tratamentos capilares num espaço de confiança desde 1982.
           </p>
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-2.5 md:gap-6">
