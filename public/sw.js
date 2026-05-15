@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rosa-maria-v17'
+const CACHE_NAME = 'rosa-maria-v18'
 const APP_SHELL = []
 const PUSH_TARGET_CACHE = 'rosa-maria-push-target'
 const PUSH_TARGET_KEY = '/latest'
