@@ -10,7 +10,7 @@ import mbwayIcon from './assets/icons/mbway-seeklogo.png'
 export default function Home() {
   return (
     <div className="bg-brand-paper">
-      <section className="relative min-h-[92svh] md:min-h-[100dvh] pt-20 md:pt-32 flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[92svh] md:min-h-[100dvh] pt-20 md:pt-24 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
             src="/IMG_6695.jpg"
@@ -23,7 +23,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(198,162,74,0.16),transparent_38%)]"></div>
         </div>
 
-        <div className="relative z-10 text-center px-5 md:px-6 pb-14 md:pb-0 max-w-[340px] md:max-w-4xl mx-auto translate-y-0 md:translate-y-16 animate-fade-in">
+        <div className="relative z-10 text-center px-5 md:px-6 pb-14 md:pb-8 max-w-[340px] md:max-w-4xl mx-auto translate-y-0 animate-fade-in">
           <h1 className="text-[clamp(20px,5.4vw,28px)] md:text-[40px] font-serif text-white/92 italic tracking-[0.02em] leading-tight">
             Confiança de gerações desde 1982
           </h1>
@@ -32,14 +32,14 @@ export default function Home() {
             São Mamede de Infesta · Matosinhos
           </p>
 
-          <div className="mt-4 mb-7 md:mt-8 md:mb-14 relative transition-transform duration-700 hover:scale-[1.015]">
+          <div className="mt-4 mb-7 md:mt-6 md:mb-8 relative transition-transform duration-700 hover:scale-[1.015]">
             <div className="absolute inset-0 blur-3xl opacity-20 bg-brand-gold scale-75"></div>
             <div className="relative scale-[0.92] md:scale-100">
               <Logo />
             </div>
           </div>
 
-          <p className="max-w-[31ch] md:max-w-2xl mx-auto text-white/78 text-[14px] md:text-[15px] leading-6 md:leading-7 font-medium mb-6 md:mb-12">
+          <p className="max-w-[31ch] md:max-w-2xl mx-auto text-white/78 text-[14px] md:text-[15px] leading-6 md:leading-7 font-medium mb-6 md:mb-8">
             Situado em São Mamede de Infesta, no concelho de Matosinhos e perto da Maia e de Leça do Balio, o Rosa Maria Cabeleireiros recebe clientes que procuram cortes, coloração, madeixas e tratamentos capilares num espaço de confiança desde 1982.
           </p>
 
