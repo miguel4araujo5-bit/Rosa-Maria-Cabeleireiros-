@@ -107,7 +107,7 @@ export default function Coloracao() {
 
             <div className="mt-8">
               <Link
-                to="/agendar"
+                to="/marcacao"
                 className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-7 py-4 text-[11px] uppercase tracking-[0.3em] font-semibold text-white transition-all duration-200 hover:border-brand-gold hover:text-brand-gold"
               >
                 Agendar agora
