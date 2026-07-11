@@ -40,7 +40,7 @@ export default function Home() {
           <div className="mt-4 mb-7 md:mt-6 md:mb-8 relative transition-transform duration-700 hover:scale-[1.015]">
             <div className="absolute inset-0 blur-3xl opacity-20 bg-brand-gold scale-75"></div>
             <div className="relative scale-[0.92] md:scale-100">
-              <Logo />
+              <Logo variant="hero" />
             </div>
           </div>
 
