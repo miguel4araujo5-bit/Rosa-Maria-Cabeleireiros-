@@ -11,6 +11,42 @@ const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
+const SITE_ORIGIN = 'https://www.rosa-maria.pt'
+
+const CANONICAL_PATHS: Record<string, string> = {
+  '/': '/',
+  '/servicos': '/servicos',
+  '/marcacao': '/marcacao',
+  '/agendar': '/marcacao',
+  '/coloracao': '/coloracao',
+  '/cortes-brushing': '/cortes-brushing',
+  '/madeixas-tratamentos': '/madeixas-tratamentos',
+  '/admin': '/admin',
+  '/ma-code': '/ma-code',
+}
+
+function normalizePathname(pathname: string) {
+  if (pathname === '/') return '/'
+
+  const normalized = pathname.replace(/\/+$/, '') || '/'
+
+  if (normalized === '/admin' || normalized.startsWith('/admin/')) {
+    return '/admin'
+  }
+
+  return normalized
+}
+
+function getCanonicalUrl(pathname: string) {
+  const normalized = normalizePathname(pathname)
+  const canonicalPath = CANONICAL_PATHS[normalized]
+
+  if (!canonicalPath) return null
+  if (canonicalPath === '/') return `${SITE_ORIGIN}/`
+
+  return `${SITE_ORIGIN}${canonicalPath}`
+}
+
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
