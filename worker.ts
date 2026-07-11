@@ -13,6 +13,60 @@ const CORS_HEADERS: Record<string, string> = {
 
 const SITE_ORIGIN = 'https://www.rosa-maria.pt'
 
+type PageSeo = {
+  title: string
+  description: string
+  robots: string
+}
+
+const PAGE_SEO: Record<string, PageSeo> = {
+  '/': {
+    title: 'Cabeleireiro em São Mamede de Infesta | Rosa Maria Cabeleireiros',
+    description: 'Cabeleireiro em São Mamede de Infesta, Matosinhos. Cortes, brushing, coloração, madeixas e tratamentos capilares personalizados desde 1982.',
+    robots: 'index,follow',
+  },
+  '/servicos': {
+    title: 'Serviços de Cabeleireiro em São Mamede de Infesta | Rosa Maria',
+    description: 'Conheça os serviços do Rosa Maria Cabeleireiros em São Mamede de Infesta: cortes, brushing, coloração, madeixas e tratamentos capilares.',
+    robots: 'index,follow',
+  },
+  '/marcacao': {
+    title: 'Marcação Online | Rosa Maria Cabeleireiros',
+    description: 'Marque online o seu serviço no Rosa Maria Cabeleireiros, em São Mamede de Infesta. Escolha o tratamento, a data e o horário disponíveis.',
+    robots: 'index,follow',
+  },
+  '/agendar': {
+    title: 'Marcação Online | Rosa Maria Cabeleireiros',
+    description: 'Marque online o seu serviço no Rosa Maria Cabeleireiros, em São Mamede de Infesta. Escolha o tratamento, a data e o horário disponíveis.',
+    robots: 'noindex,follow',
+  },
+  '/coloracao': {
+    title: 'Coloração em São Mamede de Infesta | Rosa Maria Cabeleireiros',
+    description: 'Coloração personalizada em São Mamede de Infesta, com diagnóstico, escolha de tom e cuidado capilar para um resultado harmonioso e duradouro.',
+    robots: 'index,follow',
+  },
+  '/cortes-brushing': {
+    title: 'Cortes e Brushing em São Mamede de Infesta | Rosa Maria',
+    description: 'Cortes femininos e brushing em São Mamede de Infesta, adaptados ao rosto, ao cabelo e ao estilo de cada cliente.',
+    robots: 'index,follow',
+  },
+  '/madeixas-tratamentos': {
+    title: 'Madeixas e Tratamentos em São Mamede de Infesta | Rosa Maria',
+    description: 'Madeixas, técnicas de iluminação e tratamentos capilares em São Mamede de Infesta para recuperar brilho, força e movimento.',
+    robots: 'index,follow',
+  },
+  '/admin': {
+    title: 'Administração | Rosa Maria Cabeleireiros',
+    description: 'Área reservada de administração do Rosa Maria Cabeleireiros.',
+    robots: 'noindex,nofollow',
+  },
+  '/ma-code': {
+    title: 'Desenvolvimento do Site | Rosa Maria Cabeleireiros',
+    description: 'Informação técnica sobre o desenvolvimento do site Rosa Maria Cabeleireiros.',
+    robots: 'noindex,nofollow',
+  },
+}
+
 const CANONICAL_PATHS: Record<string, string> = {
   '/': '/',
   '/servicos': '/servicos',
@@ -45,6 +99,10 @@ function getCanonicalUrl(pathname: string) {
   if (canonicalPath === '/') return `${SITE_ORIGIN}/`
 
   return `${SITE_ORIGIN}${canonicalPath}`
+}
+
+function getPageSeo(pathname: string) {
+  return PAGE_SEO[normalizePathname(pathname)] || null
 }
 
 function json(data: unknown, status = 200) {
@@ -182,10 +240,28 @@ async function spaFallback(request: Request, env: Env): Promise<Response> {
   const contentType = res.headers.get('Content-Type') || ''
   if (!contentType.includes('text/html')) return res
 
-  const canonicalUrl = getCanonicalUrl(new URL(request.url).pathname)
-  if (!canonicalUrl) return res
+  const pathname = new URL(request.url).pathname
+  const canonicalUrl = getCanonicalUrl(pathname)
+  const pageSeo = getPageSeo(pathname)
+
+  if (!canonicalUrl || !pageSeo) return res
 
   return new HTMLRewriter()
+    .on('title', {
+      element(element) {
+        element.setInnerContent(pageSeo.title)
+      },
+    })
+    .on('meta[name="description"]', {
+      element(element) {
+        element.setAttribute('content', pageSeo.description)
+      },
+    })
+    .on('meta[name="robots"]', {
+      element(element) {
+        element.setAttribute('content', pageSeo.robots)
+      },
+    })
     .on('link[rel="canonical"]', {
       element(element) {
         element.setAttribute('href', canonicalUrl)
@@ -194,6 +270,26 @@ async function spaFallback(request: Request, env: Env): Promise<Response> {
     .on('meta[property="og:url"]', {
       element(element) {
         element.setAttribute('content', canonicalUrl)
+      },
+    })
+    .on('meta[property="og:title"]', {
+      element(element) {
+        element.setAttribute('content', pageSeo.title)
+      },
+    })
+    .on('meta[property="og:description"]', {
+      element(element) {
+        element.setAttribute('content', pageSeo.description)
+      },
+    })
+    .on('meta[name="twitter:title"]', {
+      element(element) {
+        element.setAttribute('content', pageSeo.title)
+      },
+    })
+    .on('meta[name="twitter:description"]', {
+      element(element) {
+        element.setAttribute('content', pageSeo.description)
       },
     })
     .transform(res)
