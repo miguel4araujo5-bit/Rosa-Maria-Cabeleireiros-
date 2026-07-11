@@ -1,22 +1,30 @@
 import React, { memo } from 'react'
 
 type LogoProps = {
-  variant?: 'default' | 'navbar'
+  variant?: 'navbar' | 'hero' | 'footer'
 }
 
-const Logo: React.FC<LogoProps> = ({ variant = 'default' }) => {
-  const isNavbar = variant === 'navbar'
+const Logo: React.FC<LogoProps> = ({ variant = 'hero' }) => {
+  const imageClass =
+    variant === 'navbar'
+      ? 'w-[210px] md:w-[250px]'
+      : variant === 'footer'
+        ? 'w-[270px] md:w-[300px]'
+        : 'w-[275px] md:w-[340px]'
+
+  const containerClass =
+    variant === 'footer'
+      ? 'w-full justify-center md:justify-start py-2'
+      : variant === 'navbar'
+        ? 'justify-start py-0'
+        : 'w-full justify-center py-2'
 
   return (
-    <div className={`flex items-center select-none ${isNavbar ? 'py-2' : 'py-4'}`}>
+    <div className={`flex items-center select-none ${containerClass}`}>
       <img
-        src="/logo.svg"
+        src="/logo.svg?v=2"
         alt="Rosa Maria Cabeleireiros"
-        className={`block w-auto ${
-          isNavbar
-            ? 'h-[58px] md:h-[72px]'
-            : 'h-[84px] md:h-[108px] drop-shadow-[0_8px_24px_rgba(0,0,0,0.35)]'
-        }`}
+        className={`block h-auto max-w-full object-contain ${imageClass}`}
         draggable={false}
       />
     </div>
