@@ -169,16 +169,34 @@ async function requireAdmin(
 }
 
 async function spaFallback(request: Request, env: Env): Promise<Response> {
-  const res = await env.ASSETS.fetch(request)
-  if (res.status !== 404) return res
-
+  let res = await env.ASSETS.fetch(request)
   const accept = request.headers.get('Accept') || ''
-  if (!accept.includes('text/html')) return res
 
-  const url = new URL(request.url)
-  const indexUrl = new URL('/index.html', url.origin)
-  const indexReq = new Request(indexUrl.toString(), request)
-  return env.ASSETS.fetch(indexReq)
+  if (res.status === 404 && accept.includes('text/html')) {
+    const url = new URL(request.url)
+    const indexUrl = new URL('/index.html', url.origin)
+    const indexReq = new Request(indexUrl.toString(), request)
+    res = await env.ASSETS.fetch(indexReq)
+  }
+
+  const contentType = res.headers.get('Content-Type') || ''
+  if (!contentType.includes('text/html')) return res
+
+  const canonicalUrl = getCanonicalUrl(new URL(request.url).pathname)
+  if (!canonicalUrl) return res
+
+  return new HTMLRewriter()
+    .on('link[rel="canonical"]', {
+      element(element) {
+        element.setAttribute('href', canonicalUrl)
+      },
+    })
+    .on('meta[property="og:url"]', {
+      element(element) {
+        element.setAttribute('content', canonicalUrl)
+      },
+    })
+    .transform(res)
 }
 
 async function initSchema(db: D1Database) {
