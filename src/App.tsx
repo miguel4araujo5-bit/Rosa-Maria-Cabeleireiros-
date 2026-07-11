@@ -1051,7 +1051,6 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/servicos" element={<Services />} />
           <Route path="/marcacao" element={<Booking />} />
-          <Route path="/agendar" element={<Booking />} />
           <Route path="/coloracao" element={<Coloracao />} />
           <Route path="/cortes-brushing" element={<CortesBrushing />} />
           <Route path="/madeixas-tratamentos" element={<MadeixasTratamentos />} />
