@@ -1,5 +1,4 @@
 import React, { memo } from 'react'
-import { Link } from 'react-router-dom'
 
 type LogoProps = {
   variant?: 'default' | 'navbar'
@@ -9,12 +8,10 @@ const Logo: React.FC<LogoProps> = ({ variant = 'default' }) => {
   const isNavbar = variant === 'navbar'
 
   return (
-    <Link
-      to="/"
+    <div
       className={`flex flex-col justify-center select-none ${isNavbar ? 'py-2' : 'py-4'}`}
-      aria-label="Rosa Maria Cabeleireiros - Página inicial"
     >
-      <h1
+      <span
         className={`logo-rosa-maria leading-[1.05] tracking-tight ${
           isNavbar
             ? 'text-[44px] md:text-[52px] drop-shadow-none'
@@ -33,7 +30,7 @@ const Logo: React.FC<LogoProps> = ({ variant = 'default' }) => {
         }
       >
         Rosa Maria
-      </h1>
+      </span>
 
       <span
         className={`logo-cabeleireiros uppercase ${
@@ -44,7 +41,7 @@ const Logo: React.FC<LogoProps> = ({ variant = 'default' }) => {
       >
         Cabeleireiros
       </span>
-    </Link>
+    </div>
   )
 }
 
