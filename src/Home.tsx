@@ -15,6 +15,11 @@ export default function Home() {
           <img
             src="/IMG_6695.jpg"
             alt="Rosa Maria Cabeleireiros em São Mamede de Infesta"
+            width={1920}
+            height={1530}
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
             className="absolute inset-0 w-full h-full object-cover object-center md:object-top opacity-90 scale-[1.02]"
             referrerPolicy="no-referrer"
           />
