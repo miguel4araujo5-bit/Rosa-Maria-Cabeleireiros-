@@ -815,7 +815,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-14 lg:gap-18 mb-12 md:mb-14">
             <div className="space-y-6 flex flex-col items-center text-center md:items-start md:text-left">
               <Link to="/" className="inline-flex flex-col group items-center md:items-start">
-                <Logo />
+                <Logo variant="footer" />
               </Link>
 
               <p className="max-w-[30ch] md:max-w-[18ch] text-stone-400 font-medium text-[15px] md:text-[clamp(17px,4.5vw,28px)] leading-[1.65] md:leading-[1.45] tracking-[0.01em]">
