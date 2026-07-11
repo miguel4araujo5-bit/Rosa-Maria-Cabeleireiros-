@@ -63,6 +63,7 @@ export default function MadeixasTratamentos() {
           <div className="rounded-[32px] border border-stone-200/70 bg-white px-8 py-10 md:px-10 md:py-12 shadow-[0_18px_50px_rgba(0,0,0,0.05)]">
             <div className="flex items-center gap-4 mb-8">
               <div className="h-px w-12 bg-brand-gold/50"></div>
+
               <h2 className="text-[11px] uppercase tracking-[0.35em] text-brand-gold font-bold">
                 Serviços disponíveis
               </h2>
@@ -91,9 +92,11 @@ export default function MadeixasTratamentos() {
             <p className="text-[11px] uppercase tracking-[0.35em] text-brand-gold font-bold mb-4">
               Cuidado técnico
             </p>
+
             <h2 className="text-[28px] md:text-[32px] font-serif text-brand-ink leading-tight">
               Resultados pensados com equilíbrio
             </h2>
+
             <p className="mt-5 text-stone-500 text-[15px] leading-7 font-medium">
               Se procura madeixas e tratamentos em São Mamede de Infesta ou na zona de Matosinhos, encontrará um serviço atento ao detalhe, ao brilho e à harmonia do resultado.
             </p>
@@ -103,13 +106,14 @@ export default function MadeixasTratamentos() {
             <p className="text-[11px] uppercase tracking-[0.35em] text-brand-gold font-bold mb-4">
               Textura e personalidade
             </p>
+
             <p className="text-stone-300 text-[15px] leading-7 font-medium">
               Madeixas e tratamentos bem executados ajudam a criar luz, definição e presença. O trabalho técnico é sempre acompanhado por uma escolha estética pensada para valorizar cada cabelo.
             </p>
 
             <div className="mt-8">
               <Link
-                to="/agendar"
+                to="/marcacao"
                 className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-7 py-4 text-[11px] uppercase tracking-[0.3em] font-semibold text-white transition-all duration-200 hover:border-brand-gold hover:text-brand-gold"
               >
                 Agendar agora
