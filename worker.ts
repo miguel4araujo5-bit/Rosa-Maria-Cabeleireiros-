@@ -22,7 +22,7 @@ type PageSeo = {
 const PAGE_SEO: Record<string, PageSeo> = {
   '/': {
     title: 'Cabeleireiro em São Mamede de Infesta | Rosa Maria Cabeleireiros',
-    description: 'Cabeleireiro em São Mamede de Infesta, Matosinhos. Cortes, brushing, coloração, madeixas e tratamentos capilares personalizados desde 1982.',
+    description: 'Cabeleireiro em São Mamede de Infesta, Matosinhos, perto da Maia e de Leça do Balio. Cortes, brushing, coloração, madeixas e tratamentos capilares desde 1982.',
     robots: 'index,follow',
   },
   '/servicos': {
@@ -103,6 +103,39 @@ function getCanonicalUrl(pathname: string) {
 
 function getPageSeo(pathname: string) {
   return PAGE_SEO[normalizePathname(pathname)] || null
+}
+
+function getRedirectUrl(url: URL) {
+  const redirectUrl = new URL(url.toString())
+  let shouldRedirect = false
+
+  if (url.hostname === 'rosa-maria.pt') {
+    redirectUrl.protocol = 'https:'
+    redirectUrl.hostname = 'www.rosa-maria.pt'
+    shouldRedirect = true
+  }
+
+  if (normalizePathname(url.pathname) === '/agendar') {
+    redirectUrl.pathname = '/marcacao'
+    shouldRedirect = true
+  }
+
+  return shouldRedirect ? redirectUrl : null
+}
+
+function permanentRedirect(url: URL) {
+  return new Response(null, {
+    status: 308,
+    headers: {
+      Location: url.toString(),
+      'Cache-Control': 'public, max-age=3600',
+    },
+  })
+}
+
+function hasFileExtension(pathname: string) {
+  const lastSegment = pathname.split('/').pop() || ''
+  return lastSegment.includes('.')
 }
 
 function json(data: unknown, status = 200) {
@@ -227,11 +260,80 @@ async function requireAdmin(
 }
 
 async function spaFallback(request: Request, env: Env): Promise<Response> {
-  let res = await env.ASSETS.fetch(request)
-  const accept = request.headers.get('Accept') || ''
+  const url = new URL(request.url)
+  const isPageRequest =
+    (request.method === 'GET' || request.method === 'HEAD') &&
+    !hasFileExtension(url.pathname)
+  const canonicalUrl = getCanonicalUrl(url.pathname)
+  const pageSeo = getPageSeo(url.pathname)
 
-  if (res.status === 404 && accept.includes('text/html')) {
-    const url = new URL(request.url)
+  if (isPageRequest && !pageSeo) {
+    const indexUrl = new URL('/index.html', url.origin)
+    const indexReq = new Request(indexUrl.toString(), request)
+    const indexRes = await env.ASSETS.fetch(indexReq)
+
+    const transformed = new HTMLRewriter()
+      .on('title', {
+        element(element) {
+          element.setInnerContent('Página não encontrada | Rosa Maria Cabeleireiros')
+        },
+      })
+      .on('meta[name="description"]', {
+        element(element) {
+          element.setAttribute('content', 'A página que procura não foi encontrada.')
+        },
+      })
+      .on('meta[name="robots"]', {
+        element(element) {
+          element.setAttribute('content', 'noindex,nofollow')
+        },
+      })
+      .on('link[rel="canonical"]', {
+        element(element) {
+          element.remove()
+        },
+      })
+      .on('meta[property="og:url"]', {
+        element(element) {
+          element.remove()
+        },
+      })
+      .on('meta[property="og:title"]', {
+        element(element) {
+          element.setAttribute('content', 'Página não encontrada | Rosa Maria Cabeleireiros')
+        },
+      })
+      .on('meta[property="og:description"]', {
+        element(element) {
+          element.setAttribute('content', 'A página que procura não foi encontrada.')
+        },
+      })
+      .on('meta[name="twitter:title"]', {
+        element(element) {
+          element.setAttribute('content', 'Página não encontrada | Rosa Maria Cabeleireiros')
+        },
+      })
+      .on('meta[name="twitter:description"]', {
+        element(element) {
+          element.setAttribute('content', 'A página que procura não foi encontrada.')
+        },
+      })
+      .transform(indexRes)
+
+    const headers = new Headers(transformed.headers)
+    headers.set('Cache-Control', 'no-store')
+    headers.set('X-Robots-Tag', 'noindex, nofollow')
+
+    return new Response(request.method === 'HEAD' ? null : transformed.body, {
+      status: 404,
+      statusText: 'Not Found',
+      headers,
+    })
+  }
+
+  let res = await env.ASSETS.fetch(request)
+
+  if (res.status === 404 && isPageRequest) {
     const indexUrl = new URL('/index.html', url.origin)
     const indexReq = new Request(indexUrl.toString(), request)
     res = await env.ASSETS.fetch(indexReq)
@@ -239,11 +341,6 @@ async function spaFallback(request: Request, env: Env): Promise<Response> {
 
   const contentType = res.headers.get('Content-Type') || ''
   if (!contentType.includes('text/html')) return res
-
-  const pathname = new URL(request.url).pathname
-  const canonicalUrl = getCanonicalUrl(pathname)
-  const pageSeo = getPageSeo(pathname)
-
   if (!canonicalUrl || !pageSeo) return res
 
   return new HTMLRewriter()
@@ -583,6 +680,9 @@ export default {
       const pathname = url.pathname
 
       if (request.method === 'OPTIONS') return noContent()
+
+      const redirectUrl = getRedirectUrl(url)
+      if (redirectUrl) return permanentRedirect(redirectUrl)
 
       if (!env || !env.ASSETS) {
         return json({ error: 'Missing ASSETS binding' }, 500)
