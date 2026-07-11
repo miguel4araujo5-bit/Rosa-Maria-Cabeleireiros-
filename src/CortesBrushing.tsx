@@ -89,9 +89,11 @@ export default function CortesBrushing() {
             <p className="text-[11px] uppercase tracking-[0.35em] text-brand-gold font-bold mb-4">
               Estilo e naturalidade
             </p>
+
             <h2 className="text-[28px] md:text-[32px] font-serif text-brand-ink leading-tight">
               Um resultado pensado para si
             </h2>
+
             <p className="mt-5 text-stone-500 text-[15px] leading-7 font-medium">
               Em São Mamede de Infesta, criamos cortes e finalizações pensados para acompanhar o seu ritmo, a sua imagem e o seu conforto no dia a dia.
             </p>
@@ -101,13 +103,14 @@ export default function CortesBrushing() {
             <p className="text-[11px] uppercase tracking-[0.35em] text-brand-gold font-bold mb-4">
               Cuidado e presença
             </p>
+
             <p className="text-stone-300 text-[15px] leading-7 font-medium">
               Um corte bem pensado e uma finalização cuidada fazem toda a diferença na forma como o cabelo cai, se move e valoriza o rosto. O objetivo é sempre um resultado bonito e equilibrado.
             </p>
 
             <div className="mt-8">
               <Link
-                to="/agendar"
+                to="/marcacao"
                 className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-7 py-4 text-[11px] uppercase tracking-[0.3em] font-semibold text-white transition-all duration-200 hover:border-brand-gold hover:text-brand-gold"
               >
                 Agendar agora
