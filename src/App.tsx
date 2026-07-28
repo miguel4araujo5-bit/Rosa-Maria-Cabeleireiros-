@@ -1013,7 +1013,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                 © 2026 Rosa Maria Cabeleireiros. Todos os direitos reservados.
               </span>
 
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-stone-500 font-bold">
+              <div data-nosnippet="true" className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-stone-500 font-bold">
                 <Link
                   to="/ma-code"
                   className="hover:text-brand-gold transition-colors"
