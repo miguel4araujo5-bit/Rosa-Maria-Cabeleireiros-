@@ -475,6 +475,57 @@ export default function Admin() {
       setActionLoading(null)
     }
   }
+  const blockEntireDay = async () => {
+    const key = `block-day-${selectedDate}`
+    const ok = confirm(
+      `Bloquear todos os horários livres de ${toPTDateLabel(selectedDate)}? As marcações existentes não serão alteradas.`
+    )
+
+    if (!ok) return
+
+    setActionLoading(key)
+    let blockedCount = 0
+
+    try {
+      const latest = await api.getAdminAppointments()
+      const currentAppointments = Array.isArray(latest) ? latest : []
+
+      const occupiedTimes = new Set(
+        currentAppointments
+          .filter((a: any) => String(a?.date || '') === selectedDate)
+          .flatMap((a: any) => safeParseTimes(a?.time))
+      )
+
+      const freeTimes = TIMES.filter(time => !occupiedTimes.has(time))
+
+      if (freeTimes.length === 0) {
+        await fetchAppointments()
+        alert('Este dia já não tem horários livres para bloquear.')
+        return
+      }
+
+      for (const time of freeTimes) {
+        const createdId = await createBlockAndReturnId(selectedDate, time)
+        await api.updateAppointment(createdId, { status: 'bloqueado' } as any)
+        blockedCount += 1
+      }
+
+      await fetchAppointments()
+      alert(`${blockedCount} horário${blockedCount === 1 ? '' : 's'} bloqueado${blockedCount === 1 ? '' : 's'} com sucesso.`)
+    } catch (err: any) {
+      await fetchAppointments()
+
+      if (blockedCount > 0) {
+        alert(
+          `${blockedCount} horário${blockedCount === 1 ? '' : 's'} ${blockedCount === 1 ? 'foi bloqueado' : 'foram bloqueados'}, mas ocorreu um erro antes de concluir o dia.`
+        )
+      } else {
+        alert(err?.message ? String(err.message) : 'Não foi possível bloquear o dia inteiro.')
+      }
+    } finally {
+      setActionLoading(null)
+    }
+  }
 
   const openReschedule = (app: Appointment) => {
     setRescheduleAppointment(app)
@@ -872,6 +923,14 @@ export default function Admin() {
             <div className="text-center mb-8">
               <p className="text-xs uppercase tracking-[0.4em] font-black text-brand-gold mb-2">Horários para o dia</p>
               <h3 className="text-5xl font-serif italic">{toPTDateLabel(selectedDate)}</h3>
+                            <button
+                type="button"
+                onClick={blockEntireDay}
+                disabled={actionLoading !== null}
+                className="mt-6 w-full py-4 px-6 bg-stone-800 text-white rounded-2xl text-xs font-black uppercase tracking-[0.2em] hover:bg-stone-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {actionLoading === `block-day-${selectedDate}` ? 'A bloquear o dia...' : 'Bloquear dia inteiro'}
+              </button>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-8">
