@@ -11,6 +11,101 @@ const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
+const APPOINTMENT_TIMES = [
+  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+  '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00',
+] as const
+
+type AppointmentRow = {
+  id: string
+  name: string
+  whatsapp: string
+  services: string
+  date: string
+  time: string
+  observation: string
+  status: string
+  created_at: string
+}
+
+function parseAppointmentTimes(raw: unknown) {
+  const value = String(raw ?? '').trim()
+  if (!value) return []
+
+  let values: string[] = []
+
+  try {
+    const parsed = JSON.parse(value)
+    values = Array.isArray(parsed) ? parsed.map(String) : [String(parsed)]
+  } catch {
+    values = [value]
+  }
+
+  const valid = values.filter(time => APPOINTMENT_TIMES.includes(time as any))
+  return Array.from(new Set(valid))
+}
+
+function appointmentTimeValue(times: string[]) {
+  return times.length === 1 ? times[0] : JSON.stringify(times)
+}
+
+function padDatePart(value: number) {
+  return String(value).padStart(2, '0')
+}
+
+function addDaysToISO(dateISO: string, days: number) {
+  const date = new Date(`${dateISO}T00:00:00Z`)
+  date.setUTCDate(date.getUTCDate() + days)
+  return `${date.getUTCFullYear()}-${padDatePart(date.getUTCMonth() + 1)}-${padDatePart(date.getUTCDate())}`
+}
+
+function isClosedSalonDay(dateISO: string) {
+  const date = new Date(`${dateISO}T00:00:00Z`)
+  const day = date.getUTCDay()
+  return day === 0 || day === 1
+}
+
+function timeInMinutes(time: string) {
+  const [hours, minutes] = time.split(':').map(Number)
+  return (hours * 60) + minutes
+}
+
+function getLisbonNow() {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Lisbon',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date())
+
+  const map = new Map(parts.map(part => [part.type, part.value]))
+  const year = map.get('year') || ''
+  const month = map.get('month') || ''
+  const day = map.get('day') || ''
+  const hour = Number(map.get('hour') || '0')
+  const minute = Number(map.get('minute') || '0')
+
+  return {
+    date: `${year}-${month}-${day}`,
+    minutes: (hour * 60) + minute,
+  }
+}
+
+function storedTimesSql(column: string) {
+  return `CASE
+    WHEN json_valid(${column}) THEN
+      CASE
+        WHEN json_type(${column}) = 'array' THEN ${column}
+        WHEN json_type(${column}) = 'text' THEN json_array(json_extract(${column}, '$'))
+        ELSE json_array(CAST(${column} AS TEXT))
+      END
+    ELSE json_array(${column})
+  END`
+}
+
 const SITE_ORIGIN = 'https://www.rosa-maria.pt'
 
 type PageSeo = {
@@ -673,6 +768,196 @@ async function deletePushSubscription(request: Request, db: D1Database) {
   return json({ success: true })
 }
 
+async function suggestAppointment(db: D1Database, id: string) {
+  const { results } = await db.prepare(
+    `SELECT * FROM appointments ORDER BY date ASC, time ASC`
+  ).all<AppointmentRow>()
+
+  const appointments = results ?? []
+  const current = appointments.find(appointment => appointment.id === id)
+
+  if (!current) {
+    return json({ error: 'Marcação não encontrada.' }, 404)
+  }
+
+  if (current.status === 'bloqueado') {
+    return json({ error: 'Não é possível sugerir uma nova data para um horário bloqueado.' }, 400)
+  }
+
+  const previousTimes = parseAppointmentTimes(current.time)
+    .sort((a, b) => APPOINTMENT_TIMES.indexOf(a as any) - APPOINTMENT_TIMES.indexOf(b as any))
+
+  if (previousTimes.length === 0) {
+    return json({ error: 'A marcação não tem um horário válido.' }, 400)
+  }
+
+  for (let index = 1; index < previousTimes.length; index++) {
+    const previousIndex = APPOINTMENT_TIMES.indexOf(previousTimes[index - 1] as any)
+    const currentIndex = APPOINTMENT_TIMES.indexOf(previousTimes[index] as any)
+
+    if (currentIndex !== previousIndex + 1) {
+      return json({ error: 'Esta marcação tem horários não consecutivos. Use “Mudar hora/dia”.' }, 400)
+    }
+  }
+
+  const occupiedByDate = new Map<string, Set<string>>()
+
+  for (const appointment of appointments) {
+    if (appointment.id === id) continue
+
+    const times = parseAppointmentTimes(appointment.time)
+    if (times.length === 0) continue
+
+    const occupied = occupiedByDate.get(appointment.date) || new Set<string>()
+    times.forEach(time => occupied.add(time))
+    occupiedByDate.set(appointment.date, occupied)
+  }
+
+  const now = getLisbonNow()
+  const firstSearchDate = current.date > now.date ? current.date : now.date
+  const previousLastIndex = Math.max(
+    ...previousTimes.map(time => APPOINTMENT_TIMES.indexOf(time as any))
+  )
+  const requiredSlots = previousTimes.length
+
+  let suggestedDate = ''
+  let suggestedTimes: string[] = []
+
+  for (let dayOffset = 0; dayOffset <= 730 && !suggestedDate; dayOffset++) {
+    const candidateDate = addDaysToISO(firstSearchDate, dayOffset)
+
+    if (isClosedSalonDay(candidateDate)) continue
+
+    const occupied = occupiedByDate.get(candidateDate) || new Set<string>()
+    let firstTimeIndex = 0
+
+    if (candidateDate === current.date) {
+      firstTimeIndex = Math.max(firstTimeIndex, previousLastIndex + 1)
+    }
+
+    if (candidateDate === now.date) {
+      while (
+        firstTimeIndex < APPOINTMENT_TIMES.length &&
+        timeInMinutes(APPOINTMENT_TIMES[firstTimeIndex]) <= now.minutes
+      ) {
+        firstTimeIndex += 1
+      }
+    }
+
+    for (
+      let startIndex = firstTimeIndex;
+      startIndex <= APPOINTMENT_TIMES.length - requiredSlots;
+      startIndex++
+    ) {
+      const candidateTimes = APPOINTMENT_TIMES.slice(
+        startIndex,
+        startIndex + requiredSlots
+      ) as unknown as string[]
+
+      if (candidateTimes.some(time => occupied.has(time))) continue
+
+      suggestedDate = candidateDate
+      suggestedTimes = candidateTimes
+      break
+    }
+  }
+
+  if (!suggestedDate || suggestedTimes.length === 0) {
+    return json({ error: 'Não foi encontrado um horário livre nos próximos dois anos.' }, 409)
+  }
+
+  const suggestedTimeValue = appointmentTimeValue(suggestedTimes)
+  const placeholders = suggestedTimes.map(() => '?').join(', ')
+  const updateStatement = db.prepare(
+    `UPDATE appointments
+     SET date = ?, time = ?, status = 'por_confirmar'
+     WHERE id = ?
+       AND NOT EXISTS (
+         SELECT 1
+         FROM appointments AS other
+         WHERE other.id != ?
+           AND other.date = ?
+           AND EXISTS (
+             SELECT 1
+             FROM json_each(${storedTimesSql('other.time')}) AS occupied
+             WHERE CAST(occupied.value AS TEXT) IN (${placeholders})
+           )
+       )`
+  ).bind(
+    suggestedDate,
+    suggestedTimeValue,
+    id,
+    id,
+    suggestedDate,
+    ...suggestedTimes
+  )
+
+  const movedAt = new Date().toISOString()
+  const blockObservation = `Bloqueado automaticamente ao sugerir nova data para ${current.name}`
+  const blockStatements = previousTimes.map(time => {
+    const blockId = crypto.randomUUID()
+
+    return db.prepare(
+      `INSERT INTO appointments (
+         id, name, whatsapp, services, date, time, observation, status, created_at
+       )
+       SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?
+       WHERE EXISTS (
+         SELECT 1
+         FROM appointments
+         WHERE id = ? AND date = ? AND time = ?
+       )
+       AND NOT EXISTS (
+         SELECT 1
+         FROM appointments AS other
+         WHERE other.date = ?
+           AND EXISTS (
+             SELECT 1
+             FROM json_each(${storedTimesSql('other.time')}) AS occupied
+             WHERE CAST(occupied.value AS TEXT) = ?
+           )
+       )`
+    ).bind(
+      blockId,
+      'HORÁRIO BLOQUEADO',
+      '-',
+      JSON.stringify(['bloqueio_manual']),
+      current.date,
+      time,
+      blockObservation,
+      'bloqueado',
+      movedAt,
+      id,
+      suggestedDate,
+      suggestedTimeValue,
+      current.date,
+      time
+    )
+  })
+
+  const batchResults = await db.batch([updateStatement, ...blockStatements])
+  const moved = Number(batchResults[0]?.meta?.changes || 0)
+
+  if (moved !== 1) {
+    return json(
+      { error: 'O horário sugerido acabou de ficar ocupado. Tente novamente.' },
+      409
+    )
+  }
+
+  return json({
+    success: true,
+    appointmentId: id,
+    previousDate: current.date,
+    previousTimes,
+    suggestedDate,
+    suggestedTimes,
+    suggestedTime: suggestedTimes[0],
+    name: current.name,
+    whatsapp: current.whatsapp,
+  })
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     try {
@@ -838,6 +1123,18 @@ export default {
           ).all()
 
           return json(results ?? [])
+        }
+
+        const suggestMatch = pathname.match(/^\/api\/admin\/appointments\/([^/]+)\/suggest$/)
+
+        if (suggestMatch && request.method === 'POST') {
+          const auth = await requireAdmin(request, env)
+          if (!auth.ok) return auth.res
+
+          const id = decodeURIComponent(suggestMatch[1] || '')
+          if (!id) return json({ error: 'Marcação inválida.' }, 400)
+
+          return suggestAppointment(env.DB, id)
         }
 
         if (pathname.startsWith('/api/appointments/') && request.method === 'PUT') {
