@@ -430,6 +430,77 @@ export default function Admin() {
     }
   }
 
+  const handleSuggestAppointment = async (app: Appointment) => {
+    const id = String((app as any)?.id || '')
+    if (!id) {
+      alert('Marcação inválida.')
+      return
+    }
+
+    const previousDate = String((app as any)?.date || selectedDate)
+    const previousTimes = safeParseTimes((app as any)?.time)
+      .sort((a, b) => TIMES.indexOf(a as any) - TIMES.indexOf(b as any))
+    const previousTime = previousTimes[0] || String((app as any)?.time || '')
+    const name = String((app as any)?.name || '').trim()
+    const whatsapp = String((app as any)?.whatsapp || '').trim()
+
+    const ok = confirm(
+      'Procurar automaticamente o horário livre mais próximo? A marcação será movida para esse horário e o horário atual ficará bloqueado.'
+    )
+
+    if (!ok) return
+
+    const key = `suggest-${id}`
+    setActionLoading(key)
+
+    try {
+      const result = await api.suggestAppointment(id)
+      const suggestedDate = String(result?.suggestedDate || '')
+      const suggestedTimes = Array.isArray(result?.suggestedTimes)
+        ? result.suggestedTimes.map(String).filter(Boolean)
+        : []
+      const suggestedTime = String(result?.suggestedTime || suggestedTimes[0] || '')
+
+      if (!suggestedDate || !suggestedTime) {
+        throw new Error('Não foi possível determinar o novo horário.')
+      }
+
+      const targetDate = new Date(`${suggestedDate}T00:00:00`)
+      if (Number.isNaN(targetDate.getTime())) {
+        throw new Error('A nova data recebida é inválida.')
+      }
+
+      setCurrentMonth(targetDate)
+      setSelectedDate(suggestedDate)
+      setPushTargetTime(suggestedTime)
+
+      const resultPreviousDate = String(result?.previousDate || previousDate)
+      const resultPreviousTimes = Array.isArray(result?.previousTimes)
+        ? result.previousTimes.map(String).filter(Boolean)
+          .sort((a, b) => TIMES.indexOf(a as any) - TIMES.indexOf(b as any))
+        : previousTimes
+      const resultPreviousTime = resultPreviousTimes[0] || previousTime
+      const messageName = String(result?.name || name).trim()
+      const messageWhatsapp = String(result?.whatsapp || whatsapp).trim()
+      const message = `${messageName ? `Olá ${messageName}. ` : 'Olá. '}Pedimos desculpa, mas o horário que selecionou para dia ${toWhatsappDateLabel(resultPreviousDate)} às ${resultPreviousTime} já se encontra ocupado. O horário disponível mais próximo é dia ${toWhatsappDateLabel(suggestedDate)} às ${suggestedTime}. Este horário seria possível para si? Ficamos a aguardar a sua confirmação. Obrigada, Rosa Maria Cabeleireiros.`
+
+      await fetchAppointments()
+
+      window.history.replaceState(
+        {},
+        '',
+        `/admin?date=${encodeURIComponent(suggestedDate)}&time=${encodeURIComponent(suggestedTime)}&id=${encodeURIComponent(id)}`
+      )
+
+      window.location.href = waLink(messageWhatsapp, message)
+    } catch (err: any) {
+      await fetchAppointments()
+      alert(err?.message ? String(err.message) : 'Não foi possível sugerir um novo horário.')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
   const deleteAppointment = async (id: string) => {
     const ok = confirm('Tem a certeza que deseja apagar esta marcação?')
     if (!ok) return
@@ -475,6 +546,7 @@ export default function Admin() {
       setActionLoading(null)
     }
   }
+
   const blockEntireDay = async () => {
     const key = `block-day-${selectedDate}`
     const ok = confirm(
@@ -693,7 +765,7 @@ export default function Admin() {
     ).length
   }
 
-    const firstBookingTimeOnDay = (dateStr: string) => {
+  const firstBookingTimeOnDay = (dateStr: string) => {
     const times = appointments
       .filter(a =>
         String((a as any).date) === dateStr &&
@@ -717,7 +789,7 @@ export default function Admin() {
       setPushTargetTime(null)
     }
   }
-  
+
   const dayApps = useMemo(() => {
     return appointments.filter(a => String((a as any).date) === selectedDate)
   }, [appointments, selectedDate])
@@ -923,7 +995,7 @@ export default function Admin() {
             <div className="text-center mb-8">
               <p className="text-xs uppercase tracking-[0.4em] font-black text-brand-gold mb-2">Horários para o dia</p>
               <h3 className="text-5xl font-serif italic">{toPTDateLabel(selectedDate)}</h3>
-                            <button
+              <button
                 type="button"
                 onClick={blockEntireDay}
                 disabled={actionLoading !== null}
@@ -969,6 +1041,8 @@ export default function Admin() {
                 const services = app ? serviceLabels(serviceIds) : []
                 const obs = app ? String((app as any).observation || '').trim() : ''
                 const appId = app ? String((app as any)?.id || '') : ''
+                const suggestKey = appId ? `suggest-${appId}` : ''
+                const appActionLoading = actionLoading === appId || actionLoading === suggestKey
 
                 const slotTotal = servicesTotalCents(serviceIds)
 
@@ -1075,11 +1149,11 @@ export default function Admin() {
                           {obs && <p className="text-xs text-stone-500 mt-2">{obs}</p>}
                         </div>
 
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-2 gap-2">
                           <button
                             type="button"
                             onClick={() => handleConfirmAppointment(app as any, time)}
-                            disabled={confirmed || actionLoading === appId}
+                            disabled={confirmed || appActionLoading}
                             className={cn(
                               "py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all disabled:opacity-100",
                               confirmed
@@ -1090,18 +1164,29 @@ export default function Admin() {
                           >
                             {actionLoading === appId ? 'A confirmar...' : confirmed ? 'Confirmada' : 'Confirmar'}
                           </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleSuggestAppointment(app as any)}
+                            disabled={appActionLoading}
+                            className="bg-brand-gold text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-yellow-600 disabled:opacity-50"
+                          >
+                            {actionLoading === suggestKey ? 'A procurar...' : 'Sugerir'}
+                          </button>
+
                           <button
                             type="button"
                             onClick={() => openReschedule(app as any)}
-                            disabled={actionLoading === appId}
+                            disabled={appActionLoading}
                             className="bg-blue-600 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 disabled:opacity-50"
                           >
                             Mudar hora/dia
                           </button>
+
                           <button
                             type="button"
                             onClick={() => openEdit(app as any)}
-                            disabled={actionLoading === appId}
+                            disabled={appActionLoading}
                             className="bg-stone-800 text-white py-3 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-stone-900 disabled:opacity-50"
                           >
                             Editar
@@ -1118,10 +1203,11 @@ export default function Admin() {
                             <MessageCircle size={16} />
                             WhatsApp
                           </a>
+
                           <button
                             type="button"
                             onClick={() => deleteAppointment(appId)}
-                            disabled={actionLoading === appId}
+                            disabled={appActionLoading}
                             className="py-3 text-[10px] font-black uppercase tracking-widest rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:border-red-300 disabled:opacity-50 flex items-center justify-center gap-2"
                           >
                             <Trash2 size={16} /> Apagar
@@ -1131,7 +1217,7 @@ export default function Admin() {
                         <button
                           type="button"
                           onClick={() => toggleBlock(time)}
-                          disabled={actionLoading === key}
+                          disabled={actionLoading === key || appActionLoading}
                           className="w-full py-3 text-[10px] font-black uppercase tracking-widest text-stone-300 border border-stone-100 rounded-xl hover:border-brand-gold hover:text-brand-gold disabled:opacity-50"
                         >
                           {actionLoading === key ? 'A processar...' : 'Bloquear este horário'}
@@ -1160,7 +1246,9 @@ export default function Admin() {
             >
               <X size={24} />
             </button>
+
             <h3 className="text-2xl font-serif italic mb-6 text-center">Mudar hora / dia</h3>
+
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">
@@ -1177,6 +1265,7 @@ export default function Admin() {
                   className="w-full border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-brand-gold"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">
                   Novos Horários
@@ -1205,6 +1294,7 @@ export default function Admin() {
                   ))}
                 </div>
               </div>
+
               <div className="flex gap-4 pt-4">
                 <button
                   onClick={() => setShowRescheduleModal(false)}
@@ -1212,6 +1302,7 @@ export default function Admin() {
                 >
                   Cancelar
                 </button>
+
                 <button
                   onClick={saveReschedule}
                   disabled={!newRescheduleDate || newRescheduleTimes.length === 0}
@@ -1235,11 +1326,16 @@ export default function Admin() {
             >
               <X size={24} />
             </button>
-            <h3 className="text-2xl font-serif italic mb-6 text-center">{String((editAppointment as any)?.id || '') ? 'Editar Marcação' : 'Reservar'}</h3>
+
+            <h3 className="text-2xl font-serif italic mb-6 text-center">
+              {String((editAppointment as any)?.id || '') ? 'Editar Marcação' : 'Reservar'}
+            </h3>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">Nome</label>
+                <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">
+                  Nome
+                </label>
                 <input
                   value={editName}
                   onChange={e => setEditName(e.target.value)}
@@ -1248,7 +1344,9 @@ export default function Admin() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">WhatsApp</label>
+                <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">
+                  WhatsApp
+                </label>
                 <input
                   value={editWhatsapp}
                   onChange={e => setEditWhatsapp(e.target.value)}
@@ -1257,7 +1355,10 @@ export default function Admin() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">Serviços</label>
+                <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">
+                  Serviços
+                </label>
+
                 <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
                   {SERVICES.map((s: any) => (
                     <button
@@ -1284,14 +1385,20 @@ export default function Admin() {
 
                 <div className="mt-3 rounded-xl border border-stone-100 bg-stone-50 px-4 py-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-stone-400">Total (auto)</span>
-                    <span className="text-sm font-black text-stone-800">{formatEUR(servicesTotalCents(editServices))}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-stone-400">
+                      Total (auto)
+                    </span>
+                    <span className="text-sm font-black text-stone-800">
+                      {formatEUR(servicesTotalCents(editServices))}
+                    </span>
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">Observações</label>
+                <label className="block text-sm font-bold uppercase tracking-widest text-stone-600 mb-2">
+                  Observações
+                </label>
                 <textarea
                   value={editObservation}
                   onChange={e => setEditObservation(e.target.value)}
@@ -1307,6 +1414,7 @@ export default function Admin() {
                 >
                   Cancelar
                 </button>
+
                 <button
                   onClick={saveEdit}
                   disabled={actionLoading !== null}
