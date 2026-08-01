@@ -5,6 +5,18 @@ import type {
   AdminLoginResponse,
 } from '../types'
 
+export type SuggestAppointmentResponse = {
+  success: boolean
+  appointmentId: string
+  previousDate: string
+  previousTimes: string[]
+  suggestedDate: string
+  suggestedTimes: string[]
+  suggestedTime: string
+  name: string
+  whatsapp: string
+}
+
 const ADMIN_TOKEN_KEY = 'rm_admin_token'
 const ADMIN_TOKEN_MAX_AGE = 60 * 60 * 24 * 90
 
@@ -176,6 +188,15 @@ export const api = {
     })
 
     return parseResponse<Appointment[]>(res)
+  },
+
+  async suggestAppointment(id: string): Promise<SuggestAppointmentResponse> {
+    const res = await fetch(`/api/admin/appointments/${encodeURIComponent(id)}/suggest`, {
+      method: 'POST',
+      headers: authHeaders(),
+    })
+
+    return parseResponse<SuggestAppointmentResponse>(res)
   },
 
   async updateAppointment(
