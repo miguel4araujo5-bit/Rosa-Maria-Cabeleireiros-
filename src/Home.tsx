@@ -12,17 +12,24 @@ export default function Home() {
     <div className="bg-brand-paper">
       <section className="relative min-h-[92svh] md:min-h-[100dvh] pt-20 md:pt-24 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0 overflow-hidden">
-          <img
-            src="/IMG_6695.jpg"
-            alt="Rosa Maria Cabeleireiros em São Mamede de Infesta"
-            width={1920}
-            height={1530}
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-            className="absolute inset-0 w-full h-full object-cover object-center md:object-top opacity-90 scale-[1.02]"
-            referrerPolicy="no-referrer"
-          />
+          <picture>
+            <source
+              type="image/webp"
+              srcSet="/IMG_6695-768.webp 768w, /IMG_6695-1280.webp 1280w, /IMG_6695-1920.webp 1920w"
+              sizes="100vw"
+            />
+            <img
+              src="/IMG_6695.jpg"
+              alt="Rosa Maria Cabeleireiros em São Mamede de Infesta"
+              width={1920}
+              height={1530}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              className="absolute inset-0 w-full h-full object-cover object-center md:object-top opacity-90 scale-[1.02]"
+              referrerPolicy="no-referrer"
+            />
+          </picture>
           <div className="absolute inset-0 bg-gradient-to-b from-black/78 via-black/62 to-black/88"></div>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.22),transparent_52%)]"></div>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(198,162,74,0.16),transparent_38%)]"></div>
