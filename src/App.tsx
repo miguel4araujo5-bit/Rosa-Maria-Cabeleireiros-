@@ -1,7 +1,6 @@
 import InstallPrompt from './components/InstallPrompt'
 import Home from './Home'
 import Services from './Services'
-import Admin from './Admin'
 import Navbar from './components/Navbar'
 import FloatingNav from './components/FloatingNav'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -18,6 +17,8 @@ import MACode from './MACode'
 import Coloracao from './Coloracao'
 import CortesBrushing from './CortesBrushing'
 import MadeixasTratamentos from './MadeixasTratamentos'
+
+const Admin = React.lazy(() => import('./Admin'))
 
 type AvailabilitySlot = {
   date: string
@@ -1054,11 +1055,10 @@ export default function App() {
           <Route path="/coloracao" element={<Coloracao />} />
           <Route path="/cortes-brushing" element={<CortesBrushing />} />
           <Route path="/madeixas-tratamentos" element={<MadeixasTratamentos />} />
-          <Route path="/admin/*" element={<Admin />} />
+          <Route path="/admin/*" element={<React.Suspense fallback={null}><Admin /></React.Suspense>} />
           <Route path="/ma-code" element={<MACode />} />
         </Routes>
       </AppShell>
     </Router>
   )
 }
-
