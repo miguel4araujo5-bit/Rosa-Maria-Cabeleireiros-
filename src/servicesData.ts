@@ -1,3 +1,16 @@
+export const AESTHETIC_SERVICES = [
+  { id: 'estetica_limpeza_pele', label: 'Limpeza de pele (mesoestetic)', category: 'Unhas / Depilação / Estética', price: '50€' },
+  { id: 'estetica_microagulhamento', label: 'Microagulhamento (PDRN / GHK-Cu)', category: 'Unhas / Depilação / Estética', price: '80€' },
+  { id: 'estetica_hifu_rosto', label: 'HIFU rosto', category: 'Unhas / Depilação / Estética', price: '110€/zona' },
+  { id: 'estetica_queda_capilar', label: 'Tratamento para a queda capilar', category: 'Unhas / Depilação / Estética', price: '50€' },
+  { id: 'estetica_contraturas', label: 'Contraturas (30 min)', category: 'Unhas / Depilação / Estética', price: '35€' },
+  { id: 'estetica_modeladora', label: 'Modeladora', category: 'Unhas / Depilação / Estética', price: '35€/zona' },
+  { id: 'estetica_linfatica', label: 'Linfática', category: 'Unhas / Depilação / Estética', price: '55€' },
+  { id: 'estetica_laser_3_zonas', label: 'Laser — 3 zonas', category: 'Unhas / Depilação / Estética', price: '60€' },
+  { id: 'estetica_hifu_corpo', label: 'HIFU corpo', category: 'Unhas / Depilação / Estética', price: '150€/zona' },
+  { id: 'estetica_sobrancelhas_fio_a_fio', label: 'Sobrancelhas fio a fio', category: 'Unhas / Depilação / Estética', price: '120€' },
+] as const
+
 export const SERVICES = [
   { id: 'shampoo', label: 'Shampoo', category: 'Cabelo / Cortes / Brushing', price: '2€' },
   { id: 'amaciador', label: 'Amaciador', category: 'Cabelo / Cortes / Brushing', price: '3€' },
@@ -39,21 +52,23 @@ export const SERVICES = [
   { id: 'keratina_comprido', label: 'Keratina comprido', category: 'Madeixas / Forma / Tratamentos', price: '40€' },
   { id: 'extensoes', label: 'Extensões', category: 'Madeixas / Forma / Tratamentos', price: '12€' },
 
-  { id: 'manicure', label: 'Manicure', category: 'Unhas / Depilação', price: '6€' },
-  { id: 'manicure_verniz_gel', label: 'Manicure verniz gel', category: 'Unhas / Depilação', price: '15€' },
-  { id: 'pedicure', label: 'Pedicure', category: 'Unhas / Depilação', price: '17€' },
-  { id: 'pedicure_verniz_gel', label: 'Pedicure verniz gel', category: 'Unhas / Depilação', price: '28€' },
-  { id: 'verniz_gel_pes', label: 'Aplic. verniz gel pés', category: 'Unhas / Depilação', price: '15€' },
-  { id: 'verniz_pes', label: 'Aplic. verniz pés', category: 'Unhas / Depilação', price: '6€' },
-  { id: 'perna_inteira', label: 'Perna inteira', category: 'Unhas / Depilação', price: '25€' },
-  { id: 'meia_perna', label: 'Meia perna', category: 'Unhas / Depilação', price: '15€' },
-  { id: 'axilas', label: 'Axilas', category: 'Unhas / Depilação', price: '10€' },
-  { id: 'virilhas', label: 'Virilhas', category: 'Unhas / Depilação', price: '12€' },
-  { id: 'bracos', label: 'Braços', category: 'Unhas / Depilação', price: '16€' },
-  { id: 'buco', label: 'Buço', category: 'Unhas / Depilação', price: '4,50€' },
-  { id: 'rosto', label: 'Rosto', category: 'Unhas / Depilação', price: '8€' },
-  { id: 'sobrancelhas', label: 'Sobrancelhas', category: 'Unhas / Depilação', price: '5€' },
-  { id: 'sobrancelhas_cera', label: 'Sobrancelhas c/ cera', category: 'Unhas / Depilação', price: '6€' },
+  { id: 'manicure', label: 'Manicure', category: 'Unhas / Depilação / Estética', price: '6€' },
+  { id: 'manicure_verniz_gel', label: 'Manicure verniz gel', category: 'Unhas / Depilação / Estética', price: '15€' },
+  { id: 'pedicure', label: 'Pedicure', category: 'Unhas / Depilação / Estética', price: '17€' },
+  { id: 'pedicure_verniz_gel', label: 'Pedicure verniz gel', category: 'Unhas / Depilação / Estética', price: '28€' },
+  { id: 'verniz_gel_pes', label: 'Aplic. verniz gel pés', category: 'Unhas / Depilação / Estética', price: '15€' },
+  { id: 'verniz_pes', label: 'Aplic. verniz pés', category: 'Unhas / Depilação / Estética', price: '6€' },
+  { id: 'perna_inteira', label: 'Perna inteira', category: 'Unhas / Depilação / Estética', price: '25€' },
+  { id: 'meia_perna', label: 'Meia perna', category: 'Unhas / Depilação / Estética', price: '15€' },
+  { id: 'axilas', label: 'Axilas', category: 'Unhas / Depilação / Estética', price: '10€' },
+  { id: 'virilhas', label: 'Virilhas', category: 'Unhas / Depilação / Estética', price: '12€' },
+  { id: 'bracos', label: 'Braços', category: 'Unhas / Depilação / Estética', price: '16€' },
+  { id: 'buco', label: 'Buço', category: 'Unhas / Depilação / Estética', price: '4,50€' },
+  { id: 'rosto', label: 'Rosto', category: 'Unhas / Depilação / Estética', price: '8€' },
+  { id: 'sobrancelhas', label: 'Sobrancelhas', category: 'Unhas / Depilação / Estética', price: '5€' },
+  { id: 'sobrancelhas_cera', label: 'Sobrancelhas c/ cera', category: 'Unhas / Depilação / Estética', price: '6€' },
+
+  ...AESTHETIC_SERVICES,
 ] as const
 
 export const SERVICE_CATEGORIES = Array.from(
