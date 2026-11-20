@@ -1,5 +1,6 @@
+import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
-import { SERVICES, SERVICE_CATEGORIES } from './servicesData'
+import { SERVICES, SERVICE_CATEGORIES, AESTHETIC_SERVICES } from './servicesData'
 
 const CATEGORY_INTROS: Partial<Record<(typeof SERVICE_CATEGORIES)[number], string>> = {
   'Cabelo / Cortes / Brushing':
@@ -8,8 +9,8 @@ const CATEGORY_INTROS: Partial<Record<(typeof SERVICE_CATEGORIES)[number], strin
     'Serviços de coloração realizados com cuidado, harmonia e atenção à saúde e beleza do cabelo.',
   'Madeixas / Forma / Tratamentos':
     'Madeixas, tratamentos e serviços técnicos para realçar textura, brilho, definição e personalidade.',
-  'Unhas / Depilação':
-    'Cuidados de unhas e depilação com foco no bem-estar, na apresentação e no cuidado de cada detalhe.',
+  'Unhas / Depilação / Estética':
+    'Cuidados de unhas, depilação e estética com foco no bem-estar, na apresentação e no cuidado de cada detalhe.',
 }
 
 const CATEGORY_LINKS: Partial<Record<(typeof SERVICE_CATEGORIES)[number], { to: string; label: string }>> = {
@@ -82,18 +83,32 @@ export default function Services() {
                   {SERVICES
                     .filter(service => service.category === category)
                     .map(service => (
-                      <div key={service.id} className="price-item group">
-                        <span className="price-name group-hover:text-brand-ink transition-colors">
-                          {service.label}
-                        </span>
+                      <Fragment key={service.id}>
+                        {service.id === AESTHETIC_SERVICES[0].id && (
+                          <h3 className="pt-6 text-xl font-serif text-brand-ink">
+                            Tratamentos de estética
+                          </h3>
+                        )}
 
-                        <div className="flex-1 border-b border-dotted border-stone-200 mx-6 mb-2 opacity-40"></div>
+                        <div key={service.id} className="price-item group">
+                          <span className="price-name group-hover:text-brand-ink transition-colors">
+                            {service.label}
+                          </span>
 
-                        <span className="price-value">
-                          {service.price}
-                        </span>
-                      </div>
+                          <div className="flex-1 border-b border-dotted border-stone-200 mx-6 mb-2 opacity-40"></div>
+
+                          <span className="price-value">
+                            {service.price}
+                          </span>
+                        </div>
+                      </Fragment>
                     ))}
+
+                  {category === 'Unhas / Depilação / Estética' && (
+                    <p className="pt-4 text-sm leading-6 text-stone-500">
+                      Os pedidos de estética estão sujeitos à confirmação da disponibilidade da profissional.
+                    </p>
+                  )}
                 </div>
               </div>
             )
