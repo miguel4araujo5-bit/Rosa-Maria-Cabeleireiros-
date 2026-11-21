@@ -152,3 +152,25 @@
 .animate-fade-in {
   animation: fadeInUp 1.2s ease forwards;
 }
+
+.price-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.price-name {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.price-item > .flex-1 {
+  min-width: 0;
+  margin-inline: 0.5rem;
+}
+
+.price-value {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-weight: 600;
+}
