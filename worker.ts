@@ -990,9 +990,17 @@ export default {
         if (pathname === '/api/availability' && request.method === 'GET') {
           const { results } = await env.DB.prepare(
             `SELECT date, time, status FROM appointments`
-          ).all()
+          ).all<{ date: string; time: string; status: string }>()
 
-          return json(results ?? [])
+          const availability = (results ?? []).flatMap(appointment =>
+            parseAppointmentTimes(appointment.time).map(time => ({
+              date: appointment.date,
+              time,
+              status: appointment.status,
+            }))
+          )
+
+          return json(availability)
         }
 
         if (pathname === '/api/admin/push-target' && request.method === 'POST') {
@@ -1023,10 +1031,27 @@ export default {
           const appointmentDate = String(date)
           const appointmentTime = String(time)
 
+          const requestedTimes = parseAppointmentTimes(appointmentTime)
+          if (requestedTimes.length === 0) {
+            return json({ error: 'Escolha um horário válido.' }, 400)
+          }
+
+          const placeholders = requestedTimes.map(() => '?').join(', ')
+
           try {
-            await env.DB.prepare(
+            const created = await env.DB.prepare(
               `INSERT INTO appointments (id, name, whatsapp, services, date, time, observation, status, created_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+               SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?
+               WHERE NOT EXISTS (
+                 SELECT 1
+                 FROM appointments AS other
+                 WHERE other.date = ?
+                   AND EXISTS (
+                     SELECT 1
+                     FROM json_each(${storedTimesSql('other.time')}) AS occupied
+                     WHERE CAST(occupied.value AS TEXT) IN (${placeholders})
+                   )
+               )`
             )
               .bind(
                 id,
@@ -1037,9 +1062,15 @@ export default {
                 appointmentTime,
                 observation ? String(observation) : '',
                 'por_confirmar',
-                new Date().toISOString()
+                new Date().toISOString(),
+                appointmentDate,
+                ...requestedTimes
               )
               .run()
+
+            if (Number(created.meta?.changes || 0) !== 1) {
+              return json({ error: 'Horário já ocupado. Escolha outro horário.' }, 409)
+            }
           } catch (err: any) {
             if (String(err.message || '').includes('UNIQUE')) {
               return json({ error: 'Horário já ocupado' }, 400)
@@ -1220,13 +1251,35 @@ export default {
             return json({ error: 'No fields to update' }, 400)
           }
 
-          values.push(id)
+          const requestedTimes = parseAppointmentTimes(nextTime)
+          if (requestedTimes.length === 0) {
+            return json({ error: 'Escolha um horário válido.' }, 400)
+          }
 
-          await env.DB.prepare(
-            `UPDATE appointments SET ${fields.join(', ')} WHERE id = ?`
+          const placeholders = requestedTimes.map(() => '?').join(', ')
+          values.push(id, id, nextDate, ...requestedTimes)
+
+          const updated = await env.DB.prepare(
+            `UPDATE appointments SET ${fields.join(', ')}
+             WHERE id = ?
+               AND NOT EXISTS (
+                 SELECT 1
+                 FROM appointments AS other
+                 WHERE other.id != ?
+                   AND other.date = ?
+                   AND EXISTS (
+                     SELECT 1
+                     FROM json_each(${storedTimesSql('other.time')}) AS occupied
+                     WHERE CAST(occupied.value AS TEXT) IN (${placeholders})
+                   )
+               )`
           )
             .bind(...values)
             .run()
+
+          if (Number(updated.meta?.changes || 0) !== 1) {
+            return json({ error: 'Horário já ocupado. Atualize a agenda e tente novamente.' }, 409)
+          }
 
           return json({ success: true })
         }
