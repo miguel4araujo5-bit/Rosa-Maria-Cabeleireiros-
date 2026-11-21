@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { SERVICES } from './servicesData'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Bell, Calendar, ChevronRight, LogOut, RefreshCw, Trash2, X, MessageCircle } from 'lucide-react'
@@ -20,7 +20,11 @@ function cn(...parts: Array<string | false | null | undefined>) {
 }
 
 function todayISO() {
-  return new Date().toISOString().split('T')[0]
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date())
+  const values = new Map(parts.map(part => [part.type, part.value]))
+  return `${values.get('year')}-${values.get('month')}-${values.get('day')}`
 }
 
 function toPTDateLabel(dateISO: string) {
@@ -143,17 +147,8 @@ function appointmentCoversTime(app: Appointment, dateISO: string, time: string) 
 }
 
 async function postAppointmentAndReturnId(payload: any) {
-  const res = await fetch('/api/appointments', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...payload, notifyAdmin: false }),
-  })
-  const data = await res.json().catch(() => null)
-  if (!res.ok) {
-    const msg = (data as any)?.error || (data as any)?.message || `Erro ${res.status}`
-    throw new Error(String(msg))
-  }
-  const id = (data as any)?.id ? String((data as any).id) : ''
+  const data = await api.createAdminAppointment({ ...payload, notifyAdmin: false })
+  const id = data?.id ? String(data.id) : ''
   if (!id) throw new Error('Falha ao criar marcação.')
   return id
 }
@@ -190,10 +185,13 @@ export default function Admin() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(() => api.hasAdminToken())
   const [password, setPassword] = useState('')
 
   const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [appointmentsReady, setAppointmentsReady] = useState(false)
+  const [agendaError, setAgendaError] = useState('')
+  const appointmentsRequest = useRef(0)
   const [currentMonth, setCurrentMonth] = useState(() => new Date())
   const [selectedDate, setSelectedDate] = useState(() => todayISO())
   const [pushTargetTime, setPushTargetTime] = useState<string | null>(null)
@@ -237,18 +235,29 @@ export default function Admin() {
     }, 0)
   }
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
+    const requestId = ++appointmentsRequest.current
     setLoading(true)
     try {
       const data = await api.getAdminAppointments()
-      setAppointments(Array.isArray(data) ? data : [])
+      if (!Array.isArray(data)) throw new Error('Resposta da agenda inválida.')
+      if (requestId !== appointmentsRequest.current) return
+      setAppointments(data)
+      setAppointmentsReady(true)
+      setAgendaError('')
       setIsLoggedIn(true)
-    } catch {
-      setAppointments([])
+    } catch (err: any) {
+      if (requestId !== appointmentsRequest.current) return
+      setAgendaError(err?.message ? String(err.message) : 'Não foi possível atualizar a agenda.')
+      if (!api.hasAdminToken()) {
+        setIsLoggedIn(false)
+        setAppointmentsReady(false)
+        setAppointments([])
+      }
     } finally {
-      setLoading(false)
+      if (requestId === appointmentsRequest.current) setLoading(false)
     }
-  }
+  }, [])
 
   const refreshPushState = async () => {
     try {
@@ -260,8 +269,42 @@ export default function Admin() {
   }
 
   useEffect(() => {
-    fetchAppointments()
-  }, [])
+    if (api.hasAdminToken()) fetchAppointments()
+    else setLoading(false)
+  }, [fetchAppointments])
+
+  useEffect(() => {
+    if (!isLoggedIn) return
+    let refreshTimer: number | undefined
+    const scheduleRefresh = () => {
+      if (refreshTimer) window.clearTimeout(refreshTimer)
+      refreshTimer = window.setTimeout(() => fetchAppointments(), 200)
+    }
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') scheduleRefresh()
+    }
+    const onWorkerMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'ROSA_MARIA_REFRESH_APPOINTMENTS' || event.data?.type === 'ROSA_MARIA_OPEN_PUSH_TARGET') {
+        scheduleRefresh()
+      }
+    }
+    window.addEventListener('focus', scheduleRefresh)
+    window.addEventListener('pageshow', scheduleRefresh)
+    window.addEventListener('rosa-maria-push-target', scheduleRefresh)
+    document.addEventListener('visibilitychange', onVisible)
+    if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', onWorkerMessage)
+    const refreshInterval = window.setInterval(onVisible, 60000)
+    return () => {
+      if (refreshTimer) window.clearTimeout(refreshTimer)
+      window.clearInterval(refreshInterval)
+      window.removeEventListener('focus', scheduleRefresh)
+      window.removeEventListener('pageshow', scheduleRefresh)
+      window.removeEventListener('rosa-maria-push-target', scheduleRefresh)
+      document.removeEventListener('visibilitychange', onVisible)
+      if ('serviceWorker' in navigator) navigator.serviceWorker.removeEventListener('message', onWorkerMessage)
+      appointmentsRequest.current += 1
+    }
+  }, [isLoggedIn, fetchAppointments])
 
   useEffect(() => {
     if (isLoggedIn) refreshPushState()
@@ -281,7 +324,7 @@ export default function Admin() {
         : null
 
       const nextDate = targetDate || String((targetAppointment as any)?.date || '')
-      const nextTimes = targetTime ? [targetTime] : safeParseTimes((targetAppointment as any)?.time)
+      const nextTimes = safeParseTimes(targetTime || (targetAppointment as any)?.time)
       const nextTime = nextTimes[0] || ''
 
       if (nextDate) {
@@ -376,6 +419,8 @@ export default function Admin() {
   }
 
   const handleLogout = async () => {
+    appointmentsRequest.current += 1
+    setAppointmentsReady(false)
     await api.adminLogout()
     setIsLoggedIn(false)
     setAppointments([])
@@ -826,6 +871,9 @@ export default function Admin() {
         <div className="elegant-card p-16 max-w-md w-full text-center">
           <span className="section-subtitle">Acesso da Gerente</span>
           <h2 className="text-5xl font-serif italic mb-12">Entrar no Sistema</h2>
+          {agendaError && (
+            <p role="alert" className="mb-6 text-sm text-red-700">{agendaError}</p>
+          )}
           <form onSubmit={handleLogin} className="space-y-10">
             <div className="space-y-6">
               <label className="text-sm uppercase tracking-widest font-bold text-stone-400">Palavra-passe</label>
@@ -843,6 +891,22 @@ export default function Admin() {
             </button>
           </form>
         </div>
+      </div>
+    )
+  }
+
+  if (!appointmentsReady) {
+    return (
+      <div className="pt-48 pb-32 px-6 max-w-3xl mx-auto text-center">
+        <h1 className="section-title">Agenda do Salão</h1>
+        <p role={agendaError ? 'alert' : 'status'} className="mt-8 text-stone-600">
+          {agendaError || 'A carregar a agenda…'}
+        </p>
+        {agendaError && (
+          <button type="button" onClick={() => fetchAppointments()} disabled={loading} className="btn-primary mt-8 mx-auto disabled:opacity-50">
+            {loading ? 'A tentar novamente…' : 'Voltar a tentar'}
+          </button>
+        )}
       </div>
     )
   }
@@ -899,6 +963,15 @@ export default function Admin() {
           </p>
         </div>
       </div>
+
+      {agendaError && (
+        <div role="alert" className="mb-8 rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">
+          <p>Não foi possível atualizar a agenda. Os dados apresentados são os da última atualização.</p>
+          <button type="button" onClick={() => fetchAppointments()} disabled={loading} className="mt-3 font-semibold underline disabled:opacity-50">
+            {loading ? 'A atualizar…' : 'Voltar a tentar'}
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-7 space-y-8">

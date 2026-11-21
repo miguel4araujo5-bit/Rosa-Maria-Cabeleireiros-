@@ -59,6 +59,12 @@ function addDaysToISO(dateISO: string, days: number) {
   return `${date.getUTCFullYear()}-${padDatePart(date.getUTCMonth() + 1)}-${padDatePart(date.getUTCDate())}`
 }
 
+function isValidAppointmentDate(dateISO: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateISO)) return false
+  const date = new Date(dateISO + 'T00:00:00Z')
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === dateISO
+}
+
 function isClosedSalonDay(dateISO: string) {
   const date = new Date(`${dateISO}T00:00:00Z`)
   const day = date.getUTCDay()
@@ -328,6 +334,28 @@ async function cleanupExpiredSessions(db: D1Database) {
   await db.prepare(`DELETE FROM admin_sessions WHERE expires_at <= ?`).bind(now).run()
 }
 
+async function consumeAdminLoginAttempt(request: Request, db: D1Database) {
+  const now = Math.floor(Date.now() / 1000)
+  const address = request.headers.get('CF-Connecting-IP') || 'unknown'
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('admin-login:' + address))
+  const clientKey = bytesToBase64Url(new Uint8Array(digest))
+  await db.prepare('DELETE FROM admin_login_attempts WHERE reset_at <= ?').bind(now).run()
+  const result = await db.prepare(
+    `INSERT INTO admin_login_attempts (client_key, attempts, reset_at)
+     VALUES (?, 1, ?)
+     ON CONFLICT(client_key) DO UPDATE SET
+       attempts = CASE WHEN reset_at <= ? THEN 1 ELSE attempts + 1 END,
+       reset_at = CASE WHEN reset_at <= ? THEN excluded.reset_at ELSE reset_at END
+     WHERE reset_at <= ? OR attempts < ?`
+  ).bind(clientKey, now + 900, now, now, now, 10).run()
+  if (Number(result.meta?.changes || 0) === 1) {
+    return { allowed: true, clientKey, retryAfter: 0 }
+  }
+  const current = await db.prepare('SELECT reset_at FROM admin_login_attempts WHERE client_key = ?')
+    .bind(clientKey).first<{ reset_at: number }>()
+  return { allowed: false, clientKey, retryAfter: Math.max(1, Number(current?.reset_at || now + 900) - now) }
+}
+
 async function requireAdmin(
   request: Request,
   env: Env
@@ -508,6 +536,12 @@ async function initSchema(db: D1Database) {
       expires_at TEXT NOT NULL
     )`,
     `CREATE INDEX IF NOT EXISTS idx_admin_sessions_expires ON admin_sessions(expires_at)`,
+    `CREATE TABLE IF NOT EXISTS admin_login_attempts (
+      client_key TEXT PRIMARY KEY,
+      attempts INTEGER NOT NULL,
+      reset_at INTEGER NOT NULL
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_admin_login_reset ON admin_login_attempts(reset_at)`,
     `CREATE TABLE IF NOT EXISTS push_settings (
       name TEXT PRIMARY KEY,
       value TEXT NOT NULL
@@ -612,6 +646,60 @@ async function createVapidJwt(db: D1Database, endpoint: string, requestUrl: stri
   return `${unsigned}.${bytesToBase64Url(joseSignature)}`
 }
 
+function decodePushKey(value: string) {
+  const normalized = value.replace(/-/g, '+').replace(/_/g, '/')
+  const binary = atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '='))
+  return Uint8Array.from(binary, character => character.charCodeAt(0))
+}
+
+function joinPushBytes(...parts: Uint8Array[]) {
+  const result = new Uint8Array(parts.reduce((total, part) => total + part.length, 0))
+  let offset = 0
+  for (const part of parts) {
+    result.set(part, offset)
+    offset += part.length
+  }
+  return result
+}
+
+async function derivePushBytes(input: Uint8Array, salt: Uint8Array, info: Uint8Array, length: number) {
+  const key = await crypto.subtle.importKey('raw', new Uint8Array(input).buffer, 'HKDF', false, ['deriveBits'])
+  const bits = await crypto.subtle.deriveBits({
+    name: 'HKDF',
+    hash: 'SHA-256',
+    salt: new Uint8Array(salt).buffer,
+    info: new Uint8Array(info).buffer,
+  }, key, length * 8)
+  return new Uint8Array(bits)
+}
+
+async function encryptPushPayload(payload: unknown, p256dh: string, auth: string) {
+  const encoder = new TextEncoder()
+  const receiverPublic = decodePushKey(p256dh)
+  const authentication = decodePushKey(auth)
+  if (receiverPublic.length !== 65 || authentication.length !== 16) {
+    throw new Error('Invalid push keys')
+  }
+  const localKeys = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits'])
+  const senderPublic = new Uint8Array(await crypto.subtle.exportKey('raw', localKeys.publicKey))
+  const receiverKey = await crypto.subtle.importKey('raw', receiverPublic, { name: 'ECDH', namedCurve: 'P-256' }, false, [])
+  const sharedSecret = new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: receiverKey }, localKeys.privateKey, 256))
+  const keyInfo = joinPushBytes(encoder.encode('WebPush: info\0'), receiverPublic, senderPublic)
+  const inputKey = await derivePushBytes(sharedSecret, authentication, keyInfo, 32)
+  const salt = crypto.getRandomValues(new Uint8Array(16))
+  const contentKey = await derivePushBytes(inputKey, salt, encoder.encode('Content-Encoding: aes128gcm\0'), 16)
+  const nonce = await derivePushBytes(inputKey, salt, encoder.encode('Content-Encoding: nonce\0'), 12)
+  const plaintext = joinPushBytes(encoder.encode(JSON.stringify(payload)), new Uint8Array([2]))
+  if (plaintext.length + 16 > 3993) throw new Error('Push payload too large')
+  const encryptionKey = await crypto.subtle.importKey('raw', contentKey, 'AES-GCM', false, ['encrypt'])
+  const ciphertext = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce, tagLength: 128 }, encryptionKey, plaintext))
+  const header = new Uint8Array(21)
+  header.set(salt)
+  new DataView(header.buffer).setUint32(16, 4096, false)
+  header[20] = senderPublic.length
+  return joinPushBytes(header, senderPublic, ciphertext).buffer
+}
+
 async function saveLatestAdminPushTarget(
   db: D1Database,
   appointment: {
@@ -634,6 +722,8 @@ async function saveLatestAdminPushTarget(
   await db.prepare(`INSERT OR REPLACE INTO push_settings (name, value) VALUES (?, ?)`)
     .bind('latest_admin_push_target', JSON.stringify(payload))
     .run()
+
+  return payload
 }
 
 async function getLatestAdminPushTarget(request: Request, db: D1Database) {
@@ -698,13 +788,13 @@ async function sendAdminBookingPush(
   },
   env?: Env
 ) {
-  await saveLatestAdminPushTarget(db, appointment)
+  const payload = await saveLatestAdminPushTarget(db, appointment)
 
   const keys = await getVapidKeys(db)
 
   const { results } = await db.prepare(
-    `SELECT endpoint FROM push_subscriptions`
-  ).all<{ endpoint: string }>()
+    `SELECT endpoint, p256dh, auth FROM push_subscriptions`
+  ).all<{ endpoint: string; p256dh: string | null; auth: string | null }>()
 
   const subscriptions = results ?? []
   if (subscriptions.length === 0) return
@@ -713,14 +803,28 @@ async function sendAdminBookingPush(
     try {
       const token = await createVapidJwt(db, sub.endpoint, requestUrl, env)
 
+      let encryptedBody: ArrayBuffer | undefined
+      if (sub.p256dh && sub.auth) {
+        try {
+          encryptedBody = await encryptPushPayload(payload, sub.p256dh, sub.auth)
+        } catch {}
+      }
+
+      const headers: Record<string, string> = {
+        TTL: '86400',
+        Urgency: 'high',
+        Authorization: `vapid t=${token}, k=${keys.publicKey}`,
+        'Crypto-Key': `p256ecdsa=${keys.publicKey}`,
+      }
+      if (encryptedBody) {
+        headers['Content-Encoding'] = 'aes128gcm'
+        headers['Content-Type'] = 'application/octet-stream'
+      }
+
       const res = await fetch(sub.endpoint, {
         method: 'POST',
-        headers: {
-          TTL: '86400',
-          Urgency: 'high',
-          Authorization: `vapid t=${token}, k=${keys.publicKey}`,
-          'Crypto-Key': `p256ecdsa=${keys.publicKey}`,
-        },
+        headers,
+        body: encryptedBody,
       })
 
       if (res.status === 404 || res.status === 410) {
@@ -1016,6 +1120,13 @@ export default {
             return json({ error: 'Missing fields' }, 400)
           }
 
+          let isAdminRequest = false
+          if (getBearerToken(request)) {
+            const auth = await requireAdmin(request, env)
+            if (!auth.ok) return auth.res
+            isAdminRequest = true
+          }
+
           const existing = await env.DB.prepare(
             `SELECT id FROM appointments WHERE date = ? AND time = ?`
           )
@@ -1028,12 +1139,26 @@ export default {
           const appointmentName = String(name).trim()
           const appointmentWhatsapp = String(whatsapp).trim()
           const appointmentServices = String(services)
-          const appointmentDate = String(date)
+          const appointmentDate = String(date).trim()
           const appointmentTime = String(time)
 
           const requestedTimes = parseAppointmentTimes(appointmentTime)
           if (requestedTimes.length === 0) {
             return json({ error: 'Escolha um horário válido.' }, 400)
+          }
+
+          if (!isValidAppointmentDate(appointmentDate)) {
+            return json({ error: 'Escolha uma data válida.' }, 400)
+          }
+
+          if (!isAdminRequest) {
+            const now = getLisbonNow()
+            if (appointmentDate < now.date || (appointmentDate === now.date && requestedTimes.some(slot => timeInMinutes(slot) <= now.minutes))) {
+              return json({ error: 'Este horário já passou. Escolha outro horário.' }, 400)
+            }
+            if (isClosedSalonDay(appointmentDate)) {
+              return json({ error: 'O salão está encerrado nessa data.' }, 400)
+            }
           }
 
           const placeholders = requestedTimes.map(() => '?').join(', ')
@@ -1078,7 +1203,7 @@ export default {
             throw err
           }
 
-          if (notifyAdmin !== false) {
+          if (!isAdminRequest || notifyAdmin !== false) {
             ctx.waitUntil(sendAdminBookingPush(env.DB, request.url, {
               id,
               name: appointmentName,
@@ -1096,10 +1221,18 @@ export default {
           if (!password) return json({ error: 'Password required' }, 400)
           if (!env.ADMIN_PASSWORD) return json({ error: 'Missing ADMIN_PASSWORD secret' }, 500)
 
+          const attempt = await consumeAdminLoginAttempt(request, env.DB)
+          if (!attempt.allowed) {
+            const response = json({ error: 'Demasiadas tentativas. Aguarde alguns minutos antes de tentar novamente.' }, 429)
+            response.headers.set('Retry-After', String(attempt.retryAfter))
+            return response
+          }
+
           if (!timingSafeEqual(password, env.ADMIN_PASSWORD)) {
             return json({ error: 'Invalid password' }, 401)
           }
 
+          await env.DB.prepare('DELETE FROM admin_login_attempts WHERE client_key = ?').bind(attempt.clientKey).run()
           await cleanupExpiredSessions(env.DB)
 
           const token = crypto.randomUUID()

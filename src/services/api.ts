@@ -129,8 +129,12 @@ function subscriptionEndpoint(value: string | PushSubscription | { endpoint?: st
 }
 
 export const api = {
+  hasAdminToken(): boolean {
+    return !!getAdminToken()
+  },
+
   async getAvailability(): Promise<AvailabilitySlot[]> {
-    const res = await fetch('/api/availability')
+    const res = await fetch('/api/availability', { cache: 'no-store' })
     return parseResponse<AvailabilitySlot[]>(res)
   },
 
@@ -149,6 +153,23 @@ export const api = {
     })
 
     await parseResponse<{ success: boolean }>(res)
+  },
+
+  async createAdminAppointment(
+    payload: CreateAppointmentPayload
+  ): Promise<{ id: string }> {
+    const res = await fetch('/api/appointments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+      },
+      body: JSON.stringify({ ...payload, notifyAdmin: false, status: 'por_confirmar' }),
+    })
+
+    const data = await parseResponse<{ success: boolean; id: string }>(res)
+    if (!data?.id) throw new Error('Falha ao criar marcação.')
+    return { id: String(data.id) }
   },
 
   async adminLogin(password: string): Promise<void> {
@@ -184,6 +205,7 @@ export const api = {
 
   async getAdminAppointments(): Promise<Appointment[]> {
     const res = await fetch('/api/admin/appointments', {
+      cache: 'no-store',
       headers: authHeaders(),
     })
 

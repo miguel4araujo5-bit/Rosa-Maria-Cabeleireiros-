@@ -3,7 +3,7 @@ import Home from './Home'
 import Services from './Services'
 import Navbar from './components/Navbar'
 import FloatingNav from './components/FloatingNav'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { SERVICES, SERVICE_CATEGORIES } from './servicesData'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
 import { Calendar, ChevronRight, Check, MessageSquare, Menu, X, Phone, Instagram, Facebook, LogOut } from 'lucide-react'
@@ -254,8 +254,32 @@ function PushNotificationNavigation() {
   return null
 }
 
+function getLisbonNow() {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Lisbon',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date())
+  const values = new Map(parts.map(part => [part.type, part.value]))
+  return {
+    date: `${values.get('year')}-${values.get('month')}-${values.get('day')}`,
+    minutes: Number(values.get('hour') || 0) * 60 + Number(values.get('minute') || 0),
+  }
+}
+
 function todayISO() {
-  return new Date().toISOString().split('T')[0]
+  return getLisbonNow().date
+}
+
+function isPastAppointment(date: string, time: string) {
+  const now = getLisbonNow()
+  if (date !== now.date) return date < now.date
+  const [hours, minutes] = time.split(':').map(Number)
+  return hours * 60 + minutes <= now.minutes
 }
 
 function isClosedDayISO(dateISO: string) {
@@ -365,6 +389,10 @@ function Booking() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([])
+  const [availabilityLoading, setAvailabilityLoading] = useState(true)
+  const [availabilityError, setAvailabilityError] = useState('')
+  const availabilityRequest = useRef(0)
+  const [currentMoment, setCurrentMoment] = useState(getLisbonNow)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -377,22 +405,35 @@ function Booking() {
 
   const closed = useMemo(() => isClosedDayISO(formData.date), [formData.date])
 
-  const fetchAvailability = async () => {
+  const fetchAvailability = useCallback(async () => {
+    const requestId = ++availabilityRequest.current
+    setAvailabilityLoading(true)
+    setAvailabilityError('')
     try {
       const data = await api.getAvailability()
-      setAvailability(Array.isArray(data) ? data : [])
+      if (!Array.isArray(data)) throw new Error('Resposta de disponibilidade inválida.')
+      if (requestId !== availabilityRequest.current) return
+      setAvailability(data)
     } catch {
-      setAvailability([])
+      if (requestId !== availabilityRequest.current) return
+      setAvailabilityError('Não foi possível consultar os horários. Tente novamente.')
+    } finally {
+      if (requestId === availabilityRequest.current) setAvailabilityLoading(false)
     }
-  }
-
-  useEffect(() => {
-    fetchAvailability()
   }, [])
 
   useEffect(() => {
+    fetchAvailability()
+  }, [fetchAvailability])
+
+  useEffect(() => {
     if (step === 2) fetchAvailability()
-  }, [step])
+  }, [step, fetchAvailability])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setCurrentMoment(getLisbonNow()), 30000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   const isSlotTaken = (time: string) => {
     return availability.some(a =>
@@ -440,12 +481,17 @@ function Booking() {
       return
     }
 
+    if (availabilityLoading || availabilityError) {
+      alert('Consulte novamente a disponibilidade antes de enviar o pedido.')
+      return
+    }
+
     if (!formData.date || closed) {
       alert('Escolha uma data válida.')
       return
     }
 
-    if (!formData.time || isSlotTaken(formData.time)) {
+    if (!formData.time || isSlotTaken(formData.time) || isPastAppointment(formData.date, formData.time)) {
       alert('Escolha um horário disponível.')
       return
     }
@@ -476,6 +522,7 @@ function Booking() {
       }
     } catch (err: any) {
       alert(err?.message ? String(err.message) : 'Erro ao agendar.')
+      await fetchAvailability()
     } finally {
       setLoading(false)
     }
@@ -591,12 +638,25 @@ function Booking() {
 
           {step === 2 && (
             <form onSubmit={handleSubmit} className="space-y-16">
+              {availabilityLoading && (
+                <p role="status" className="text-sm text-stone-500">A consultar os horários disponíveis…</p>
+              )}
+
+              {availabilityError && (
+                <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">
+                  <p>{availabilityError}</p>
+                  <button type="button" onClick={() => fetchAvailability()} className="mt-3 font-semibold underline">
+                    Voltar a tentar
+                  </button>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <div className="space-y-4">
                   <label className="input-label">Escolha o Dia</label>
                   <input
                     type="date"
-                    min={todayISO()}
+                    min={currentMoment.date}
                     className="input-field"
                     value={formData.date}
                     onChange={e => setFormData({ ...formData, date: e.target.value, time: '' })}
@@ -612,7 +672,8 @@ function Booking() {
                     {TIMES.map(t => {
                       const taken = !closed && formData.date ? isSlotTaken(t) : false
                       const selected = formData.time === t
-                      const disabled = closed || !formData.date || taken
+                      const past = !!formData.date && isPastAppointment(formData.date, t)
+                      const disabled = closed || !formData.date || taken || past || availabilityLoading || !!availabilityError
 
                       return (
                         <button
@@ -631,6 +692,7 @@ function Booking() {
                         >
                           <span>{t}</span>
                           {taken && <span className="text-[10px] uppercase tracking-tighter">Ocupado</span>}
+                          {!taken && past && <span className="text-[10px] uppercase tracking-tighter">Já passou</span>}
                         </button>
                       )
                     })}
@@ -654,7 +716,7 @@ function Booking() {
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || availabilityLoading || !!availabilityError || closed || !formData.date || !formData.time || isPastAppointment(formData.date, formData.time)}
                   className="btn-primary flex-1 py-6 text-lg flex items-center justify-center gap-3 disabled:opacity-50"
                 >
                   {loading ? 'A marcar...' : 'Confirmar Marcação'}

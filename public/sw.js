@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rosa-maria-v18'
+const CACHE_NAME = 'rosa-maria-v19'
 const APP_SHELL = []
 const PUSH_TARGET_CACHE = 'rosa-maria-push-target'
 const PUSH_TARGET_KEY = '/latest'
@@ -101,9 +101,31 @@ async function savePushTarget(targetPath, createdAt) {
   } catch {}
 }
 
+async function readPushData(event) {
+  if (event.data) {
+    try {
+      const data = event.data.json()
+      if (data && typeof data === 'object' && data.url) return data
+    } catch {}
+  }
+  return getPushTarget()
+}
+
+async function refreshOpenAdminWindows() {
+  try {
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+    for (const client of windows) {
+      const url = new URL(client.url)
+      if (url.origin === self.location.origin && url.pathname.startsWith('/admin')) {
+        client.postMessage({ type: 'ROSA_MARIA_REFRESH_APPOINTMENTS' })
+      }
+    }
+  } catch {}
+}
+
 self.addEventListener('push', event => {
   event.waitUntil(
-    getPushTarget().then(async data => {
+    readPushData(event).then(async data => {
       const title = data.title || 'Nova marcação recebida'
       const targetUrl = normalizePushTarget(data.url || '/admin?fromPush=1')
       const createdAt = new Date().toISOString()
@@ -112,6 +134,7 @@ self.addEventListener('push', event => {
         : `rosa-maria-marcacao-${Date.now()}`
 
       await savePushTarget(targetUrl, createdAt)
+      await refreshOpenAdminWindows()
 
       return self.registration.showNotification(title, {
         body: data.body || 'Toque para abrir a marcação no painel.',
